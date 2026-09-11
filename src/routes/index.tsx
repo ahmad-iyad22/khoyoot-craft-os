@@ -1,24 +1,45 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Khoyoot — Business Operating System" },
+      {
+        name: "description",
+        content: "Sign in to the Khoyoot operating system: inventory, orders, finance and marketing.",
+      },
+      { property: "og:title", content: "Khoyoot — Business Operating System" },
+      {
+        property: "og:description",
+        content: "Sign in to the Khoyoot operating system: inventory, orders, finance and marketing.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      navigate({ to: data.session ? "/dashboard" : "/auth", replace: true });
+    });
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
+      <div className="tatreez-band h-2 w-28 rounded-full" />
+      <h1 className="font-display text-3xl text-foreground">Khoyoot</h1>
+      <p className="text-sm text-muted-foreground">Preparing your workspace…</p>
     </div>
   );
 }
