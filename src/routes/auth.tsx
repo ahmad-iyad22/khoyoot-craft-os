@@ -1,0 +1,170 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+export const Route = createFileRoute("/auth")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Sign in — Khoyoot" },
+      { name: "description", content: "Sign in to the Khoyoot business operating system." },
+      { property: "og:title", content: "Sign in — Khoyoot" },
+      { property: "og:description", content: "Sign in to the Khoyoot business operating system." },
+    ],
+  }),
+  component: AuthPage,
+});
+
+function AuthPage() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/dashboard", replace: true });
+    });
+  }, [navigate]);
+
+  async function signIn(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    navigate({ to: "/dashboard", replace: true });
+  }
+
+  async function signUp(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: { full_name: fullName },
+      },
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    if (!data.session) {
+      toast.success("Account created. Check your email to confirm, then sign in.");
+      return;
+    }
+    navigate({ to: "/dashboard", replace: true });
+  }
+
+  return (
+    <div className="grid min-h-screen lg:grid-cols-2">
+      <div className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
+        <div className="tatreez-band h-3 w-40 rounded-full" />
+        <div>
+          <h1 className="font-display text-5xl leading-tight">Khoyoot</h1>
+          <p className="mt-2 font-display text-2xl text-sidebar-primary" dir="rtl">
+            خيوط
+          </p>
+          <p className="mt-6 max-w-sm text-sm text-sidebar-foreground/75">
+            One place for stock, orders, money, partners and marketing — built around the way three
+            partners actually run a heritage craft business.
+          </p>
+        </div>
+        <p className="text-xs text-sidebar-foreground/50">Phase 1 · Internal use only</p>
+      </div>
+
+      <div className="flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm">
+          <div className="mb-8 lg:hidden">
+            <div className="tatreez-band mb-4 h-2 w-24 rounded-full" />
+            <h1 className="font-display text-3xl">Khoyoot</h1>
+          </div>
+
+          <Tabs defaultValue="signin">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign in</TabsTrigger>
+              <TabsTrigger value="signup">Create account</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="signin">
+              <form onSubmit={signIn} className="mt-6 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@khoyoot.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Signing in…" : "Sign in"}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <form onSubmit={signUp} className="mt-6 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full name</Label>
+                  <Input
+                    id="name"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email2">Email</Label>
+                  <Input
+                    id="email2"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password2">Password</Label>
+                  <Input
+                    id="password2"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Creating…" : "Create account"}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  The first account created becomes the Owner. The Owner assigns roles to the other
+                  two partners in Settings.
+                </p>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </div>
+  );
+}
