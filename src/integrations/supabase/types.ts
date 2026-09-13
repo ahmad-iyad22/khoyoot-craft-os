@@ -87,7 +87,10 @@ export type Database = {
       }
       content_calendar: {
         Row: {
+          attributed_orders: number
+          attributed_revenue: number
           created_at: string
+          engagement: number
           id: string
           notes: string | null
           platform: string
@@ -96,9 +99,13 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          views: number
         }
         Insert: {
+          attributed_orders?: number
+          attributed_revenue?: number
           created_at?: string
+          engagement?: number
           id?: string
           notes?: string | null
           platform?: string
@@ -107,9 +114,13 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          views?: number
         }
         Update: {
+          attributed_orders?: number
+          attributed_revenue?: number
           created_at?: string
+          engagement?: number
           id?: string
           notes?: string | null
           platform?: string
@@ -118,6 +129,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          views?: number
         }
         Relationships: [
           {
@@ -267,6 +279,54 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      margin_history: {
+        Row: {
+          avg_cost: number
+          id: string
+          margin_percent: number
+          product_id: string
+          recorded_at: string
+          selling_price: number
+          shipment_id: string | null
+          source: string
+        }
+        Insert: {
+          avg_cost?: number
+          id?: string
+          margin_percent?: number
+          product_id: string
+          recorded_at?: string
+          selling_price?: number
+          shipment_id?: string | null
+          source?: string
+        }
+        Update: {
+          avg_cost?: number
+          id?: string
+          margin_percent?: number
+          product_id?: string
+          recorded_at?: string
+          selling_price?: number
+          shipment_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "margin_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_history_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -434,6 +494,51 @@ export type Database = {
           },
         ]
       }
+      platform_analytics: {
+        Row: {
+          ad_spend: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          orders: number
+          platform: string
+          product_views: number
+          revenue: number
+          snapshot_date: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          ad_spend?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          orders?: number
+          platform: string
+          product_views?: number
+          revenue?: number
+          snapshot_date?: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          ad_spend?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          orders?: number
+          platform?: string
+          product_views?: number
+          revenue?: number
+          snapshot_date?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: []
+      }
       platform_fees: {
         Row: {
           fee_percent: number
@@ -463,14 +568,26 @@ export type Database = {
           cost_price: number
           created_at: string
           description: string | null
+          documents: Json
+          expected_launch_date: string | null
+          how_made: string | null
           id: string
+          margin_alert_threshold: number
+          marketing_cost: number
+          materials: string | null
+          min_stock: number
           name: string
           name_ar: string | null
+          notes: string | null
+          photos: Json
+          prefix_code: string | null
           reorder_threshold: number
           sale_price: number
           sku: string
+          status: Database["public"]["Enums"]["product_status"]
           stock_qty: number
           supplier_id: string | null
+          target_margin: number
           tracks_serials: boolean
           updated_at: string
         }
@@ -481,14 +598,26 @@ export type Database = {
           cost_price?: number
           created_at?: string
           description?: string | null
+          documents?: Json
+          expected_launch_date?: string | null
+          how_made?: string | null
           id?: string
+          margin_alert_threshold?: number
+          marketing_cost?: number
+          materials?: string | null
+          min_stock?: number
           name: string
           name_ar?: string | null
+          notes?: string | null
+          photos?: Json
+          prefix_code?: string | null
           reorder_threshold?: number
           sale_price?: number
           sku: string
+          status?: Database["public"]["Enums"]["product_status"]
           stock_qty?: number
           supplier_id?: string | null
+          target_margin?: number
           tracks_serials?: boolean
           updated_at?: string
         }
@@ -499,14 +628,26 @@ export type Database = {
           cost_price?: number
           created_at?: string
           description?: string | null
+          documents?: Json
+          expected_launch_date?: string | null
+          how_made?: string | null
           id?: string
+          margin_alert_threshold?: number
+          marketing_cost?: number
+          materials?: string | null
+          min_stock?: number
           name?: string
           name_ar?: string | null
+          notes?: string | null
+          photos?: Json
+          prefix_code?: string | null
           reorder_threshold?: number
           sale_price?: number
           sku?: string
+          status?: Database["public"]["Enums"]["product_status"]
           stock_qty?: number
           supplier_id?: string | null
+          target_margin?: number
           tracks_serials?: boolean
           updated_at?: string
         }
@@ -533,18 +674,21 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          language: string
         }
         Insert: {
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          language?: string
         }
         Update: {
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          language?: string
         }
         Relationships: []
       }
@@ -592,6 +736,129 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shipment_items: {
+        Row: {
+          allocated_shipping_per_unit: number
+          created_at: string
+          id: string
+          landed_unit_cost: number
+          product_id: string
+          quantity: number
+          shipment_id: string
+          total_weight_kg: number
+          unit_product_cost: number
+        }
+        Insert: {
+          allocated_shipping_per_unit?: number
+          created_at?: string
+          id?: string
+          landed_unit_cost?: number
+          product_id: string
+          quantity?: number
+          shipment_id: string
+          total_weight_kg?: number
+          unit_product_cost?: number
+        }
+        Update: {
+          allocated_shipping_per_unit?: number
+          created_at?: string
+          id?: string
+          landed_unit_cost?: number
+          product_id?: string
+          quantity?: number
+          shipment_id?: string
+          total_weight_kg?: number
+          unit_product_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          notes: string | null
+          received_at: string | null
+          reference: string
+          status: Database["public"]["Enums"]["shipment_status"]
+          status_dates: Json
+          total_paid_weight_kg: number
+          total_shipping_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          notes?: string | null
+          received_at?: string | null
+          reference: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          status_dates?: Json
+          total_paid_weight_kg?: number
+          total_shipping_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          notes?: string | null
+          received_at?: string | null
+          reference?: string
+          status?: Database["public"]["Enums"]["shipment_status"]
+          status_dates?: Json
+          total_paid_weight_kg?: number
+          total_shipping_cost?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sku_prefixes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          label: string
+          label_ar: string | null
+          next_number: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          label: string
+          label_ar?: string | null
+          next_number?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          label?: string
+          label_ar?: string | null
+          next_number?: number
+        }
+        Relationships: []
       }
       stock_movements: {
         Row: {
@@ -759,6 +1026,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      claim_next_sku: { Args: { _code: string }; Returns: string }
       get_products_basic: {
         Args: never
         Returns: {
@@ -794,6 +1062,8 @@ export type Database = {
       is_marketing: { Args: never; Returns: boolean }
       is_ops: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
+      next_sku_preview: { Args: { _code: string }; Returns: string }
+      receive_shipment: { Args: { _shipment_id: string }; Returns: undefined }
       receive_stock: {
         Args: {
           _batch_code?: string
@@ -811,6 +1081,22 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "operations" | "marketing"
+      product_status:
+        | "idea"
+        | "in_development"
+        | "preparing"
+        | "ready"
+        | "future_product"
+        | "active"
+        | "out_of_stock"
+        | "discontinued"
+      shipment_status:
+        | "preparing"
+        | "sent_from_palestine"
+        | "in_transit"
+        | "customs"
+        | "arrived_in_malaysia"
+        | "added_to_inventory"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -939,6 +1225,24 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "operations", "marketing"],
+      product_status: [
+        "idea",
+        "in_development",
+        "preparing",
+        "ready",
+        "future_product",
+        "active",
+        "out_of_stock",
+        "discontinued",
+      ],
+      shipment_status: [
+        "preparing",
+        "sent_from_palestine",
+        "in_transit",
+        "customs",
+        "arrived_in_malaysia",
+        "added_to_inventory",
+      ],
     },
   },
 } as const
