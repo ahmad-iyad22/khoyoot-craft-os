@@ -19,6 +19,7 @@ import { Route as AuthenticatedMarketingRouteImport } from './routes/_authentica
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated/partners'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedShipmentsRouteImport } from './routes/_authenticated/shipments'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 
@@ -71,6 +72,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedShipmentsRoute = AuthenticatedShipmentsRouteImport.update({
+  id: '/shipments',
+  path: '/shipments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSuppliersRoute = AuthenticatedSuppliersRouteImport.update({
   id: '/suppliers',
   path: '/suppliers',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedOrdersRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/shipments': typeof AuthenticatedShipmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/tasks': typeof AuthenticatedTasksRoute
 }
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedOrdersRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/shipments': typeof AuthenticatedShipmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/tasks': typeof AuthenticatedTasksRoute
 }
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/shipments': typeof AuthenticatedShipmentsRoute
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
 }
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/partners'
     | '/settings'
+    | '/shipments'
     | '/suppliers'
     | '/tasks'
   fileRoutesByTo: FileRoutesByTo
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/partners'
     | '/settings'
+    | '/shipments'
     | '/suppliers'
     | '/tasks'
   id:
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orders'
     | '/_authenticated/partners'
     | '/_authenticated/settings'
+    | '/_authenticated/shipments'
     | '/_authenticated/suppliers'
     | '/_authenticated/tasks'
   fileRoutesById: FileRoutesById
@@ -244,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/shipments': {
+      id: '/_authenticated/shipments'
+      path: '/shipments'
+      fullPath: '/shipments'
+      preLoaderRoute: typeof AuthenticatedShipmentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/suppliers': {
       id: '/_authenticated/suppliers'
       path: '/suppliers'
@@ -269,6 +288,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedShipmentsRoute: typeof AuthenticatedShipmentsRoute
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
 }
@@ -281,6 +301,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedShipmentsRoute: AuthenticatedShipmentsRoute,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
 }
