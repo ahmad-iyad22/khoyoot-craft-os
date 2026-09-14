@@ -70,18 +70,21 @@ export type Database = {
           id: string
           name: string
           name_ar: string | null
+          prefix_code: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
           name_ar?: string | null
+          prefix_code?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           name_ar?: string | null
+          prefix_code?: string | null
         }
         Relationships: []
       }
@@ -141,6 +144,75 @@ export type Database = {
           },
         ]
       }
+      expense_categories: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_shared: boolean
+          label: string
+          label_ar: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          label: string
+          label_ar?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          label?: string
+          label_ar?: string | null
+        }
+        Relationships: []
+      }
+      expense_splits: {
+        Row: {
+          created_at: string
+          expense_id: string
+          id: string
+          partner_id: string
+          share_amount: number
+          share_percent: number
+        }
+        Insert: {
+          created_at?: string
+          expense_id: string
+          id?: string
+          partner_id: string
+          share_amount?: number
+          share_percent?: number
+        }
+        Update: {
+          created_at?: string
+          expense_id?: string
+          id?: string
+          partner_id?: string
+          share_amount?: number
+          share_percent?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_splits_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_splits_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -150,7 +222,11 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          is_shared: boolean
           order_id: string | null
+          paid_by_partner_id: string | null
+          split_mode: string
+          updated_at: string
         }
         Insert: {
           amount: number
@@ -160,7 +236,11 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          is_shared?: boolean
           order_id?: string | null
+          paid_by_partner_id?: string | null
+          split_mode?: string
+          updated_at?: string
         }
         Update: {
           amount?: number
@@ -170,7 +250,11 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          is_shared?: boolean
           order_id?: string | null
+          paid_by_partner_id?: string | null
+          split_mode?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -178,6 +262,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_paid_by_partner_id_fkey"
+            columns: ["paid_by_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]
@@ -273,6 +364,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_batches_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_balances"
+            referencedColumns: ["supplier_id"]
           },
           {
             foreignKeyName: "inventory_batches_supplier_id_fkey"
@@ -461,28 +559,40 @@ export type Database = {
       }
       partners: {
         Row: {
+          active: boolean
           created_at: string
+          email: string | null
+          expense_share_percent: number
           id: string
           name: string
           notes: string | null
           profile_id: string | null
           share_percent: number
+          updated_at: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
+          email?: string | null
+          expense_share_percent?: number
           id?: string
           name: string
           notes?: string | null
           profile_id?: string | null
           share_percent?: number
+          updated_at?: string
         }
         Update: {
+          active?: boolean
           created_at?: string
+          email?: string | null
+          expense_share_percent?: number
           id?: string
           name?: string
           notes?: string | null
           profile_id?: string | null
           share_percent?: number
+          updated_at?: string
         }
         Relationships: [
           {
@@ -663,6 +773,13 @@ export type Database = {
             foreignKeyName: "products_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
+            referencedRelation: "supplier_balances"
+            referencedColumns: ["supplier_id"]
+          },
+          {
+            foreignKeyName: "products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
             referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
@@ -739,6 +856,7 @@ export type Database = {
       }
       shipment_items: {
         Row: {
+          allocated_customs_per_unit: number
           allocated_shipping_per_unit: number
           created_at: string
           id: string
@@ -746,10 +864,13 @@ export type Database = {
           product_id: string
           quantity: number
           shipment_id: string
+          supplier_amount_owed: number
+          supplier_id: string | null
           total_weight_kg: number
           unit_product_cost: number
         }
         Insert: {
+          allocated_customs_per_unit?: number
           allocated_shipping_per_unit?: number
           created_at?: string
           id?: string
@@ -757,10 +878,13 @@ export type Database = {
           product_id: string
           quantity?: number
           shipment_id: string
+          supplier_amount_owed?: number
+          supplier_id?: string | null
           total_weight_kg?: number
           unit_product_cost?: number
         }
         Update: {
+          allocated_customs_per_unit?: number
           allocated_shipping_per_unit?: number
           created_at?: string
           id?: string
@@ -768,6 +892,8 @@ export type Database = {
           product_id?: string
           quantity?: number
           shipment_id?: string
+          supplier_amount_owed?: number
+          supplier_id?: string | null
           total_weight_kg?: number
           unit_product_cost?: number
         }
@@ -786,6 +912,20 @@ export type Database = {
             referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "shipment_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_balances"
+            referencedColumns: ["supplier_id"]
+          },
+          {
+            foreignKeyName: "shipment_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       shipments: {
@@ -793,6 +933,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          customs_cost: number
           id: string
           notes: string | null
           received_at: string | null
@@ -807,6 +948,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          customs_cost?: number
           id?: string
           notes?: string | null
           received_at?: string | null
@@ -821,6 +963,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          customs_cost?: number
           id?: string
           notes?: string | null
           received_at?: string | null
@@ -904,6 +1047,109 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          paid_on: string
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          paid_on?: string
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          paid_on?: string
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_balances"
+            referencedColumns: ["supplier_id"]
+          },
+          {
+            foreignKeyName: "supplier_payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_prices: {
+        Row: {
+          agreed_price: number
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          product_id: string
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_price?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_price?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_prices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_balances"
+            referencedColumns: ["supplier_id"]
+          },
+          {
+            foreignKeyName: "supplier_prices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -1014,7 +1260,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      shipment_line_costs: {
+        Row: {
+          allocated_customs_line: number | null
+          allocated_customs_unit: number | null
+          allocated_shipping_line: number | null
+          allocated_shipping_unit: number | null
+          customs_cost_per_kg: number | null
+          id: string | null
+          landed_cost_per_unit: number | null
+          product_id: string | null
+          quantity: number | null
+          shipment_id: string | null
+          shipping_cost_per_kg: number | null
+          supplier_amount_owed_live: number | null
+          supplier_id: string | null
+          supplier_price_per_unit: number | null
+          total_weight: number | null
+          total_weight_kg: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_balances"
+            referencedColumns: ["supplier_id"]
+          },
+          {
+            foreignKeyName: "shipment_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_balances: {
+        Row: {
+          balance: number | null
+          name: string | null
+          supplier_id: string | null
+          total_owed: number | null
+          total_paid: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       adjust_stock: {

@@ -133,6 +133,46 @@ export const DICT: Dict = {
   skuPrefixes: { en: "Code prefixes", ar: "بادئات الأكواد" },
   prefixCode: { en: "Prefix", ar: "البادئة" },
   nextCode: { en: "Next code will be", ar: "الكود التالي سيكون" },
+  categories: { en: "Categories", ar: "الفئات" },
+  expenseCategories: { en: "Expense categories", ar: "فئات المصاريف" },
+  platformFeesTab: { en: "Platform fees", ar: "رسوم المنصات" },
+  team: { en: "Team", ar: "الفريق" },
+  role: { en: "Role", ar: "الدور" },
+  defaultTargetMargin: { en: "Default target margin", ar: "هامش الربح الافتراضي" },
+
+  // shipping additions
+  customsCost: { en: "Customs / tax cost", ar: "تكلفة الجمارك" },
+  supplierPrice: { en: "Supplier price / unit", ar: "سعر المورد للوحدة" },
+  allocatedCustoms: { en: "Allocated customs / unit", ar: "الجمارك الموزعة للوحدة" },
+  amountOwed: { en: "Amount owed to supplier", ar: "المبلغ المستحق للمورد" },
+  owedBalance: { en: "Owed balance", ar: "الرصيد المستحق" },
+  payments: { en: "Payments", ar: "الدفعات" },
+  recordPayment: { en: "Record payment", ar: "تسجيل دفعة" },
+  agreedPrices: { en: "Agreed prices", ar: "الأسعار المتفق عليها" },
+  deleteConfirm: { en: "Delete this record?", ar: "حذف هذا السجل؟" },
+
+  // partners / expenses
+  profitShare: { en: "Profit share %", ar: "نسبة الأرباح %" },
+  expenseShare: { en: "Expense share %", ar: "نسبة المصاريف %" },
+  addPartner: { en: "Add partner", ar: "إضافة شريك" },
+  rebalance: { en: "Percentages must total 100%", ar: "يجب أن يكون مجموع النسب 100%" },
+  capital: { en: "Capital contributions", ar: "المساهمات الرأسمالية" },
+  withdrawals: { en: "Withdrawals", ar: "السحوبات" },
+  balance: { en: "Balance", ar: "الرصيد" },
+  ledger: { en: "Ledger", ar: "دفتر الحسابات" },
+  sharedExpenses: { en: "Shared expenses", ar: "المصاريف المشتركة" },
+  paidBy: { en: "Paid by", ar: "دفعها" },
+  splitEqually: { en: "Split equally", ar: "تقسيم بالتساوي" },
+  customSplit: { en: "Custom split", ar: "تقسيم مخصص" },
+  owesPayer: { en: "Owes the payer", ar: "مستحق للدافع" },
+  profitDistribution: { en: "Profit distribution", ar: "توزيع الأرباح" },
+
+  // analytics / content
+  addSnapshot: { en: "Add snapshot", ar: "إضافة لقطة" },
+  engagement: { en: "Engagement", ar: "التفاعل" },
+  attributedOrders: { en: "Attributed orders", ar: "الطلبات المنسوبة" },
+  attributedRevenue: { en: "Attributed revenue", ar: "الإيرادات المنسوبة" },
+  postPerformance: { en: "Post performance", ar: "أداء المنشور" },
 };
 
 export const STATUS_LABELS: Record<string, { en: string; ar: string }> = {
