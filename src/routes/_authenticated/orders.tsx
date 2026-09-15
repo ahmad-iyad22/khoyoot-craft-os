@@ -131,13 +131,13 @@ function OrdersPage() {
   return (
     <div>
       <PageHeader
-        title="Orders"
-        description="Manual entry for now — marketplace sync arrives in a later phase."
+        title={t("orders")}
+        description={t("ordersSubtitle")}
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="size-4" /> New order
+                <Plus className="size-4" /> {t("newOrder")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">

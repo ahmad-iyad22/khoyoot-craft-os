@@ -221,8 +221,8 @@ function Dashboard() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Dashboard"
-        description={`${new Date().toLocaleString("en", { month: "long", year: "numeric" })} · compared with last month`}
+        title={t("dashboard")}
+        description={`${new Date().toLocaleString(lang === "ar" ? "ar" : "en", { month: "long", year: "numeric" })} · ${t("dashboardSubtitle")}`}
       />
 
       {lowStock.length > 0 && (

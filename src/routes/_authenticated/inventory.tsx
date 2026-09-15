@@ -168,13 +168,13 @@ function InventoryPage() {
   return (
     <div>
       <PageHeader
-        title="Inventory"
-        description="Stock levels, landed costs, batches and serial numbers."
+        title={t("inventory")}
+        description={t("inventorySubtitle")}
         action={
           <Dialog open={receiveOpen} onOpenChange={setReceiveOpen}>
             <DialogTrigger asChild>
               <Button>
-                <PackagePlus className="size-4" /> Receive stock
+                <PackagePlus className="size-4" /> {t("receiveStock")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto">
