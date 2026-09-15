@@ -127,6 +127,30 @@ function SettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveCategory = useMutation({
+    mutationFn: async (v: { id: string; patch: Record<string, unknown> }) => {
+      const { error } = await supabase.from("categories").update(v.patch as never).eq("id", v.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Category updated");
+      qc.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteCategory = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("categories").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Category deleted");
+      qc.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const saveFee = useMutation({
     mutationFn: async (v: { id: string; fee_percent: number }) => {
       const { error } = await supabase
