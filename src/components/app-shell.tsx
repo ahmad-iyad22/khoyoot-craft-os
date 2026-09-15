@@ -104,6 +104,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   const { data: user } = useUser();
   const { primaryRole } = useRoles();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -118,8 +119,8 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col gap-6 bg-sidebar p-4 text-sidebar-foreground">
       <div>
         <div className="tatreez-band mb-3 h-1.5 w-16 rounded-full" />
-        <p className="font-display text-2xl leading-none">Khoyoot</p>
-        <p className="mt-1 text-xs text-sidebar-foreground/55">Business OS · Phase 1</p>
+        <p className="font-display text-2xl leading-none">{t("appName")}</p>
+        <p className="mt-1 text-xs text-sidebar-foreground/55">{t("tagline")} · Phase 1</p>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -127,6 +128,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <div className="space-y-3 border-t border-sidebar-border pt-4">
+        <LanguageToggle />
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{user?.email}</p>
           {primaryRole && (
@@ -141,8 +143,12 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
           onClick={signOut}
           className="w-full justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
-          <LogOut className="size-4" /> Sign out
+          <LogOut className="size-4" /> {t("signOut")}
         </Button>
+      </div>
+    </div>
+  );
+}
       </div>
     </div>
   );
