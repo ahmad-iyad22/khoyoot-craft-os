@@ -276,13 +276,54 @@ function SettingsPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Arabic</TableHead>
+                    {roles.isOperations && <TableHead className="w-24" />}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(categoriesQ.data ?? []).map((c: any) => (
                     <TableRow key={c.id}>
-                      <TableCell>{c.name}</TableCell>
-                      <TableCell className="rtl-content">{c.name_ar ?? "—"}</TableCell>
+                      <TableCell>
+                        {roles.isOperations ? (
+                          <Input
+                            defaultValue={c.name}
+                            onBlur={(e) => {
+                              const value = e.target.value.trim();
+                              if (value && value !== c.name)
+                                saveCategory.mutate({ id: c.id, patch: { name: value } });
+                            }}
+                          />
+                        ) : (
+                          c.name
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {roles.isOperations ? (
+                          <Input
+                            className="rtl-content"
+                            defaultValue={c.name_ar ?? ""}
+                            onBlur={(e) => {
+                              const value = e.target.value.trim();
+                              if (value !== (c.name_ar ?? ""))
+                                saveCategory.mutate({ id: c.id, patch: { name_ar: value || null } });
+                            }}
+                          />
+                        ) : (
+                          <span className="rtl-content">{c.name_ar ?? "—"}</span>
+                        )}
+                      </TableCell>
+                      {roles.isOperations && (
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (confirm(`Delete category "${c.name}"?`)) deleteCategory.mutate(c.id);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -290,6 +331,7 @@ function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="fees" className="mt-4">
           <Card>
