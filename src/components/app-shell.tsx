@@ -97,9 +97,6 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
     </nav>
   );
 }
-    </nav>
-  );
-}
 
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   const { data: user } = useUser();
