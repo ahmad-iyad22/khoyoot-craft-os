@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useRoles, useUser } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -23,22 +24,47 @@ import { Badge } from "@/components/ui/badge";
 
 type NavItem = {
   to: string;
-  label: string;
+  labelKey: string;
   icon: typeof LayoutDashboard;
   show: (r: ReturnType<typeof useRoles>) => boolean;
 };
 
 const NAV: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: () => true },
-  { to: "/inventory", label: "Inventory", icon: Package, show: (r) => r.isOperations },
-  { to: "/orders", label: "Orders", icon: ShoppingCart, show: (r) => r.isOperations },
-  { to: "/finance", label: "Finance", icon: Wallet, show: (r) => r.isOwner },
-  { to: "/partners", label: "Partners", icon: Users, show: (r) => r.isOwner },
-  { to: "/suppliers", label: "Suppliers", icon: Truck, show: (r) => r.isOperations },
-  { to: "/marketing", label: "Marketing", icon: Megaphone, show: (r) => r.isMarketing },
-  { to: "/tasks", label: "Tasks", icon: CheckSquare, show: () => true },
-  { to: "/settings", label: "Settings", icon: SettingsIcon, show: () => true },
+  { to: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard, show: () => true },
+  { to: "/inventory", labelKey: "inventory", icon: Package, show: (r) => r.isOperations },
+  { to: "/orders", labelKey: "orders", icon: ShoppingCart, show: (r) => r.isOperations },
+  { to: "/finance", labelKey: "finance", icon: Wallet, show: (r) => r.isOwner },
+  { to: "/partners", labelKey: "partners", icon: Users, show: (r) => r.isOwner },
+  { to: "/suppliers", labelKey: "suppliers", icon: Truck, show: (r) => r.isOperations },
+  { to: "/marketing", labelKey: "marketing", icon: Megaphone, show: (r) => r.isMarketing },
+  { to: "/tasks", labelKey: "tasks", icon: CheckSquare, show: () => true },
+  { to: "/settings", labelKey: "settings", icon: SettingsIcon, show: () => true },
 ];
+
+function LanguageToggle() {
+  const { lang, setLang, t } = useI18n();
+  return (
+    <div className="flex items-center gap-1 rounded-lg bg-sidebar-accent/40 p-1">
+      <Languages className="mx-1 size-4 shrink-0 text-sidebar-foreground/60" />
+      {(["en", "ar"] as const).map((code) => (
+        <button
+          key={code}
+          type="button"
+          onClick={() => setLang(code)}
+          className={cn(
+            "flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
+            lang === code
+              ? "bg-sidebar-primary text-sidebar-primary-foreground"
+              : "text-sidebar-foreground/70 hover:text-sidebar-foreground",
+          )}
+        >
+          {code === "en" ? t("english") : t("arabic")}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const roles = useRoles();
