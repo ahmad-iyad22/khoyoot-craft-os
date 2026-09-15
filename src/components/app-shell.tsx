@@ -13,6 +13,7 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Menu,
+  Languages,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useRoles, useUser } from "@/lib/auth";
