@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PackagePlus, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/inventory")({
 
 function InventoryPage() {
   const roles = useRoles();
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -294,7 +296,7 @@ function InventoryPage() {
 
         <TabsContent value="products" className="space-y-3">
           <Input
-            placeholder="Search by name, SKU or Arabic name…"
+            placeholder={t("searchProducts")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-sm"

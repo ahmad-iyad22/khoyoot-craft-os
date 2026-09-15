@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import { PageHeader } from "@/components/app-shell";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,7 @@ function monthLabel(d: Date) {
 
 function Dashboard() {
   const roles = useRoles();
+  const { t, lang } = useI18n();
   const since = new Date();
   since.setMonth(since.getMonth() - 5);
   since.setDate(1);
