@@ -146,10 +146,6 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
