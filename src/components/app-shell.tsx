@@ -69,6 +69,7 @@ function LanguageToggle() {
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const roles = useRoles();
+  const { t } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -89,10 +90,13 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             )}
           >
             <Icon className="size-4 shrink-0" />
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         );
       })}
+    </nav>
+  );
+}
     </nav>
   );
 }
