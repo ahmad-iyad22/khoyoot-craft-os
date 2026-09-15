@@ -424,15 +424,6 @@ function SettingsPage() {
               <Label htmlFor="pr-name">Name</Label>
               <Input id="pr-name" name="name" defaultValue={editing?.name ?? ""} required />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="pr-name-ar">Arabic name</Label>
-              <Input
-                id="pr-name-ar"
-                name="name_ar"
-                className="rtl-content"
-                defaultValue={editing?.name_ar ?? ""}
-              />
-            </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="pr-cost">Cost price</Label>
