@@ -184,16 +184,16 @@ function Dashboard() {
     return (
       <div>
         <PageHeader
-          title="Sales performance"
+          title={t("salesPerformance")}
           description="Which products and platforms sell — costs and financial records stay with the Owner."
         />
         <div className="card-surface overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-4 py-3">Product</th>
-                <th className="px-4 py-3">Units sold</th>
-                <th className="px-4 py-3">Revenue</th>
+                <th className="px-4 py-3">{t("product")}</th>
+                <th className="px-4 py-3">{t("unitsSold")}</th>
+                <th className="px-4 py-3">{t("revenue")}</th>
               </tr>
             </thead>
             <tbody>
