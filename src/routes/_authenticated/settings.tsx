@@ -127,6 +127,30 @@ function SettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveCategory = useMutation({
+    mutationFn: async (v: { id: string; patch: Record<string, unknown> }) => {
+      const { error } = await supabase.from("categories").update(v.patch as never).eq("id", v.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Category updated");
+      qc.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteCategory = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("categories").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Category deleted");
+      qc.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const saveFee = useMutation({
     mutationFn: async (v: { id: string; fee_percent: number }) => {
       const { error } = await supabase
@@ -276,13 +300,54 @@ function SettingsPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Arabic</TableHead>
+                    {roles.isOperations && <TableHead className="w-24" />}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(categoriesQ.data ?? []).map((c: any) => (
                     <TableRow key={c.id}>
-                      <TableCell>{c.name}</TableCell>
-                      <TableCell className="rtl-content">{c.name_ar ?? "—"}</TableCell>
+                      <TableCell>
+                        {roles.isOperations ? (
+                          <Input
+                            defaultValue={c.name}
+                            onBlur={(e) => {
+                              const value = e.target.value.trim();
+                              if (value && value !== c.name)
+                                saveCategory.mutate({ id: c.id, patch: { name: value } });
+                            }}
+                          />
+                        ) : (
+                          c.name
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {roles.isOperations ? (
+                          <Input
+                            className="rtl-content"
+                            defaultValue={c.name_ar ?? ""}
+                            onBlur={(e) => {
+                              const value = e.target.value.trim();
+                              if (value !== (c.name_ar ?? ""))
+                                saveCategory.mutate({ id: c.id, patch: { name_ar: value || null } });
+                            }}
+                          />
+                        ) : (
+                          <span className="rtl-content">{c.name_ar ?? "—"}</span>
+                        )}
+                      </TableCell>
+                      {roles.isOperations && (
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (confirm(`Delete category "${c.name}"?`)) deleteCategory.mutate(c.id);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -290,6 +355,7 @@ function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="fees" className="mt-4">
           <Card>
@@ -389,7 +455,7 @@ function SettingsPage() {
               saveProduct.mutate({
                 sku: String(f.get("sku")),
                 name: String(f.get("name")),
-                name_ar: String(f.get("name_ar") || "") || null,
+                name_ar: null,
                 description: String(f.get("description") || "") || null,
                 category_id: String(f.get("category_id") || "") || null,
                 cost_price: Number(f.get("cost_price") || 0),
@@ -423,15 +489,6 @@ function SettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="pr-name">Name</Label>
               <Input id="pr-name" name="name" defaultValue={editing?.name ?? ""} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pr-name-ar">Arabic name</Label>
-              <Input
-                id="pr-name-ar"
-                name="name_ar"
-                className="rtl-content"
-                defaultValue={editing?.name_ar ?? ""}
-              />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">

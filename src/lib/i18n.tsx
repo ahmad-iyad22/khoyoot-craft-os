@@ -173,7 +173,24 @@ export const DICT: Dict = {
   attributedOrders: { en: "Attributed orders", ar: "الطلبات المنسوبة" },
   attributedRevenue: { en: "Attributed revenue", ar: "الإيرادات المنسوبة" },
   postPerformance: { en: "Post performance", ar: "أداء المنشور" },
+
+  // page headers
+  dashboardSubtitle: { en: "compared with last month", ar: "مقارنة بالشهر الماضي" },
+  inventorySubtitle: {
+    en: "Stock levels, landed costs, batches and serial numbers.",
+    ar: "مستويات المخزون وتكاليف الوصول والدفعات والأرقام التسلسلية.",
+  },
+  receiveStock: { en: "Receive stock", ar: "استلام مخزون" },
+  ordersSubtitle: {
+    en: "Manual entry for now — marketplace sync arrives in a later phase.",
+    ar: "إدخال يدوي حاليًا — مزامنة المنصات في مرحلة لاحقة.",
+  },
+  newOrder: { en: "New order", ar: "طلب جديد" },
+  salesPerformance: { en: "Sales performance", ar: "أداء المبيعات" },
+  unitsSold: { en: "Units sold", ar: "الوحدات المباعة" },
+  searchProducts: { en: "Search by name or SKU…", ar: "ابحث بالاسم أو رمز المنتج…" },
 };
+
 
 export const STATUS_LABELS: Record<string, { en: string; ar: string }> = {
   idea: { en: "Idea", ar: "فكرة" },

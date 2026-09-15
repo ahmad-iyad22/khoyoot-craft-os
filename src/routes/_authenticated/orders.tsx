@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ type Line = { product_id: string; quantity: number; sale_price: number };
 
 function OrdersPage() {
   const roles = useRoles();
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<any | null>(null);
@@ -131,13 +133,13 @@ function OrdersPage() {
   return (
     <div>
       <PageHeader
-        title="Orders"
-        description="Manual entry for now — marketplace sync arrives in a later phase."
+        title={t("orders")}
+        description={t("ordersSubtitle")}
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="size-4" /> New order
+                <Plus className="size-4" /> {t("newOrder")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
