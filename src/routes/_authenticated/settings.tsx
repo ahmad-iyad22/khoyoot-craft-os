@@ -389,7 +389,7 @@ function SettingsPage() {
               saveProduct.mutate({
                 sku: String(f.get("sku")),
                 name: String(f.get("name")),
-                name_ar: String(f.get("name_ar") || "") || null,
+                name_ar: null,
                 description: String(f.get("description") || "") || null,
                 category_id: String(f.get("category_id") || "") || null,
                 cost_price: Number(f.get("cost_price") || 0),
