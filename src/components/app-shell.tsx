@@ -15,9 +15,11 @@ import {
   Menu,
   Languages,
 } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useRoles, useUser } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -67,7 +69,22 @@ function LanguageToggle() {
 }
 
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  const { t } = useI18n();
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className="flex w-full items-center gap-2 rounded-lg bg-sidebar-accent/40 px-3 py-1.5 text-xs font-medium text-sidebar-foreground/70 transition-colors hover:text-sidebar-foreground"
+    >
+      {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      {theme === "dark" ? t("light") : t("dark")}
+    </button>
+  );
+}
+
+function NavLinks({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   const roles = useRoles();
   const { t } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -98,7 +115,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   const { data: user } = useUser();
   const { primaryRole } = useRoles();
   const { t } = useI18n();
@@ -126,6 +143,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="space-y-3 border-t border-sidebar-border pt-4">
         <LanguageToggle />
+        <ThemeToggle />
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{user?.email}</p>
           {primaryRole && (

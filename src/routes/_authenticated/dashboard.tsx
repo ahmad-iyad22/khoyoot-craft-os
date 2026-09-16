@@ -143,8 +143,9 @@ function Dashboard() {
     };
   });
 
-  const cur = monthly[monthly.length - 1];
-  const prev = monthly[monthly.length - 2];
+  const emptyMonth = { label: "", revenue: 0, cogs: 0, expenseTotal: 0, adSpend: 0, orders: 0, profit: 0 };
+  const cur = monthly[monthly.length - 1] ?? emptyMonth;
+  const prev = monthly[monthly.length - 2] ?? emptyMonth;
   const stockValue = products.reduce((s, p) => s + Number(p.stock_qty) * Number(p.avg_cost), 0);
   const lowStock = products.filter((p) => Number(p.stock_qty) <= Number(p.reorder_threshold));
 

@@ -41,6 +41,17 @@ function SettingsPage() {
   const qc = useQueryClient();
   const [productOpen, setProductOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [newSku, setNewSku] = useState("");
+
+  async function previewSku(categoryId: string) {
+    const cat = (categoriesQ.data ?? []).find((c: any) => c.id === categoryId);
+    if (!cat?.prefix_code) {
+      setNewSku("");
+      return;
+    }
+    const { data } = await supabase.rpc("next_sku_preview", { _code: cat.prefix_code });
+    setNewSku(typeof data === "string" ? data : "");
+  }
 
   const productsQ = useQuery({
     queryKey: ["settings-products"],
@@ -101,6 +112,7 @@ function SettingsPage() {
       toast.success("Product saved");
       setProductOpen(false);
       setEditing(null);
+      setNewSku("");
       qc.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -199,6 +211,7 @@ function SettingsPage() {
                 <Button
                   onClick={() => {
                     setEditing(null);
+                    setNewSku("");
                     setProductOpen(true);
                   }}
                 >
@@ -237,6 +250,7 @@ function SettingsPage() {
                               size="sm"
                               onClick={() => {
                                 setEditing(p);
+                                setNewSku("");
                                 setProductOpen(true);
                               }}
                             >
@@ -449,11 +463,28 @@ function SettingsPage() {
           </DialogHeader>
           <form
             className="space-y-4"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
+              const categoryId = String(f.get("category_id") || "") || null;
+              let sku = editing ? String(f.get("sku")) : newSku;
+              if (!editing && categoryId) {
+                const cat = (categoriesQ.data ?? []).find((c: any) => c.id === categoryId);
+                if (cat?.prefix_code) {
+                  const { data, error } = await supabase.rpc("claim_next_sku", { _code: cat.prefix_code });
+                  if (error) {
+                    toast.error(error.message);
+                    return;
+                  }
+                  sku = String(data);
+                }
+              }
+              if (!sku) {
+                toast.error("Pick a category to generate the SKU");
+                return;
+              }
               saveProduct.mutate({
-                sku: String(f.get("sku")),
+                sku,
                 name: String(f.get("name")),
                 name_ar: null,
                 description: String(f.get("description") || "") || null,
@@ -467,7 +498,21 @@ function SettingsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="pr-sku">SKU</Label>
-                <Input id="pr-sku" name="sku" defaultValue={editing?.sku ?? ""} required />
+                {editing ? (
+                  <Input id="pr-sku" name="sku" defaultValue={editing.sku} required />
+                ) : (
+                  <Input
+                    id="pr-sku"
+                    name="sku"
+                    value={newSku}
+                    readOnly
+                    placeholder="Pick a category"
+                    className="bg-muted"
+                  />
+                )}
+                {!editing && newSku && (
+                  <p className="text-xs text-muted-foreground">Next code will be: {newSku}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="pr-cat">Category</Label>
@@ -475,6 +520,9 @@ function SettingsPage() {
                   id="pr-cat"
                   name="category_id"
                   defaultValue={editing?.category_id ?? ""}
+                  onChange={(e) => {
+                    if (!editing) void previewSku(e.target.value);
+                  }}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
                   <option value="">None</option>
