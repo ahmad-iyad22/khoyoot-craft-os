@@ -211,6 +211,7 @@ function SettingsPage() {
                 <Button
                   onClick={() => {
                     setEditing(null);
+                    setNewSku("");
                     setProductOpen(true);
                   }}
                 >
@@ -249,6 +250,7 @@ function SettingsPage() {
                               size="sm"
                               onClick={() => {
                                 setEditing(p);
+                                setNewSku("");
                                 setProductOpen(true);
                               }}
                             >
