@@ -121,11 +121,11 @@ function InventoryPage() {
         _quantity: form.quantity,
         _unit_cost: form.unit_cost,
         _shipping_cost: form.shipping_cost,
-        _supplier_id: form.supplier_id,
-        _batch_code: form.batch_code,
+        _supplier_id: form.supplier_id ?? undefined,
+        _batch_code: form.batch_code ?? undefined,
         _received_at: form.received_at,
-        _notes: form.notes,
-        _serials: form.serials,
+        _notes: form.notes ?? undefined,
+        _serials: form.serials ?? undefined,
       });
       if (error) throw error;
     },

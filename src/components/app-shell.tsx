@@ -84,7 +84,7 @@ function ThemeToggle() {
   );
 }
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function NavLinks({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   const roles = useRoles();
   const { t } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -115,7 +115,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   const { data: user } = useUser();
   const { primaryRole } = useRoles();
   const { t } = useI18n();

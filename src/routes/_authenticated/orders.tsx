@@ -153,7 +153,10 @@ function OrdersPage() {
                   e.preventDefault();
                   const f = new FormData(e.currentTarget as HTMLFormElement);
                   const valid = lines.filter((l) => l.product_id && l.quantity > 0);
-                  if (!valid.length) return toast.error("Add at least one product");
+                  if (!valid.length) {
+                    toast.error("Add at least one product");
+                    return;
+                  }
                   create.mutate({
                     order: {
                       order_number: (f.get("order_number") as string) || null,
