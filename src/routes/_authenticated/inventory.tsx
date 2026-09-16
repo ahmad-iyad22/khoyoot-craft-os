@@ -116,17 +116,18 @@ function InventoryPage() {
       notes: string | null;
       serials: string[] | null;
     }) => {
-      const { error } = await supabase.rpc("receive_stock", {
+      const args: Record<string, unknown> = {
         _product_id: form.product_id,
         _quantity: form.quantity,
         _unit_cost: form.unit_cost,
         _shipping_cost: form.shipping_cost,
-        _supplier_id: form.supplier_id ?? undefined,
-        _batch_code: form.batch_code ?? undefined,
         _received_at: form.received_at,
-        _notes: form.notes ?? undefined,
-        _serials: form.serials ?? undefined,
-      });
+      };
+      if (form.supplier_id) args._supplier_id = form.supplier_id;
+      if (form.batch_code) args._batch_code = form.batch_code;
+      if (form.notes) args._notes = form.notes;
+      if (form.serials?.length) args._serials = form.serials;
+      const { error } = await supabase.rpc("receive_stock", args as never);
       if (error) throw error;
     },
     onSuccess: () => {
