@@ -123,10 +123,10 @@ function InventoryPage() {
         _shipping_cost: form.shipping_cost,
         _received_at: form.received_at,
       };
-      if (form.supplier_id) args._supplier_id = form.supplier_id;
-      if (form.batch_code) args._batch_code = form.batch_code;
-      if (form.notes) args._notes = form.notes;
-      if (form.serials?.length) args._serials = form.serials;
+      if (form.supplier_id) args["_supplier_id"] = form.supplier_id;
+      if (form.batch_code) args["_batch_code"] = form.batch_code;
+      if (form.notes) args["_notes"] = form.notes;
+      if (form.serials?.length) args["_serials"] = form.serials;
       const { error } = await supabase.rpc("receive_stock", args as never);
       if (error) throw error;
     },
