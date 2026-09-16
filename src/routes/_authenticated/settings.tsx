@@ -237,6 +237,12 @@ function SettingsPage() {
                         <TableRow key={p.id} className={p.archived ? "opacity-50" : ""}>
                           <TableCell>{p.sku}</TableCell>
                           <TableCell>
+                            <div className="flex items-center gap-3">
+                              {p.image_url ? (
+                                <img src={p.image_url} alt={p.name} className="h-9 w-9 rounded-md border object-cover" />
+                              ) : (
+                                <div className="h-9 w-9 rounded-md border bg-muted" />
+                              )}
                             <p className="font-medium">{p.name}</p>
                             {p.name_ar && <p className="rtl-content text-xs text-muted-foreground">{p.name_ar}</p>}
                           </TableCell>
@@ -492,6 +498,7 @@ function SettingsPage() {
                 cost_price: Number(f.get("cost_price") || 0),
                 sale_price: Number(f.get("sale_price") || 0),
                 reorder_threshold: Number(f.get("reorder_threshold") || 0),
+                image_url: String(f.get("image_url") || "").trim(),
               });
             }}
           >
@@ -568,6 +575,23 @@ function SettingsPage() {
                   defaultValue={editing?.reorder_threshold ?? 0}
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pr-image">Photo URL</Label>
+              <Input
+                id="pr-image"
+                name="image_url"
+                type="url"
+                placeholder="https://…"
+                defaultValue={editing?.image_url ?? ""}
+              />
+              {editing?.image_url && (
+                <img
+                  src={editing.image_url}
+                  alt={editing.name}
+                  className="h-16 w-16 rounded-md border object-cover"
+                />
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="pr-desc">Description</Label>

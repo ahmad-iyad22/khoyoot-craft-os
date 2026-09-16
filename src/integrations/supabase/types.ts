@@ -682,6 +682,7 @@ export type Database = {
           expected_launch_date: string | null
           how_made: string | null
           id: string
+          image_url: string
           margin_alert_threshold: number
           marketing_cost: number
           materials: string | null
@@ -712,6 +713,7 @@ export type Database = {
           expected_launch_date?: string | null
           how_made?: string | null
           id?: string
+          image_url?: string
           margin_alert_threshold?: number
           marketing_cost?: number
           materials?: string | null
@@ -742,6 +744,7 @@ export type Database = {
           expected_launch_date?: string | null
           how_made?: string | null
           id?: string
+          image_url?: string
           margin_alert_threshold?: number
           marketing_cost?: number
           materials?: string | null
