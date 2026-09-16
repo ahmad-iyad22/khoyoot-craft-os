@@ -112,6 +112,7 @@ function SettingsPage() {
       toast.success("Product saved");
       setProductOpen(false);
       setEditing(null);
+      setNewSku("");
       qc.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
