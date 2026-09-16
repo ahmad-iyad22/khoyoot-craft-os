@@ -324,12 +324,21 @@ function InventoryPage() {
                     <tr key={p.id} className="border-t">
                       <td className="px-4 py-3 font-mono text-xs">{p.sku}</td>
                       <td className="px-4 py-3">
-                        <div className="font-medium">{p.name}</div>
-                        {p.name_ar && (
-                          <div className="text-xs text-muted-foreground" dir="rtl">
-                            {p.name_ar}
+                        <div className="flex items-center gap-3">
+                          {p.image_url ? (
+                            <img src={p.image_url} alt={p.name} className="h-9 w-9 rounded-md border object-cover" />
+                          ) : (
+                            <div className="h-9 w-9 shrink-0 rounded-md border bg-muted" />
+                          )}
+                          <div>
+                            <div className="font-medium">{p.name}</div>
+                            {p.name_ar && (
+                              <div className="text-xs text-muted-foreground" dir="rtl">
+                                {p.name_ar}
+                              </div>
+                            )}
                           </div>
-                        )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">{p.categories?.name ?? "—"}</td>
                       <td className="px-4 py-3">{money(p.cost_price)}</td>
