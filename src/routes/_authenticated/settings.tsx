@@ -41,6 +41,17 @@ function SettingsPage() {
   const qc = useQueryClient();
   const [productOpen, setProductOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [newSku, setNewSku] = useState("");
+
+  async function previewSku(categoryId: string) {
+    const cat = (categoriesQ.data ?? []).find((c: any) => c.id === categoryId);
+    if (!cat?.prefix_code) {
+      setNewSku("");
+      return;
+    }
+    const { data } = await supabase.rpc("next_sku_preview", { _code: cat.prefix_code });
+    setNewSku(typeof data === "string" ? data : "");
+  }
 
   const productsQ = useQuery({
     queryKey: ["settings-products"],
