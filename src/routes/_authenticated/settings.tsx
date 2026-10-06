@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { money } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
+import { ChangePasswordCard } from "@/components/change-password";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -38,6 +40,7 @@ const ROLES: AppRole[] = ["owner", "operations", "marketing"];
 
 function SettingsPage() {
   const roles = useRoles();
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [productOpen, setProductOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
@@ -113,6 +116,18 @@ function SettingsPage() {
       setProductOpen(false);
       setEditing(null);
       setNewSku("");
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteProduct = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("deleted"));
       qc.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -263,7 +278,18 @@ function SettingsPage() {
                               Edit
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => toggleArchive.mutate(p)}>
-                              {p.archived ? "Restore" : "Archive"}
+                              {p.archived ? t("restore") : t("archive")}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive"
+                              onClick={() => {
+                                if (confirm(t("deleteProductConfirm").replace("{name}", p.name)))
+                                  deleteProduct.mutate(p.id);
+                              }}
+                            >
+                              {t("delete")}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -494,6 +520,7 @@ function SettingsPage() {
                 name: String(f.get("name")),
                 name_ar: null,
                 description: String(f.get("description") || "") || null,
+                notes: String(f.get("notes") || "") || null,
                 category_id: String(f.get("category_id") || "") || null,
                 cost_price: Number(f.get("cost_price") || 0),
                 sale_price: Number(f.get("sale_price") || 0),
@@ -594,11 +621,15 @@ function SettingsPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pr-desc">Description</Label>
+              <Label htmlFor="pr-desc">{t("description")}</Label>
               <Textarea id="pr-desc" name="description" defaultValue={editing?.description ?? ""} />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="pr-notes">{t("notes")}</Label>
+              <Textarea id="pr-notes" name="notes" defaultValue={editing?.notes ?? ""} />
+            </div>
             <DialogFooter>
-              <Button type="submit" disabled={saveProduct.isPending}>Save</Button>
+              <Button type="submit" disabled={saveProduct.isPending}>{t("save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
