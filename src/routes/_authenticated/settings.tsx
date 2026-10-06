@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { money } from "@/lib/format";
+import { useI18n , tt } from "@/lib/i18n";
+import { ChangePasswordCard } from "@/components/change-password";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -38,6 +40,7 @@ const ROLES: AppRole[] = ["owner", "operations", "marketing"];
 
 function SettingsPage() {
   const roles = useRoles();
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [productOpen, setProductOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
@@ -109,10 +112,22 @@ function SettingsPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Product saved");
+      toast.success(tt("Product saved"));
       setProductOpen(false);
       setEditing(null);
       setNewSku("");
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteProduct = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("deleted"));
       qc.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -133,7 +148,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Category added");
+      toast.success(tt("Category added"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -145,7 +160,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Category updated");
+      toast.success(tt("Category updated"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -157,7 +172,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Category deleted");
+      toast.success(tt("Category deleted"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -172,7 +187,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Fee updated");
+      toast.success(tt("Fee updated"));
       qc.invalidateQueries({ queryKey: ["platform-fees"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -186,7 +201,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Role updated");
+      toast.success(tt("Role updated"));
       qc.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -194,14 +209,15 @@ function SettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Settings" description="Catalog, categories, platform fees and team roles." />
+      <PageHeader title={t("settings")} description={t("settingsSubtitle")} />
 
       <Tabs defaultValue="products">
         <TabsList>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="fees">Platform fees</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
+          <TabsTrigger value="products">{t("products")}</TabsTrigger>
+          <TabsTrigger value="categories">{t("categories")}</TabsTrigger>
+          <TabsTrigger value="fees">{t("platformFeesTab")}</TabsTrigger>
+          <TabsTrigger value="account">{t("account")}</TabsTrigger>
+          <TabsTrigger value="team">{t("team")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products" className="mt-4">
@@ -215,7 +231,7 @@ function SettingsPage() {
                     setProductOpen(true);
                   }}
                 >
-                  Add product
+                  {t("addProduct")}
                 </Button>
               </div>
               <Card>
@@ -223,12 +239,12 @@ function SettingsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>SKU</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead className="text-right">Cost</TableHead>
-                        <TableHead className="text-right">Sale</TableHead>
-                        <TableHead className="text-right">Reorder at</TableHead>
+                        <TableHead>{t("sku")}</TableHead>
+                        <TableHead>{t("name")}</TableHead>
+                        <TableHead>{t("category")}</TableHead>
+                        <TableHead className="text-right">{t("cost")}</TableHead>
+                        <TableHead className="text-right">{t("sellingPrice")}</TableHead>
+                        <TableHead className="text-right">{t("reorderThreshold")}</TableHead>
                         <TableHead />
                       </TableRow>
                     </TableHeader>
@@ -243,8 +259,8 @@ function SettingsPage() {
                               ) : (
                                 <div className="h-9 w-9 rounded-md border bg-muted" />
                               )}
-                            <p className="font-medium">{p.name}</p>
-                            {p.name_ar && <p className="rtl-content text-xs text-muted-foreground">{p.name_ar}</p>}
+                              <p className="font-medium">{p.name}</p>
+                            </div>
                           </TableCell>
                           <TableCell>{p.categories?.name ?? "—"}</TableCell>
                           <TableCell className="text-right tabular-nums">{money(p.cost_price)}</TableCell>
@@ -260,10 +276,21 @@ function SettingsPage() {
                                 setProductOpen(true);
                               }}
                             >
-                              Edit
+                              {t("edit")}
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => toggleArchive.mutate(p)}>
-                              {p.archived ? "Restore" : "Archive"}
+                              {p.archived ? t("restore") : t("archive")}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive"
+                              onClick={() => {
+                                if (confirm(t("deleteProductConfirm").replace("{name}", p.name)))
+                                  deleteProduct.mutate(p.id);
+                              }}
+                            >
+                              {t("delete")}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -271,7 +298,7 @@ function SettingsPage() {
                       {(productsQ.data ?? []).length === 0 && (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center text-muted-foreground">
-                            No products yet.
+                            {t("none")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -282,7 +309,7 @@ function SettingsPage() {
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              The product catalog is managed by Owner and Operations roles.
+              {t("catalogRestricted")}
             </p>
           )}
         </TabsContent>
@@ -305,21 +332,21 @@ function SettingsPage() {
                   }}
                 >
                   <div className="space-y-2">
-                    <Label htmlFor="cat-name">Name</Label>
+                    <Label htmlFor="cat-name">{t("name")}</Label>
                     <Input id="cat-name" name="name" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cat-ar">Arabic name</Label>
+                    <Label htmlFor="cat-ar">{t("arabicName")}</Label>
                     <Input id="cat-ar" name="name_ar" className="rtl-content" />
                   </div>
-                  <Button type="submit">Add</Button>
+                  <Button type="submit">{t("add")}</Button>
                 </form>
               )}
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Arabic</TableHead>
+                    <TableHead>{t("name")}</TableHead>
+                    <TableHead>{t("arabicName")}</TableHead>
                     {roles.isOperations && <TableHead className="w-24" />}
                   </TableRow>
                 </TableHeader>
@@ -361,10 +388,10 @@ function SettingsPage() {
                             size="sm"
                             variant="ghost"
                             onClick={() => {
-                              if (confirm(`Delete category "${c.name}"?`)) deleteCategory.mutate(c.id);
+                              if (confirm(t("deleteConfirm"))) deleteCategory.mutate(c.id);
                             }}
                           >
-                            Delete
+                            {t("delete")}
                           </Button>
                         </TableCell>
                       )}
@@ -383,8 +410,8 @@ function SettingsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Platform</TableHead>
-                    <TableHead>Fee %</TableHead>
+                    <TableHead>{t("platform")}</TableHead>
+                    <TableHead>{t("feePercent")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -420,8 +447,8 @@ function SettingsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Role</TableHead>
+                    <TableHead>{t("user")}</TableHead>
+                    <TableHead>{t("role")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -439,7 +466,7 @@ function SettingsPage() {
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                           >
                             <option value="" disabled>
-                              No role
+                              {tt("No role")}
                             </option>
                             {ROLES.map((r) => (
                               <option key={r} value={r}>
@@ -460,12 +487,16 @@ function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="account" className="mt-4">
+          <ChangePasswordCard />
+        </TabsContent>
       </Tabs>
 
       <Dialog open={productOpen} onOpenChange={setProductOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit product" : "Add product"}</DialogTitle>
+            <DialogTitle>{editing ? t("editProduct") : t("addProduct")}</DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -486,7 +517,7 @@ function SettingsPage() {
                 }
               }
               if (!sku) {
-                toast.error("Pick a category to generate the SKU");
+                toast.error(t("pickCategory"));
                 return;
               }
               saveProduct.mutate({
@@ -494,6 +525,7 @@ function SettingsPage() {
                 name: String(f.get("name")),
                 name_ar: null,
                 description: String(f.get("description") || "") || null,
+                notes: String(f.get("notes") || "") || null,
                 category_id: String(f.get("category_id") || "") || null,
                 cost_price: Number(f.get("cost_price") || 0),
                 sale_price: Number(f.get("sale_price") || 0),
@@ -504,7 +536,7 @@ function SettingsPage() {
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="pr-sku">SKU</Label>
+                <Label htmlFor="pr-sku">{t("sku")}</Label>
                 {editing ? (
                   <Input id="pr-sku" name="sku" defaultValue={editing.sku} required />
                 ) : (
@@ -513,16 +545,16 @@ function SettingsPage() {
                     name="sku"
                     value={newSku}
                     readOnly
-                    placeholder="Pick a category"
+                    placeholder={t("pickCategory")}
                     className="bg-muted"
                   />
                 )}
                 {!editing && newSku && (
-                  <p className="text-xs text-muted-foreground">Next code will be: {newSku}</p>
+                  <p className="text-xs text-muted-foreground">{t("nextCode")}: {newSku}</p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pr-cat">Category</Label>
+                <Label htmlFor="pr-cat">{t("category")}</Label>
                 <select
                   id="pr-cat"
                   name="category_id"
@@ -532,7 +564,7 @@ function SettingsPage() {
                   }}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  <option value="">None</option>
+                  <option value="">—</option>
                   {(categoriesQ.data ?? []).map((c: any) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -542,12 +574,12 @@ function SettingsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pr-name">Name</Label>
+              <Label htmlFor="pr-name">{t("name")}</Label>
               <Input id="pr-name" name="name" defaultValue={editing?.name ?? ""} required />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
-                <Label htmlFor="pr-cost">Cost price</Label>
+                <Label htmlFor="pr-cost">{t("cost")}</Label>
                 <Input
                   id="pr-cost"
                   name="cost_price"
@@ -557,7 +589,7 @@ function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pr-sale">Sale price</Label>
+                <Label htmlFor="pr-sale">{t("sellingPrice")}</Label>
                 <Input
                   id="pr-sale"
                   name="sale_price"
@@ -567,7 +599,7 @@ function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pr-reorder">Reorder at</Label>
+                <Label htmlFor="pr-reorder">{t("reorderThreshold")}</Label>
                 <Input
                   id="pr-reorder"
                   name="reorder_threshold"
@@ -577,7 +609,7 @@ function SettingsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pr-image">Photo URL</Label>
+              <Label htmlFor="pr-image">{t("photoUrl")}</Label>
               <Input
                 id="pr-image"
                 name="image_url"
@@ -594,11 +626,15 @@ function SettingsPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pr-desc">Description</Label>
+              <Label htmlFor="pr-desc">{t("description")}</Label>
               <Textarea id="pr-desc" name="description" defaultValue={editing?.description ?? ""} />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="pr-notes">{t("notes")}</Label>
+              <Textarea id="pr-notes" name="notes" defaultValue={editing?.notes ?? ""} />
+            </div>
             <DialogFooter>
-              <Button type="submit" disabled={saveProduct.isPending}>Save</Button>
+              <Button type="submit" disabled={saveProduct.isPending}>{t("save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

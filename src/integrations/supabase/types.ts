@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          summary: string | null
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          summary?: string | null
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          summary?: string | null
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           budget: number
@@ -85,6 +121,39 @@ export type Database = {
           name?: string
           name_ar?: string | null
           prefix_code?: string | null
+        }
+        Relationships: []
+      }
+      company_documents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          doc_date: string | null
+          doc_type: string
+          id: string
+          notes: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          doc_date?: string | null
+          doc_type?: string
+          id?: string
+          notes?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          doc_date?: string | null
+          doc_type?: string
+          id?: string
+          notes?: string | null
+          title?: string
+          url?: string
         }
         Relationships: []
       }

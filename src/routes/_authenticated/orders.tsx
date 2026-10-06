@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
+import { useI18n , tt } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,7 +102,7 @@ function OrdersPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Order saved");
+      toast.success(tt("Order saved"));
       setOpen(false);
       setLines([{ product_id: "", quantity: 1, sale_price: 0 }]);
       qc.invalidateQueries();
@@ -120,7 +120,7 @@ function OrdersPage() {
   });
 
   if (!roles.isLoading && !roles.isOperations) {
-    return <AccessDenied message="Orders are available to the Owner and the Operations partner." />;
+    return <AccessDenied message={tt("Orders are available to the Owner and the Operations partner.")} />;
   }
 
   const products = (productsQ.data ?? []) as any[];
@@ -144,8 +144,8 @@ function OrdersPage() {
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>New order</DialogTitle>
-                <DialogDescription>Stock is deducted automatically for each line.</DialogDescription>
+                <DialogTitle>{tt("New order")}</DialogTitle>
+                <DialogDescription>{tt("Stock is deducted automatically for each line.")}</DialogDescription>
               </DialogHeader>
               <form
                 className="space-y-4"
@@ -154,7 +154,7 @@ function OrdersPage() {
                   const f = new FormData(e.currentTarget as HTMLFormElement);
                   const valid = lines.filter((l) => l.product_id && l.quantity > 0);
                   if (!valid.length) {
-                    toast.error("Add at least one product");
+                    toast.error(tt("Add at least one product"));
                     return;
                   }
                   create.mutate({
@@ -174,11 +174,11 @@ function OrdersPage() {
               >
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>Date</Label>
+                    <Label>{tt("Date")}</Label>
                     <Input name="order_date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Platform</Label>
+                    <Label>{tt("Platform")}</Label>
                     <Select name="platform" defaultValue="Manual">
                       <SelectTrigger>
                         <SelectValue />
@@ -193,11 +193,11 @@ function OrdersPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Order ref</Label>
-                    <Input name="order_number" placeholder="Optional" />
+                    <Label>{tt("Order ref")}</Label>
+                    <Input name="order_number" placeholder={tt("Optional")} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Status</Label>
+                    <Label>{tt("Status")}</Label>
                     <Select name="status" defaultValue="pending">
                       <SelectTrigger>
                         <SelectValue />
@@ -213,12 +213,12 @@ function OrdersPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Customer</Label>
+                  <Label>{tt("Customer")}</Label>
                   <Input name="customer_name" dir="auto" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Products</Label>
+                  <Label>{tt("Products")}</Label>
                   {lines.map((line, idx) => (
                     <div key={idx} className="grid grid-cols-[1fr_70px_90px] gap-2">
                       <Select
@@ -233,7 +233,7 @@ function OrdersPage() {
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Product" />
+                          <SelectValue placeholder={tt("Product")} />
                         </SelectTrigger>
                         <SelectContent>
                           {products.map((p) => (
@@ -271,22 +271,22 @@ function OrdersPage() {
                     size="sm"
                     onClick={() => setLines((p) => [...p, { product_id: "", quantity: 1, sale_price: 0 }])}
                   >
-                    Add line
+                    {tt("Add line")}
                   </Button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>Shipping cost</Label>
+                    <Label>{tt("Shipping cost")}</Label>
                     <Input name="shipping_cost" type="number" step="0.01" defaultValue={0} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Platform fee</Label>
+                    <Label>{tt("Platform fee")}</Label>
                     <Input name="platform_fee" type="number" step="0.01" defaultValue={0} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label>{tt("Notes")}</Label>
                   <Textarea name="notes" rows={2} dir="auto" />
                 </div>
                 <DialogFooter>
@@ -304,12 +304,12 @@ function OrdersPage() {
         <table className="w-full min-w-[820px] text-sm">
           <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Platform</th>
-              <th className="px-4 py-3">Items</th>
-              <th className="px-4 py-3">Total</th>
-              {roles.isOwner && <th className="px-4 py-3">Margin</th>}
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">{tt("Date")}</th>
+              <th className="px-4 py-3">{tt("Platform")}</th>
+              <th className="px-4 py-3">{tt("Items")}</th>
+              <th className="px-4 py-3">{tt("Total")}</th>
+              {roles.isOwner && <th className="px-4 py-3">{tt("Margin")}</th>}
+              <th className="px-4 py-3">{tt("Status")}</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -343,7 +343,7 @@ function OrdersPage() {
                 </td>
                 <td className="px-4 py-3">
                   <Button size="sm" variant="ghost" onClick={() => setDetail(o)}>
-                    View
+                    {tt("View")}
                   </Button>
                 </td>
               </tr>
@@ -351,7 +351,7 @@ function OrdersPage() {
             {!orders.length && (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                  No orders yet.
+                  {tt("No orders yet.")}
                 </td>
               </tr>
             )}
@@ -362,7 +362,7 @@ function OrdersPage() {
       <Dialog open={!!detail} onOpenChange={(v) => !v && setDetail(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Order detail</DialogTitle>
+            <DialogTitle>{tt("Order detail")}</DialogTitle>
             <DialogDescription>
               {detail && `${formatDate(detail.order_date)} · ${detail.platform}`}
             </DialogDescription>
@@ -386,21 +386,21 @@ function OrdersPage() {
                 </div>
               ))}
               <div className="flex justify-between border-t pt-3">
-                <span>Order total</span>
+                <span>{tt("Order total")}</span>
                 <span className="font-medium">{money(totalOf(detail))}</span>
               </div>
               {roles.isOwner && (
                 <>
                   <div className="flex justify-between">
-                    <span>Product cost</span>
+                    <span>{tt("Product cost")}</span>
                     <span>{money(costOf(detail))}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping + platform fee</span>
+                    <span>{tt("Shipping + platform fee")}</span>
                     <span>{money(Number(detail.shipping_cost) + Number(detail.platform_fee))}</span>
                   </div>
                   <div className="flex justify-between font-display text-lg">
-                    <span>Net margin</span>
+                    <span>{tt("Net margin")}</span>
                     <span>
                       {money(
                         totalOf(detail) - costOf(detail) - Number(detail.shipping_cost) - Number(detail.platform_fee),

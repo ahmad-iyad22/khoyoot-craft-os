@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
+import { useI18n , tt } from "@/lib/i18n";
 import { PageHeader } from "@/components/app-shell";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
@@ -188,7 +188,7 @@ function Dashboard() {
       <div>
         <PageHeader
           title={t("salesPerformance")}
-          description="Which products and platforms sell — costs and financial records stay with the Owner."
+          description={tt("Which products and platforms sell \u2014 costs and financial records stay with the Owner.")}
         />
         <div className="card-surface overflow-hidden">
           <table className="w-full text-sm">
@@ -210,7 +210,7 @@ function Dashboard() {
               {!top.length && (
                 <tr>
                   <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">
-                    No sales recorded yet.
+                    {tt("No sales recorded yet.")}
                   </td>
                 </tr>
               )}
@@ -242,34 +242,34 @@ function Dashboard() {
               .join(", ")}
           </span>
           <Link to="/inventory" className="ml-auto text-sm font-medium text-primary underline">
-            Open inventory
+            {tt("Open inventory")}
           </Link>
         </div>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard label="Revenue" value={money(cur.revenue)} previous={pct(cur.revenue, prev.revenue)} />
+        <StatCard label={tt("Revenue")} value={money(cur.revenue)} previous={pct(cur.revenue, prev.revenue)} />
         {roles.isOwner && (
           <StatCard
-            label="Total expenses"
+            label={tt("Total expenses")}
             value={money(cur.expenseTotal)}
             previous={pct(cur.expenseTotal, prev.expenseTotal)}
             invertColor
           />
         )}
         {roles.isOwner && (
-          <StatCard label="Net profit" value={money(cur.profit)} previous={pct(cur.profit, prev.profit)} />
+          <StatCard label={tt("Net profit")} value={money(cur.profit)} previous={pct(cur.profit, prev.profit)} />
         )}
-        <StatCard label="Orders" value={String(cur.orders)} previous={pct(cur.orders, prev.orders)} />
-        <StatCard label="Stock value" value={money(stockValue)} hint="At weighted average cost" />
+        <StatCard label={tt("Orders")} value={String(cur.orders)} previous={pct(cur.orders, prev.orders)} />
+        <StatCard label={tt("Stock value")} value={money(stockValue)} hint={tt("At weighted average cost")} />
         {roles.isOwner && (
-          <StatCard label="Ad spend" value={money(cur.adSpend)} previous={pct(cur.adSpend, prev.adSpend)} invertColor />
+          <StatCard label={tt("Ad spend")} value={money(cur.adSpend)} previous={pct(cur.adSpend, prev.adSpend)} invertColor />
         )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card-surface p-4">
-          <h2 className="mb-4 font-display text-lg">Revenue · last 6 months</h2>
+          <h2 className="mb-4 font-display text-lg">{tt("Revenue \u00b7 last 6 months")}</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={monthly}>
@@ -296,7 +296,7 @@ function Dashboard() {
         </div>
 
         <div className="card-surface p-4">
-          <h2 className="mb-4 font-display text-lg">Top 5 products by margin</h2>
+          <h2 className="mb-4 font-display text-lg">{tt("Top 5 products by margin")}</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={profitByProduct} layout="vertical" margin={{ left: 12 }}>
@@ -313,19 +313,19 @@ function Dashboard() {
 
       <div className="card-surface overflow-x-auto">
         <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="font-display text-lg">Recent orders</h2>
+          <h2 className="font-display text-lg">{tt("Recent orders")}</h2>
           <Link to="/orders" className="text-sm text-primary underline">
-            All orders
+            {tt("All orders")}
           </Link>
         </div>
         <table className="w-full min-w-[540px] text-sm">
           <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Platform</th>
-              <th className="px-4 py-3">Customer</th>
-              <th className="px-4 py-3">Value</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">{tt("Date")}</th>
+              <th className="px-4 py-3">{tt("Platform")}</th>
+              <th className="px-4 py-3">{tt("Customer")}</th>
+              <th className="px-4 py-3">{tt("Value")}</th>
+              <th className="px-4 py-3">{tt("Status")}</th>
             </tr>
           </thead>
           <tbody>
@@ -347,7 +347,7 @@ function Dashboard() {
             {!orders.length && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                  No orders yet — add one from the Orders page.
+                  {tt("No orders yet \u2014 add one from the Orders page.")}
                 </td>
               </tr>
             )}
