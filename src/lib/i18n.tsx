@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Lang = "en" | "ar";
@@ -277,6 +277,12 @@ type Ctx = {
 
 const LangContext = createContext<Ctx | null>(null);
 
+let currentLang: Lang = "en";
+/** Translate outside hooks (toasts, helpers). Tree remounts on language change so this stays fresh. */
+export function tt(key: string): string {
+  return DICT[key]?.[currentLang] ?? key;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
 
@@ -314,6 +320,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
+  currentLang = lang;
   const value = useMemo<Ctx>(
     () => ({
       lang,
@@ -325,7 +332,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [lang, setLang],
   );
 
-  return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
+  return <LangContext.Provider value={value}><Fragment key={lang}>{children}</Fragment></LangContext.Provider>;
 }
 
 export function useI18n() {
