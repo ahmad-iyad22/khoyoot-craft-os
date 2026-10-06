@@ -243,8 +243,8 @@ function SettingsPage() {
                               ) : (
                                 <div className="h-9 w-9 rounded-md border bg-muted" />
                               )}
-                            <p className="font-medium">{p.name}</p>
-                            {p.name_ar && <p className="rtl-content text-xs text-muted-foreground">{p.name_ar}</p>}
+                              <p className="font-medium">{p.name}</p>
+                            </div>
                           </TableCell>
                           <TableCell>{p.categories?.name ?? "—"}</TableCell>
                           <TableCell className="text-right tabular-nums">{money(p.cost_price)}</TableCell>
