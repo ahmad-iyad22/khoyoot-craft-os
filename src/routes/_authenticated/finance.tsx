@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { tt } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
@@ -101,7 +102,7 @@ function FinancePage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Expense recorded");
+      toast.success(tt("Expense recorded"));
       setExpenseOpen(false);
       qc.invalidateQueries();
     },
@@ -114,7 +115,7 @@ function FinancePage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Income recorded");
+      toast.success(tt("Income recorded"));
       setIncomeOpen(false);
       qc.invalidateQueries();
     },
@@ -159,23 +160,23 @@ function FinancePage() {
   );
 
   if (!roles.isLoading && !roles.isOwner) {
-    return <AccessDenied message="Financial records are limited to the Owner / Finance role." />;
+    return <AccessDenied message={tt("Financial records are limited to the Owner / Finance role.")} />;
   }
 
   return (
     <div>
       <PageHeader
-        title="Finance"
-        description="Income, expenses and profit & loss."
+        title={tt("Finance")}
+        description={tt("Income, expenses and profit & loss.")}
         action={
           <div className="flex gap-2">
             <Dialog open={incomeOpen} onOpenChange={setIncomeOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">Add income</Button>
+                <Button variant="outline">{tt("Add income")}</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Record income</DialogTitle>
+                  <DialogTitle>{tt("Record income")}</DialogTitle>
                 </DialogHeader>
                 <form
                   className="space-y-4"
@@ -192,24 +193,24 @@ function FinancePage() {
                 >
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="i-date">Date</Label>
+                      <Label htmlFor="i-date">{tt("Date")}</Label>
                       <Input id="i-date" name="entry_date" type="date" defaultValue={today} required />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="i-amount">Amount</Label>
+                      <Label htmlFor="i-amount">{tt("Amount")}</Label>
                       <Input id="i-amount" name="amount" type="number" step="0.01" required />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="i-source">Source</Label>
+                    <Label htmlFor="i-source">{tt("Source")}</Label>
                     <Input id="i-source" name="source" defaultValue="sale" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="i-notes">Notes</Label>
+                    <Label htmlFor="i-notes">{tt("Notes")}</Label>
                     <Textarea id="i-notes" name="notes" />
                   </div>
                   <DialogFooter>
-                    <Button type="submit" disabled={addIncome.isPending}>Save</Button>
+                    <Button type="submit" disabled={addIncome.isPending}>{tt("Save")}</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -217,11 +218,11 @@ function FinancePage() {
 
             <Dialog open={expenseOpen} onOpenChange={setExpenseOpen}>
               <DialogTrigger asChild>
-                <Button>Add expense</Button>
+                <Button>{tt("Add expense")}</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Record expense</DialogTitle>
+                  <DialogTitle>{tt("Record expense")}</DialogTitle>
                 </DialogHeader>
                 <form
                   className="space-y-4"
@@ -238,16 +239,16 @@ function FinancePage() {
                 >
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="e-date">Date</Label>
+                      <Label htmlFor="e-date">{tt("Date")}</Label>
                       <Input id="e-date" name="entry_date" type="date" defaultValue={today} required />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="e-amount">Amount</Label>
+                      <Label htmlFor="e-amount">{tt("Amount")}</Label>
                       <Input id="e-amount" name="amount" type="number" step="0.01" required />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="e-cat">Category</Label>
+                    <Label htmlFor="e-cat">{tt("Category")}</Label>
                     <select
                       id="e-cat"
                       name="category"
@@ -262,11 +263,11 @@ function FinancePage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="e-desc">Description</Label>
+                    <Label htmlFor="e-desc">{tt("Description")}</Label>
                     <Textarea id="e-desc" name="description" />
                   </div>
                   <DialogFooter>
-                    <Button type="submit" disabled={addExpense.isPending}>Save</Button>
+                    <Button type="submit" disabled={addExpense.isPending}>{tt("Save")}</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -278,21 +279,21 @@ function FinancePage() {
       <Card className="mb-6">
         <CardContent className="flex flex-wrap items-end gap-4 pt-6">
           <div className="space-y-2">
-            <Label htmlFor="from">From</Label>
+            <Label htmlFor="from">{tt("From")}</Label>
             <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="to">To</Label>
+            <Label htmlFor="to">{tt("To")}</Label>
             <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Expense category</Label>
+            <Label>{tt("Expense category")}</Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
+                <SelectItem value="all">{tt("All categories")}</SelectItem>
                 {EXPENSE_CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>
                     {titleCase(c)}
@@ -306,9 +307,9 @@ function FinancePage() {
 
       <Tabs defaultValue="pnl">
         <TabsList>
-          <TabsTrigger value="pnl">Profit &amp; Loss</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="income">Income</TabsTrigger>
+          <TabsTrigger value="pnl">{tt("Profit &amp; Loss")}</TabsTrigger>
+          <TabsTrigger value="expenses">{tt("Expenses")}</TabsTrigger>
+          <TabsTrigger value="income">{tt("Income")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pnl" className="mt-4">
@@ -336,7 +337,7 @@ function FinancePage() {
                     </TableRow>
                   ))}
                   <TableRow className="font-semibold">
-                    <TableCell>Net profit</TableCell>
+                    <TableCell>{tt("Net profit")}</TableCell>
                     <TableCell
                       className={`text-right tabular-nums ${pnl.net >= 0 ? "text-primary" : "text-destructive"}`}
                     >
@@ -355,10 +356,10 @@ function FinancePage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>{tt("Date")}</TableHead>
+                    <TableHead>{tt("Category")}</TableHead>
+                    <TableHead>{tt("Description")}</TableHead>
+                    <TableHead className="text-right">{tt("Amount")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -375,7 +376,7 @@ function FinancePage() {
                   {filteredExpenses.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        No expenses in this range.
+                        {tt("No expenses in this range.")}
                       </TableCell>
                     </TableRow>
                   )}
@@ -391,10 +392,10 @@ function FinancePage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>{tt("Date")}</TableHead>
+                    <TableHead>{tt("Source")}</TableHead>
+                    <TableHead>{tt("Notes")}</TableHead>
+                    <TableHead className="text-right">{tt("Amount")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -409,7 +410,7 @@ function FinancePage() {
                   {(incomeQ.data ?? []).length === 0 && (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        No income entries in this range.
+                        {tt("No income entries in this range.")}
                       </TableCell>
                     </TableRow>
                   )}

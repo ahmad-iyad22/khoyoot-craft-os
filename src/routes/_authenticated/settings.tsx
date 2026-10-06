@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { money } from "@/lib/format";
-import { useI18n } from "@/lib/i18n";
+import { useI18n , tt } from "@/lib/i18n";
 import { ChangePasswordCard } from "@/components/change-password";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -112,7 +112,7 @@ function SettingsPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Product saved");
+      toast.success(tt("Product saved"));
       setProductOpen(false);
       setEditing(null);
       setNewSku("");
@@ -148,7 +148,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Category added");
+      toast.success(tt("Category added"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -160,7 +160,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Category updated");
+      toast.success(tt("Category updated"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -172,7 +172,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Category deleted");
+      toast.success(tt("Category deleted"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -187,7 +187,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Fee updated");
+      toast.success(tt("Fee updated"));
       qc.invalidateQueries({ queryKey: ["platform-fees"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -201,7 +201,7 @@ function SettingsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Role updated");
+      toast.success(tt("Role updated"));
       qc.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -466,7 +466,7 @@ function SettingsPage() {
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                           >
                             <option value="" disabled>
-                              No role
+                              {tt("No role")}
                             </option>
                             {ROLES.map((r) => (
                               <option key={r} value={r}>

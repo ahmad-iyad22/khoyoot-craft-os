@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { PackagePlus, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
+import { useI18n , tt } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,7 +131,7 @@ function InventoryPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Stock received");
+      toast.success(tt("Stock received"));
       setReceiveOpen(false);
       queryClient.invalidateQueries();
     },
@@ -149,14 +149,14 @@ function InventoryPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Stock adjusted");
+      toast.success(tt("Stock adjusted"));
       queryClient.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   if (!roles.isLoading && !roles.isOperations) {
-    return <AccessDenied message="Inventory is available to the Owner and the Operations partner." />;
+    return <AccessDenied message={tt("Inventory is available to the Owner and the Operations partner.")} />;
   }
 
   const products = (productsQ.data ?? []) as any[];
@@ -182,7 +182,7 @@ function InventoryPage() {
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Receive stock</DialogTitle>
+                <DialogTitle>{tt("Receive stock")}</DialogTitle>
                 <DialogDescription>
                   Landed cost per unit = unit cost + shipping split across the batch. Weighted average
                   cost updates automatically.
@@ -208,10 +208,10 @@ function InventoryPage() {
                 }}
               >
                 <div className="space-y-2">
-                  <Label>Product</Label>
+                  <Label>{tt("Product")}</Label>
                   <Select name="product_id" required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose product" />
+                      <SelectValue placeholder={tt("Choose product")} />
                     </SelectTrigger>
                     <SelectContent>
                       {products.map((p) => (
@@ -224,24 +224,24 @@ function InventoryPage() {
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-2">
-                    <Label>Quantity</Label>
+                    <Label>{tt("Quantity")}</Label>
                     <Input name="quantity" type="number" min={1} required defaultValue={1} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Unit cost</Label>
+                    <Label>{tt("Unit cost")}</Label>
                     <Input name="unit_cost" type="number" step="0.01" min={0} required />
                   </div>
                   <div className="space-y-2">
-                    <Label>Shipping</Label>
+                    <Label>{tt("Shipping")}</Label>
                     <Input name="shipping_cost" type="number" step="0.01" min={0} defaultValue={0} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>Supplier</Label>
+                    <Label>{tt("Supplier")}</Label>
                     <Select name="supplier_id">
                       <SelectTrigger>
-                        <SelectValue placeholder="Optional" />
+                        <SelectValue placeholder={tt("Optional")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(suppliersQ.data ?? []).map((s: any) => (
@@ -253,7 +253,7 @@ function InventoryPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Received on</Label>
+                    <Label>{tt("Received on")}</Label>
                     <Input
                       name="received_at"
                       type="date"
@@ -263,15 +263,15 @@ function InventoryPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Batch code (optional)</Label>
+                  <Label>{tt("Batch code (optional)")}</Label>
                   <Input name="batch_code" placeholder="e.g. NAB-2026-04" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Serial numbers (optional, one per line)</Label>
+                  <Label>{tt("Serial numbers (optional, one per line)")}</Label>
                   <Textarea name="serials" rows={3} placeholder="KH-0001&#10;KH-0002" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label>{tt("Notes")}</Label>
                   <Textarea name="notes" rows={2} dir="auto" />
                 </div>
                 <DialogFooter>
@@ -287,11 +287,11 @@ function InventoryPage() {
 
       <Tabs defaultValue="products">
         <TabsList>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="batches">Batches</TabsTrigger>
-          <TabsTrigger value="serials">Serials</TabsTrigger>
+          <TabsTrigger value="products">{tt("Products")}</TabsTrigger>
+          <TabsTrigger value="batches">{tt("Batches")}</TabsTrigger>
+          <TabsTrigger value="serials">{tt("Serials")}</TabsTrigger>
           <TabsTrigger value="history">
-            <History className="mr-1 size-3.5" /> Movements
+            <History className="mr-1 size-3.5" /> {tt("Movements")}
           </TabsTrigger>
         </TabsList>
 
@@ -307,14 +307,14 @@ function InventoryPage() {
             <table className="w-full min-w-[860px] text-sm">
               <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">SKU</th>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Cost</th>
-                  <th className="px-4 py-3">Avg cost</th>
-                  <th className="px-4 py-3">Sale</th>
-                  <th className="px-4 py-3">Stock</th>
-                  <th className="px-4 py-3">Adjust</th>
+                  <th className="px-4 py-3">{tt("SKU")}</th>
+                  <th className="px-4 py-3">{tt("Product")}</th>
+                  <th className="px-4 py-3">{tt("Category")}</th>
+                  <th className="px-4 py-3">{tt("Cost")}</th>
+                  <th className="px-4 py-3">{tt("Avg cost")}</th>
+                  <th className="px-4 py-3">{tt("Sale")}</th>
+                  <th className="px-4 py-3">{tt("Stock")}</th>
+                  <th className="px-4 py-3">{tt("Adjust")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -391,13 +391,13 @@ function InventoryPage() {
             <table className="w-full min-w-[760px] text-sm">
               <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">Received</th>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Batch</th>
-                  <th className="px-4 py-3">Qty</th>
-                  <th className="px-4 py-3">Unit cost</th>
-                  <th className="px-4 py-3">Shipping</th>
-                  <th className="px-4 py-3">Landed / unit</th>
+                  <th className="px-4 py-3">{tt("Received")}</th>
+                  <th className="px-4 py-3">{tt("Product")}</th>
+                  <th className="px-4 py-3">{tt("Batch")}</th>
+                  <th className="px-4 py-3">{tt("Qty")}</th>
+                  <th className="px-4 py-3">{tt("Unit cost")}</th>
+                  <th className="px-4 py-3">{tt("Shipping")}</th>
+                  <th className="px-4 py-3">{tt("Landed / unit")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -415,7 +415,7 @@ function InventoryPage() {
                 {!(batchesQ.data ?? []).length && (
                   <tr>
                     <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                      No batches received yet.
+                      {tt("No batches received yet.")}
                     </td>
                   </tr>
                 )}
@@ -429,10 +429,10 @@ function InventoryPage() {
             <table className="w-full min-w-[560px] text-sm">
               <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">Serial</th>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Added</th>
+                  <th className="px-4 py-3">{tt("Serial")}</th>
+                  <th className="px-4 py-3">{tt("Product")}</th>
+                  <th className="px-4 py-3">{tt("Status")}</th>
+                  <th className="px-4 py-3">{tt("Added")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -449,7 +449,7 @@ function InventoryPage() {
                 {!(serialsQ.data ?? []).length && (
                   <tr>
                     <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                      No serial numbers recorded.
+                      {tt("No serial numbers recorded.")}
                     </td>
                   </tr>
                 )}
@@ -463,11 +463,11 @@ function InventoryPage() {
             <table className="w-full min-w-[640px] text-sm">
               <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">When</th>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Change</th>
-                  <th className="px-4 py-3">Reason</th>
-                  <th className="px-4 py-3">By</th>
+                  <th className="px-4 py-3">{tt("When")}</th>
+                  <th className="px-4 py-3">{tt("Product")}</th>
+                  <th className="px-4 py-3">{tt("Change")}</th>
+                  <th className="px-4 py-3">{tt("Reason")}</th>
+                  <th className="px-4 py-3">{tt("By")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -490,7 +490,7 @@ function InventoryPage() {
                 {!(movementsQ.data ?? []).length && (
                   <tr>
                     <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                      No stock movements yet.
+                      {tt("No stock movements yet.")}
                     </td>
                   </tr>
                 )}
