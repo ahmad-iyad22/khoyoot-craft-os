@@ -364,6 +364,22 @@ export const DICT: Dict = {
   "When": { en: "When", ar: "\u0645\u062a\u0649" },
   "Which products and platforms sell \u2014 costs and financial records stay with the Owner.": { en: "Which products and platforms sell \u2014 costs and financial records stay with the Owner.", ar: "\u0623\u064a \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0648\u0627\u0644\u0645\u0646\u0635\u0627\u062a \u062a\u0628\u064a\u0639 \u2014 \u0627\u0644\u062a\u0643\u0627\u0644\u064a\u0641 \u0648\u0627\u0644\u0633\u062c\u0644\u0627\u062a \u0627\u0644\u0645\u0627\u0644\u064a\u0629 \u062a\u0628\u0642\u0649 \u0644\u062f\u0649 \u0627\u0644\u0645\u0627\u0644\u0643." },
   printPdf: { en: "Print / PDF", ar: "طباعة / PDF" },
+  "Revenue \u00b7 last 6 months": { en: "Revenue \u00b7 last 6 months", ar: "\u0627\u0644\u0625\u064a\u0631\u0627\u062f\u0627\u062a \u00b7 \u0622\u062e\u0631 6 \u0623\u0634\u0647\u0631" },
+  "1 product is at or below the reorder threshold": { en: "1 product is at or below the reorder threshold", ar: "\u0645\u0646\u062a\u062c \u0648\u0627\u062d\u062f \u0639\u0646\u062f \u0623\u0648 \u0623\u0642\u0644 \u0645\u0646 \u062d\u062f \u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u0637\u0644\u0628" },
+  "{count} products are at or below the reorder threshold": { en: "{count} products are at or below the reorder threshold", ar: "{count} \u0645\u0646\u062a\u062c\u0627\u062a \u0639\u0646\u062f \u0623\u0648 \u0623\u0642\u0644 \u0645\u0646 \u062d\u062f \u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u0637\u0644\u0628" },
+  "Saving\u2026": { en: "Saving\u2026", ar: "\u062c\u0627\u0631\u064d \u0627\u0644\u062d\u0641\u0638\u2026" },
+  "No products yet \u2014 add them in Settings \u2192 Product catalog.": { en: "No products yet \u2014 add them in Settings \u2192 Product catalog.", ar: "\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0646\u062a\u062c\u0627\u062a \u0628\u0639\u062f \u2014 \u0623\u0636\u0641\u0647\u0627 \u0641\u064a \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062f\u0627\u062a \u2190 \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a." },
+  "Order fulfilment": { en: "Order fulfilment", ar: "\u062a\u0646\u0641\u064a\u0630 \u0627\u0644\u0637\u0644\u0628" },
+  "Revenue (orders)": { en: "Revenue (orders)", ar: "\u0627\u0644\u0625\u064a\u0631\u0627\u062f\u0627\u062f\u0627\u062a (\u0627\u0644\u0637\u0644\u0628\u0627\u062a)" },
+  "Other income": { en: "Other income", ar: "\u062f\u062e\u0644 \u0622\u062e\u0631" },
+  "Other expenses": { en: "Other expenses", ar: "\u0645\u0635\u0627\u0631\u064a\u0641 \u0623\u062e\u0631\u0649" },
+  "Ads": { en: "Ads", ar: "\u0627\u0644\u0625\u0639\u0644\u0627\u0646\u0627\u062a" },
+  "pcs": { en: "pcs", ar: "\u0642\u0637\u0639\u0629" },
+  "margin": { en: "margin", ar: "\u0647\u0627\u0645\u0634" },
+  "Phase 1 \u00b7 Internal use only": { en: "Phase 1 \u00b7 Internal use only", ar: "\u0627\u0644\u0645\u0631\u062d\u0644\u0629 1 \u00b7 \u0644\u0644\u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0627\u0644\u062f\u0627\u062e\u0644\u064a \u0641\u0642\u0637" },
+  "Ask the Owner if you need access to this section.": { en: "Ask the Owner if you need access to this section.", ar: "\u0627\u0633\u0623\u0644 \u0627\u0644\u0645\u0627\u0644\u0643 \u0625\u0630\u0627 \u0643\u0646\u062a \u0628\u062d\u0627\u062c\u0629 \u0625\u0644\u0649 \u0627\u0644\u0648\u0635\u0648\u0644 \u0644\u0647\u0630\u0627 \u0627\u0644\u0642\u0633\u0645." },
+  "min": { en: "min", ar: "\u0627\u0644\u0623\u062f\u0646\u0649" },
+  "Not available for your role": { en: "Not available for your role", ar: "\u063a\u064a\u0631 \u0645\u062a\u0627\u062d \u0644\u062f\u0648\u0631\u0643" },
 };
 
 
