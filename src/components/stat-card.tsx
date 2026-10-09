@@ -1,4 +1,5 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function StatCard({
@@ -14,6 +15,7 @@ export function StatCard({
   invertColor?: boolean;
   hint?: string;
 }) {
+  const { t } = useI18n();
   const hasDelta = previous !== undefined && previous !== null && Number.isFinite(previous);
   const up = (previous ?? 0) > 0.05;
   const down = (previous ?? 0) < -0.05;
@@ -31,7 +33,7 @@ export function StatCard({
           )}
         >
           {up ? <ArrowUpRight className="size-3" /> : down ? <ArrowDownRight className="size-3" /> : <Minus className="size-3" />}
-          {Math.abs(previous ?? 0).toFixed(1)}% vs last month
+          {Math.abs(previous ?? 0).toFixed(1)}% {t("comparedLastMonth")}
         </p>
       ) : (
         hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>

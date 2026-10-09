@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
 import { useI18n , tt } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
+import { ProductThumbnail } from "@/components/product-thumbnail";
+import { TatreezEmptyState } from "@/components/tatreez";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,18 +42,18 @@ type Line = { product_id: string; quantity: number; sale_price: number };
 
 function OrdersPage() {
   const roles = useRoles();
-  const { t } = useI18n();
+  const { t, ts } = useI18n();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<any | null>(null);
   const [lines, setLines] = useState<Line[]>([{ product_id: "", quantity: 1, sale_price: 0 }]);
 
   const productsQ = useQuery({
-    queryKey: ["products"],
+    queryKey: ["order-products"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("id, sku, name, sale_price, avg_cost, cost_price")
+        .select("id, sku, name, image_url, sale_price, avg_cost, cost_price")
         .eq("archived", false)
         .order("name");
       if (error) throw error;
@@ -64,7 +66,7 @@ function OrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, order_items(*, products(name, sku))")
+        .select("*, order_items(*, products(name, sku, image_url))")
         .order("order_date", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -186,7 +188,7 @@ function OrdersPage() {
                       <SelectContent>
                         {PLATFORMS.map((p) => (
                           <SelectItem key={p} value={p}>
-                            {p}
+                            {tt(p)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -205,7 +207,7 @@ function OrdersPage() {
                       <SelectContent>
                         {ORDER_STATUSES.map((s) => (
                           <SelectItem key={s} value={s}>
-                            {titleCase(s)}
+                            {ts(s)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -238,7 +240,7 @@ function OrdersPage() {
                         <SelectContent>
                           {products.map((p) => (
                             <SelectItem key={p.id} value={p.id}>
-                              {p.sku} · {p.name}
+                              <span className="flex min-w-0 items-center gap-2"><ProductThumbnail url={p.image_url} name={p.name} /><span className="truncate">{p.sku} · {p.name}</span></span>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -291,7 +293,7 @@ function OrdersPage() {
                 </div>
                 <DialogFooter>
                   <Button type="submit" disabled={create.isPending}>
-                    {create.isPending ? "Saving…" : "Save order"}
+                    {tt(create.isPending ? "Saving…" : "Save order")}
                   </Button>
                 </DialogFooter>
               </form>
@@ -317,9 +319,9 @@ function OrdersPage() {
             {orders.map((o) => (
               <tr key={o.id} className="border-t">
                 <td className="px-4 py-3">{formatDate(o.order_date)}</td>
-                <td className="px-4 py-3">{o.platform}</td>
+                <td className="px-4 py-3">{tt(o.platform)}</td>
                 <td className="px-4 py-3">
-                  {o.order_items.reduce((s: number, i: any) => s + Number(i.quantity), 0)} pcs
+                  <div className="flex items-center gap-2">{o.order_items.slice(0, 2).map((i: any) => <ProductThumbnail key={i.id} url={i.products?.image_url} name={i.products?.name} />)}<span>{o.order_items.reduce((s: number, i: any) => s + Number(i.quantity), 0)} {tt("pcs")}</span></div>
                 </td>
                 <td className="px-4 py-3">{money(totalOf(o))}</td>
                 {roles.isOwner && (
@@ -335,7 +337,7 @@ function OrdersPage() {
                     <SelectContent>
                       {ORDER_STATUSES.map((s) => (
                         <SelectItem key={s} value={s}>
-                          {titleCase(s)}
+                          {ts(s)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -351,7 +353,7 @@ function OrdersPage() {
             {!orders.length && (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                  {tt("No orders yet.")}
+                  <TatreezEmptyState title={tt("No orders yet.")} />
                 </td>
               </tr>
             )}
@@ -371,16 +373,17 @@ function OrdersPage() {
             <div className="space-y-3 text-sm">
               {detail.order_items.map((i: any) => (
                 <div key={i.id} className="flex items-center justify-between rounded-lg border p-3">
-                  <div>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <ProductThumbnail url={i.products?.image_url} name={i.products?.name} /><div>
                     <p className="font-medium">{i.products?.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {i.quantity} × {money(i.sale_price)}
-                      {roles.isOwner && ` · cost ${money(i.unit_cost)}`}
-                    </p>
+                      {roles.isOwner && ` · ${t("cost")} ${money(i.unit_cost)}`}
+                    </p></div>
                   </div>
                   {roles.isOwner && (
                     <Badge variant="secondary">
-                      {money(Number(i.quantity) * (Number(i.sale_price) - Number(i.unit_cost)))} margin
+                      {money(Number(i.quantity) * (Number(i.sale_price) - Number(i.unit_cost)))} {tt("margin")}
                     </Badge>
                   )}
                 </div>

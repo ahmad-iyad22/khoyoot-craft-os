@@ -8,6 +8,7 @@ import { useRoles } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
+import { ProductThumbnail } from "@/components/product-thumbnail";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,7 +69,7 @@ function ShipmentsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("id, sku, name, name_ar, avg_cost, sale_price, stock_qty")
+        .select("id, sku, name, name_ar, image_url, avg_cost, sale_price, stock_qty")
         .eq("archived", false)
         .order("sku");
       if (error) throw error;
@@ -82,7 +83,7 @@ function ShipmentsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("shipments")
-        .select("*, shipment_items(*, products(id, sku, name))")
+        .select("*, shipment_items(*, products(id, sku, name, image_url))")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -140,10 +141,11 @@ function ShipmentsPage() {
         if (error) throw error;
         shipmentId = data.id;
       }
+      if (!shipmentId) throw new Error("Shipment was not saved");
       const rows = items
         .filter((i) => i.product_id)
         .map((i) => ({
-          shipment_id: shipmentId!,
+          shipment_id: shipmentId,
           product_id: i.product_id,
           quantity: Number(i.quantity || 0),
           total_weight_kg: Number(i.total_weight_kg || 0),
@@ -262,9 +264,7 @@ function ShipmentsPage() {
               <ul className="space-y-1 text-sm">
                 {(s.shipment_items ?? []).map((i: any, n: number) => (
                   <li key={i.id} className="flex items-center justify-between gap-2">
-                    <span className="truncate">
-                      {i.products?.sku} · {i.products?.name} × {i.quantity}
-                    </span>
+                    <span className="flex min-w-0 items-center gap-2"><ProductThumbnail url={i.products?.image_url} name={i.products?.name} /><span className="truncate">{i.products?.sku} · {i.products?.name} × {i.quantity}</span></span>
                     <span className="shrink-0 text-muted-foreground">
                       {money(alloc.lines[n]?.landedPerUnit ?? 0)}
                     </span>
@@ -346,8 +346,9 @@ function ShipmentsPage() {
 
             {items.map((it, idx) => (
               <div key={idx} className="grid gap-2 rounded-lg border p-3 sm:grid-cols-5">
+                <div className="flex min-w-0 items-center gap-2 sm:col-span-2"><ProductThumbnail url={productsQ.data?.find((p) => p.id === it.product_id)?.image_url} />
                 <select
-                  className="h-9 rounded-md border bg-background px-2 text-sm sm:col-span-2"
+                  className="h-9 w-full min-w-0 rounded-md border bg-background px-2 text-sm"
                   value={it.product_id}
                   onChange={(e) =>
                     setItems((prev) =>
@@ -361,7 +362,7 @@ function ShipmentsPage() {
                       {p.sku} — {p.name}
                     </option>
                   ))}
-                </select>
+                </select></div>
                 <Input
                   type="number"
                   placeholder={t("quantity")}

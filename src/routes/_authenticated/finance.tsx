@@ -257,7 +257,7 @@ function FinancePage() {
                     >
                       {EXPENSE_CATEGORIES.map((c) => (
                         <option key={c} value={c}>
-                          {titleCase(c)}
+                          {tt(titleCase(c))}
                         </option>
                       ))}
                     </select>
@@ -296,7 +296,7 @@ function FinancePage() {
                 <SelectItem value="all">{tt("All categories")}</SelectItem>
                 {EXPENSE_CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>
-                    {titleCase(c)}
+                    {tt(titleCase(c))}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -323,13 +323,13 @@ function FinancePage() {
               <Table>
                 <TableBody>
                   {[
-                    ["Revenue (orders)", pnl.revenue],
-                    ["Other income", pnl.manualIncome],
-                    ["Product cost", -pnl.productCost],
-                    ["Shipping", -pnl.shipping],
-                    ["Platform fees", -pnl.fees],
-                    ["Ads", -pnl.ads],
-                    ["Other expenses", -pnl.other],
+                    [tt("Revenue (orders)"), pnl.revenue],
+                    [tt("Other income"), pnl.manualIncome],
+                    [tt("Product cost"), -pnl.productCost],
+                    [tt("Shipping"), -pnl.shipping],
+                    [tt("Platform fees"), -pnl.fees],
+                    [tt("Ads"), -pnl.ads],
+                    [tt("Other expenses"), -pnl.other],
                   ].map(([label, value]) => (
                     <TableRow key={label as string}>
                       <TableCell>{label as string}</TableCell>
@@ -367,7 +367,7 @@ function FinancePage() {
                     <TableRow key={e.id}>
                       <TableCell>{formatDate(e.entry_date)}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{titleCase(e.category)}</Badge>
+                        <Badge variant="secondary">{tt(titleCase(e.category))}</Badge>
                       </TableCell>
                       <TableCell className="rtl-content">{e.description ?? "—"}</TableCell>
                       <TableCell className="text-right tabular-nums">{money(e.amount)}</TableCell>
@@ -402,7 +402,7 @@ function FinancePage() {
                   {(incomeQ.data ?? []).map((i: any) => (
                     <TableRow key={i.id}>
                       <TableCell>{formatDate(i.entry_date)}</TableCell>
-                      <TableCell>{titleCase(i.source)}</TableCell>
+                      <TableCell>{tt(titleCase(i.source))}</TableCell>
                       <TableCell className="rtl-content">{i.notes ?? "—"}</TableCell>
                       <TableCell className="text-right tabular-nums">{money(i.amount)}</TableCell>
                     </TableRow>

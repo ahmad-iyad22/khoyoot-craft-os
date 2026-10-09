@@ -134,7 +134,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
       <div>
         <div className="tatreez-band mb-3 h-1.5 w-16 rounded-full" />
         <p className="font-display text-2xl leading-none">{t("appName")}</p>
-        <p className="mt-1 text-xs text-sidebar-foreground/55">{t("tagline")} · Phase 1</p>
+        <p className="mt-1 text-xs text-sidebar-foreground/55">{t("tagline")} · tt("Phase 1 \u00b7 Internal use only")</p>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -187,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SidebarInner onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          <span className="font-display text-lg">Khoyoot</span>
+          <span className="font-display text-lg">{t("appName")}</span>
         </header>
 
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
@@ -219,9 +219,9 @@ export function PageHeader({
 export function AccessDenied({ message }: { message?: string }) {
   return (
     <div className="card-surface mx-auto mt-16 max-w-md p-8 text-center">
-      <h2 className="font-display text-xl">Not available for your role</h2>
+      <h2 className="font-display text-xl">tt("Not available for your role")</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        {message ?? "Ask the Owner if you need access to this section."}
+        {message ?? tt("Ask the Owner if you need access to this section.")}
       </p>
     </div>
   );

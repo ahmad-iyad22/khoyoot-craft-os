@@ -41,13 +41,13 @@ type OrderRow = {
   order_items: { quantity: number; sale_price: number; unit_cost: number; product_id: string | null }[];
 };
 
-function monthLabel(d: Date) {
-  return d.toLocaleString("en", { month: "short" });
+function monthLabel(d: Date, lang: string) {
+  return d.toLocaleString(lang === "ar" ? "ar" : "en", { month: "short" });
 }
 
 function Dashboard() {
   const roles = useRoles();
-  const { t, lang } = useI18n();
+  const { t, ts, lang } = useI18n();
   const since = new Date();
   since.setMonth(since.getMonth() - 5);
   since.setDate(1);
@@ -133,7 +133,7 @@ function Dashboard() {
     const expenseTotal = monthExp.reduce((s, e) => s + Number(e.amount), 0);
     const adSpend = monthExp.filter((e) => e.category === "ads").reduce((s, e) => s + Number(e.amount), 0);
     return {
-      label: monthLabel(d),
+      label: monthLabel(d, lang),
       revenue,
       cogs,
       expenseTotal,
@@ -162,7 +162,7 @@ function Dashboard() {
       );
     return [...map.entries()]
       .map(([id, profit]) => ({
-        name: products.find((p) => p.id === id)?.name ?? "Unknown",
+        name: products.find((p) => p.id === id)?.name ?? tt("Unknown"),
         profit: Math.round(profit),
       }))
       .sort((a, b) => b.profit - a.profit)
@@ -232,8 +232,9 @@ function Dashboard() {
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-warning/40 bg-warning/15 px-4 py-3 text-sm">
           <AlertTriangle className="size-4 text-warning" />
           <span className="font-medium">
-            {lowStock.length} product{lowStock.length > 1 ? "s are" : " is"} at or below the reorder
-            threshold
+            {lowStock.length === 1 
+              ? tt("1 product is at or below the reorder threshold")
+              : tt("{count} products are at or below the reorder threshold").replace("{count}", String(lowStock.length))}
           </span>
           <span className="text-muted-foreground">
             {lowStock
@@ -285,7 +286,7 @@ function Dashboard() {
                 <Tooltip formatter={(v: number) => money(v)} />
                 <Area
                   type="monotone"
-                  dataKey="revenue"
+                  dataKey="revenue" name={t("revenue")}
                   stroke="var(--color-primary)"
                   strokeWidth={2}
                   fill="url(#rev)"
@@ -304,7 +305,7 @@ function Dashboard() {
                 <XAxis type="number" tickLine={false} axisLine={false} fontSize={12} tickFormatter={(v) => compactMoney(v)} />
                 <YAxis type="category" dataKey="name" width={110} tickLine={false} axisLine={false} fontSize={12} />
                 <Tooltip formatter={(v: number) => money(v)} />
-                <Bar dataKey="profit" fill="var(--color-accent)" radius={[0, 6, 6, 0]} />
+                <Bar name={t("profit")} dataKey="profit" fill="var(--color-accent)" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -332,14 +333,14 @@ function Dashboard() {
             {orders.slice(0, 10).map((o) => (
               <tr key={o.id} className="border-t">
                 <td className="px-4 py-3">{formatDate(o.order_date)}</td>
-                <td className="px-4 py-3">{o.platform}</td>
+                <td className="px-4 py-3">{tt(o.platform)}</td>
                 <td className="px-4 py-3">{o.customer_name ?? "—"}</td>
                 <td className="px-4 py-3">
                   {money(o.order_items.reduce((s, i) => s + Number(i.quantity) * Number(i.sale_price), 0))}
                 </td>
                 <td className="px-4 py-3">
                   <Badge variant={o.status === "completed" ? "default" : "secondary"}>
-                    {titleCase(o.status)}
+                    {ts(o.status)}
                   </Badge>
                 </td>
               </tr>
