@@ -476,7 +476,7 @@ function SettingsPage() {
                           </select>
                         ) : (
                           <Badge variant="secondary">
-                            {p.roles[0] ? ROLE_LABELS[p.roles[0] as AppRole] : "No role"}
+                            {p.roles[0] ? ROLE_LABELS[p.roles[0] as AppRole] : tt("No role")}
                           </Badge>
                         )}
                       </TableCell>

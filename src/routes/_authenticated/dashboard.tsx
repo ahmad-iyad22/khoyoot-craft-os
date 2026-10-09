@@ -162,7 +162,7 @@ function Dashboard() {
       );
     return [...map.entries()]
       .map(([id, profit]) => ({
-        name: products.find((p) => p.id === id)?.name ?? "Unknown",
+        name: products.find((p) => p.id === id)?.name ?? tt("Unknown"),
         profit: Math.round(profit),
       }))
       .sort((a, b) => b.profit - a.profit)
