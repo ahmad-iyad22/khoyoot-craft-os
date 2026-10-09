@@ -5,7 +5,7 @@ export function TatreezDivider({ className = "" }: { className?: string }) {
       viewBox="0 0 240 12"
       preserveAspectRatio="none"
       aria-hidden="true"
-      className={`h-3 w-full text-primary/35 ${className}`}
+      className={`h-3 w-full text-primary/70 ${className}`}
     >
       <g fill="currentColor">
         {Array.from({ length: 20 }, (_, i) => (
@@ -28,7 +28,7 @@ export function TatreezEmptyState({
 }) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-      <svg viewBox="0 0 64 64" aria-hidden="true" className="size-14 text-primary/30">
+      <svg viewBox="0 0 64 64" aria-hidden="true" className="size-14 text-primary/65">
         <g fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M32 4 L60 32 L32 60 L4 32 Z" />
           <path d="M32 16 L48 32 L32 48 L16 32 Z" />

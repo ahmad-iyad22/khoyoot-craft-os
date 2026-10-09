@@ -19,7 +19,7 @@ export function pct(current: number, previous: number) {
 
 export function formatDate(value?: string | null) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-GB", {
+  return new Date(value).toLocaleDateString(undefined, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -36,7 +36,7 @@ export function monthRange(offset = 0) {
   const end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
   const iso = (d: Date) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  return { start: iso(start), end: iso(end), label: start.toLocaleString("en", { month: "long", year: "numeric" }) };
+  return { start: iso(start), end: iso(end), label: start.toLocaleString(undefined, { month: "long", year: "numeric" }) };
 }
 
 export const EXPENSE_CATEGORIES = [
