@@ -377,7 +377,7 @@ function InventoryPage() {
                 {!filtered.length && (
                   <tr>
                     <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                      No products yet — add them in Settings → Product catalog.
+                      tt("No products yet 2014 add them in Settings 2192 Product catalog.")
                     </td>
                   </tr>
                 )}

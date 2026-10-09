@@ -232,8 +232,9 @@ function Dashboard() {
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-warning/40 bg-warning/15 px-4 py-3 text-sm">
           <AlertTriangle className="size-4 text-warning" />
           <span className="font-medium">
-            {lowStock.length} product{lowStock.length > 1 ? "s are" : " is"} at or below the reorder
-            threshold
+            {lowStock.length === 1 
+              ? tt("1 product is at or below the reorder threshold")
+              : tt("{count} products are at or below the reorder threshold").replace("{count}", String(lowStock.length))}
           </span>
           <span className="text-muted-foreground">
             {lowStock
@@ -269,7 +270,7 @@ function Dashboard() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card-surface p-4">
-          <h2 className="mb-4 font-display text-lg">{tt("tt("Revenue \u00b7 last 6 months")")}</h2>
+          <h2 className="mb-4 font-display text-lg">{tt("Revenue \u00b7 last 6 months")}</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={monthly}>
