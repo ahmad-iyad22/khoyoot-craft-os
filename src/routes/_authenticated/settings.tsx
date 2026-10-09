@@ -40,7 +40,7 @@ const ROLES: AppRole[] = ["owner", "operations", "marketing"];
 
 function SettingsPage() {
   const roles = useRoles();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const qc = useQueryClient();
   const [productOpen, setProductOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
@@ -62,7 +62,7 @@ function SettingsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, categories(name)")
+        .select("*, categories(name, name_ar)")
         .order("name");
       if (error) throw error;
       return data ?? [];
@@ -262,7 +262,7 @@ function SettingsPage() {
                               <p className="font-medium">{p.name}</p>
                             </div>
                           </TableCell>
-                          <TableCell>{p.categories?.name ?? "—"}</TableCell>
+                          <TableCell>{(lang === "ar" ? p.categories?.name_ar || p.categories?.name : p.categories?.name) ?? "—"}</TableCell>
                           <TableCell className="text-right tabular-nums">{money(p.cost_price)}</TableCell>
                           <TableCell className="text-right tabular-nums">{money(p.sale_price)}</TableCell>
                           <TableCell className="text-right tabular-nums">{p.reorder_threshold}</TableCell>
@@ -356,7 +356,7 @@ function SettingsPage() {
                       <TableCell>
                         {roles.isOperations ? (
                           <Input
-                            defaultValue={c.name}
+                            defaultValue={lang === "ar" ? c.name_ar || c.name : c.name}
                             onBlur={(e) => {
                               const value = e.target.value.trim();
                               if (value && value !== c.name)
@@ -470,13 +470,13 @@ function SettingsPage() {
                             </option>
                             {ROLES.map((r) => (
                               <option key={r} value={r}>
-                                {ROLE_LABELS[r]}
+                                {t(`role_${r}`)}
                               </option>
                             ))}
                           </select>
                         ) : (
                           <Badge variant="secondary">
-                            {p.roles[0] ? ROLE_LABELS[p.roles[0] as AppRole] : tt("No role")}
+                            {p.roles[0] ? t(`role_${p.roles[0]}`) : tt("No role")}
                           </Badge>
                         )}
                       </TableCell>
@@ -567,7 +567,7 @@ function SettingsPage() {
                   <option value="">—</option>
                   {(categoriesQ.data ?? []).map((c: any) => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {lang === "ar" ? c.name_ar || c.name : c.name}
                     </option>
                   ))}
                 </select>

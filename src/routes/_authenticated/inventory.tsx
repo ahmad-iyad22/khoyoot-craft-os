@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
 import { useI18n , tt } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
+import { TatreezEmptyState } from "@/components/tatreez";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -184,8 +185,7 @@ function InventoryPage() {
               <DialogHeader>
                 <DialogTitle>{tt("Receive stock")}</DialogTitle>
                 <DialogDescription>
-                  Landed cost per unit = unit cost + shipping split across the batch. Weighted average
-                  cost updates automatically.
+                  {tt("Landed cost per unit = unit cost + shipping split across the batch. Weighted average cost updates automatically.")}
                 </DialogDescription>
               </DialogHeader>
               <form
@@ -264,7 +264,7 @@ function InventoryPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>{tt("Batch code (optional)")}</Label>
-                  <Input name="batch_code" placeholder="e.g. NAB-2026-04" />
+                  <Input name="batch_code" placeholder="NAB-2026-04" />
                 </div>
                 <div className="space-y-2">
                   <Label>{tt("Serial numbers (optional, one per line)")}</Label>
@@ -276,7 +276,7 @@ function InventoryPage() {
                 </div>
                 <DialogFooter>
                   <Button type="submit" disabled={receive.isPending}>
-                    {receive.isPending ? "Saving…" : "Receive stock"}
+                    {tt(receive.isPending ? "Saving…" : "Receive stock")}
                   </Button>
                 </DialogFooter>
               </form>
@@ -377,7 +377,7 @@ function InventoryPage() {
                 {!filtered.length && (
                   <tr>
                     <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                      tt("No products yet 2014 add them in Settings 2192 Product catalog.")
+                      <TatreezEmptyState title={t("noProducts")} />
                     </td>
                   </tr>
                 )}
@@ -441,7 +441,7 @@ function InventoryPage() {
                     <td className="px-4 py-3 font-mono text-xs">{s.serial}</td>
                     <td className="px-4 py-3">{s.products?.name}</td>
                     <td className="px-4 py-3">
-                      <Badge variant="secondary">{titleCase(s.status)}</Badge>
+                      <Badge variant="secondary">{tt(titleCase(s.status))}</Badge>
                     </td>
                     <td className="px-4 py-3">{formatDate(s.created_at)}</td>
                   </tr>
@@ -483,7 +483,7 @@ function InventoryPage() {
                       {m.change_qty > 0 ? "+" : ""}
                       {m.change_qty}
                     </td>
-                    <td className="px-4 py-3">{titleCase(m.reason)}</td>
+                    <td className="px-4 py-3">{tt(titleCase(m.reason))}</td>
                     <td className="px-4 py-3">{m.profiles?.full_name ?? "—"}</td>
                   </tr>
                 ))}

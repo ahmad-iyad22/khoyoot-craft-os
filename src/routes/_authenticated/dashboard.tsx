@@ -47,7 +47,7 @@ function monthLabel(d: Date, lang: string) {
 
 function Dashboard() {
   const roles = useRoles();
-  const { t, lang } = useI18n();
+  const { t, ts, lang } = useI18n();
   const since = new Date();
   since.setMonth(since.getMonth() - 5);
   since.setDate(1);
@@ -286,7 +286,7 @@ function Dashboard() {
                 <Tooltip formatter={(v: number) => money(v)} />
                 <Area
                   type="monotone"
-                  dataKey="revenue"
+                  dataKey="revenue" name={t("revenue")}
                   stroke="var(--color-primary)"
                   strokeWidth={2}
                   fill="url(#rev)"
@@ -305,7 +305,7 @@ function Dashboard() {
                 <XAxis type="number" tickLine={false} axisLine={false} fontSize={12} tickFormatter={(v) => compactMoney(v)} />
                 <YAxis type="category" dataKey="name" width={110} tickLine={false} axisLine={false} fontSize={12} />
                 <Tooltip formatter={(v: number) => money(v)} />
-                <Bar dataKey="profit" fill="var(--color-accent)" radius={[0, 6, 6, 0]} />
+                <Bar name={t("profit")} dataKey="profit" fill="var(--color-accent)" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -333,14 +333,14 @@ function Dashboard() {
             {orders.slice(0, 10).map((o) => (
               <tr key={o.id} className="border-t">
                 <td className="px-4 py-3">{formatDate(o.order_date)}</td>
-                <td className="px-4 py-3">{o.platform}</td>
+                <td className="px-4 py-3">{tt(o.platform)}</td>
                 <td className="px-4 py-3">{o.customer_name ?? "—"}</td>
                 <td className="px-4 py-3">
                   {money(o.order_items.reduce((s, i) => s + Number(i.quantity) * Number(i.sale_price), 0))}
                 </td>
                 <td className="px-4 py-3">
                   <Badge variant={o.status === "completed" ? "default" : "secondary"}>
-                    {titleCase(o.status)}
+                    {ts(o.status)}
                   </Badge>
                 </td>
               </tr>

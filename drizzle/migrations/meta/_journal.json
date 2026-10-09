@@ -8,6 +8,13 @@
       "when": 1791296835966,
       "tag": "0000_product_delete_audit_docs",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791520085217,
+      "tag": "0001_partner_profit_periods",
+      "breakpoints": true
     }
   ]
 }

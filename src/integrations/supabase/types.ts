@@ -588,6 +588,36 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_profit_periods: {
+        Row: {
+          created_at: string
+          id: string
+          net_profit: number
+          notes: string | null
+          period_end: string
+          period_start: string
+          shares: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          net_profit: number
+          notes?: string | null
+          period_end: string
+          period_start: string
+          shares: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          net_profit?: number
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          shares?: Json
+        }
+        Relationships: []
+      }
       partner_transactions: {
         Row: {
           amount: number
@@ -595,6 +625,7 @@ export type Database = {
           id: string
           notes: string | null
           partner_id: string
+          profit_period_id: string | null
           txn_date: string
           txn_type: string
         }
@@ -604,6 +635,7 @@ export type Database = {
           id?: string
           notes?: string | null
           partner_id: string
+          profit_period_id?: string | null
           txn_date?: string
           txn_type?: string
         }
@@ -613,6 +645,7 @@ export type Database = {
           id?: string
           notes?: string | null
           partner_id?: string
+          profit_period_id?: string | null
           txn_date?: string
           txn_type?: string
         }
@@ -624,6 +657,13 @@ export type Database = {
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "partner_transactions_profit_period_id_fkey"
+            columns: ["profit_period_id"]
+            isOneToOne: false
+            referencedRelation: "partner_profit_periods"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partners: {
@@ -633,6 +673,7 @@ export type Database = {
           email: string | null
           expense_share_percent: number
           id: string
+          location: string
           name: string
           notes: string | null
           profile_id: string | null
@@ -645,6 +686,7 @@ export type Database = {
           email?: string | null
           expense_share_percent?: number
           id?: string
+          location?: string
           name: string
           notes?: string | null
           profile_id?: string | null
@@ -657,6 +699,7 @@ export type Database = {
           email?: string | null
           expense_share_percent?: number
           id?: string
+          location?: string
           name?: string
           notes?: string | null
           profile_id?: string | null
@@ -1452,6 +1495,17 @@ export type Database = {
           _shipping_cost: number
           _supplier_id?: string
           _unit_cost: number
+        }
+        Returns: string
+      }
+      save_partner_profit_period: {
+        Args: {
+          _end: string
+          _id: string
+          _notes?: string
+          _profit: number
+          _shares: Json
+          _start: string
         }
         Returns: string
       }
