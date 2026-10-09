@@ -323,13 +323,13 @@ function FinancePage() {
               <Table>
                 <TableBody>
                   {[
-                    ["Revenue (orders)", pnl.revenue],
-                    ["Other income", pnl.manualIncome],
-                    ["Product cost", -pnl.productCost],
-                    ["Shipping", -pnl.shipping],
-                    ["Platform fees", -pnl.fees],
-                    ["Ads", -pnl.ads],
-                    ["Other expenses", -pnl.other],
+                    [tt("Revenue (orders)"), pnl.revenue],
+                    [tt("Other income"), pnl.manualIncome],
+                    [tt("Product cost"), -pnl.productCost],
+                    [tt("Shipping"), -pnl.shipping],
+                    [tt("Platform fees"), -pnl.fees],
+                    [tt("Ads"), -pnl.ads],
+                    [tt("Other expenses"), -pnl.other],
                   ].map(([label, value]) => (
                     <TableRow key={label as string}>
                       <TableCell>{label as string}</TableCell>

@@ -346,7 +346,7 @@ function InventoryPage() {
                       <td className="px-4 py-3">{money(p.sale_price)}</td>
                       <td className="px-4 py-3">
                         <Badge variant={low ? "destructive" : "secondary"}>
-                          {p.stock_qty} / min {p.reorder_threshold}
+                          {p.stock_qty} / {tt("min")} {p.reorder_threshold}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">

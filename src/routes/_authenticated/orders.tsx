@@ -97,7 +97,7 @@ function OrdersPage() {
           _product_id: l.product_id,
           _change: -Math.abs(l.quantity),
           _reason: "sale",
-          _note: "Order fulfilment",
+          _note: "tt("Order fulfilment")",
         });
       }
     },
@@ -319,7 +319,7 @@ function OrdersPage() {
                 <td className="px-4 py-3">{formatDate(o.order_date)}</td>
                 <td className="px-4 py-3">{o.platform}</td>
                 <td className="px-4 py-3">
-                  {o.order_items.reduce((s: number, i: any) => s + Number(i.quantity), 0)} pcs
+                  {o.order_items.reduce((s: number, i: any) => s + Number(i.quantity), 0)} {tt("pcs")}
                 </td>
                 <td className="px-4 py-3">{money(totalOf(o))}</td>
                 {roles.isOwner && (
@@ -380,7 +380,7 @@ function OrdersPage() {
                   </div>
                   {roles.isOwner && (
                     <Badge variant="secondary">
-                      {money(Number(i.quantity) * (Number(i.sale_price) - Number(i.unit_cost)))} margin
+                      {money(Number(i.quantity) * (Number(i.sale_price) - Number(i.unit_cost)))} {tt("margin")}
                     </Badge>
                   )}
                 </div>

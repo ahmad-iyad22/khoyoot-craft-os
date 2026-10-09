@@ -41,8 +41,8 @@ type OrderRow = {
   order_items: { quantity: number; sale_price: number; unit_cost: number; product_id: string | null }[];
 };
 
-function monthLabel(d: Date) {
-  return d.toLocaleString("en", { month: "short" });
+function monthLabel(d: Date, lang: string) {
+  return d.toLocaleString(lang === "ar" ? "ar" : "en", { month: "short" });
 }
 
 function Dashboard() {
@@ -133,7 +133,7 @@ function Dashboard() {
     const expenseTotal = monthExp.reduce((s, e) => s + Number(e.amount), 0);
     const adSpend = monthExp.filter((e) => e.category === "ads").reduce((s, e) => s + Number(e.amount), 0);
     return {
-      label: monthLabel(d),
+      label: monthLabel(d, lang),
       revenue,
       cogs,
       expenseTotal,
@@ -269,7 +269,7 @@ function Dashboard() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card-surface p-4">
-          <h2 className="mb-4 font-display text-lg">{tt("Revenue \u00b7 last 6 months")}</h2>
+          <h2 className="mb-4 font-display text-lg">{tt("tt("Revenue \u00b7 last 6 months")")}</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={monthly}>
