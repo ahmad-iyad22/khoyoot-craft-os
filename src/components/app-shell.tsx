@@ -18,7 +18,7 @@ import {
 import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useRoles, useUser } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
+import { tt, useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -134,7 +134,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
       <div>
         <div className="tatreez-band mb-3 h-1.5 w-16 rounded-full" />
         <p className="font-display text-2xl leading-none">{t("appName")}</p>
-        <p className="mt-1 text-xs text-sidebar-foreground/55">{t("tagline")} · tt("Phase 1 \u00b7 Internal use only")</p>
+        <p className="mt-1 text-xs text-sidebar-foreground/55">{t("tagline")} · {tt("Phase 1 · Internal use only")}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -167,6 +167,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -219,7 +220,7 @@ export function PageHeader({
 export function AccessDenied({ message }: { message?: string }) {
   return (
     <div className="card-surface mx-auto mt-16 max-w-md p-8 text-center">
-      <h2 className="font-display text-xl">tt("Not available for your role")</h2>
+      <h2 className="font-display text-xl">{tt("Not available for your role")}</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         {message ?? tt("Ask the Owner if you need access to this section.")}
       </p>
