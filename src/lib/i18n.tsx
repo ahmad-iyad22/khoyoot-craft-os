@@ -48,6 +48,7 @@ export const DICT: Dict = {
   total: { en: "Total", ar: "الإجمالي" },
   platform: { en: "Platform", ar: "المنصة" },
   revenue: { en: "Revenue", ar: "الإيرادات" },
+  comparedLastMonth: { en: "vs last month", ar: "مقارنة بالشهر الماضي" },
   profit: { en: "Profit", ar: "الربح" },
   none: { en: "Nothing here yet", ar: "لا يوجد شيء بعد" },
   loading: { en: "Loading…", ar: "جارٍ التحميل…" },
@@ -364,10 +365,8 @@ export const DICT: Dict = {
   "When": { en: "When", ar: "\u0645\u062a\u0649" },
   "Which products and platforms sell \u2014 costs and financial records stay with the Owner.": { en: "Which products and platforms sell \u2014 costs and financial records stay with the Owner.", ar: "\u0623\u064a \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0648\u0627\u0644\u0645\u0646\u0635\u0627\u062a \u062a\u0628\u064a\u0639 \u2014 \u0627\u0644\u062a\u0643\u0627\u0644\u064a\u0641 \u0648\u0627\u0644\u0633\u062c\u0644\u0627\u062a \u0627\u0644\u0645\u0627\u0644\u064a\u0629 \u062a\u0628\u0642\u0649 \u0644\u062f\u0649 \u0627\u0644\u0645\u0627\u0644\u0643." },
   printPdf: { en: "Print / PDF", ar: "طباعة / PDF" },
-  "Revenue \u00b7 last 6 months": { en: "Revenue \u00b7 last 6 months", ar: "\u0627\u0644\u0625\u064a\u0631\u0627\u062f\u0627\u062a \u00b7 \u0622\u062e\u0631 6 \u0623\u0634\u0647\u0631" },
   "Unknown": { en: "Unknown", ar: "\u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641" },
   "Save order": { en: "Save order", ar: "\u062d\u0641\u0638 \u0627\u0644\u0637\u0644\u0628" },
-  "No role": { en: "No role", ar: "\u0628\u062f\u0648\u0646 \u062f\u0648\u0631" },
   "Landed cost per unit = unit cost + shipping split across the batch. Weighted average cost updates automatically.": { 
     en: "Landed cost per unit = unit cost + shipping split across the batch. Weighted average cost updates automatically.", 
     ar: "\u062a\u0643\u0644\u0641\u0629 \u0627\u0644\u0648\u0635\u0648\u0644 \u0644\u0644\u0648\u062d\u062f\u0629 = \u062a\u0643\u0644\u0641\u0629 \u0627\u0644\u0648\u062d\u062f\u0629 + \u062a\u0642\u0633\u064a\u0645 \u0627\u0644\u0634\u062d\u0646 \u0639\u0644\u0649 \u0627\u0644\u062f\u0641\u0639\u0629. \u064a\u062a\u0645 \u062a\u062d\u062f\u064a\u062b \u0645\u062a\u0648\u0633\u0637 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 \u0627\u0644\u0645\u0631\u062c\u062d \u062a\u0644\u0642\u0627\u0626\u064a\u064b\u0627."
@@ -382,11 +381,8 @@ export const DICT: Dict = {
   "Other expenses": { en: "Other expenses", ar: "\u0645\u0635\u0627\u0631\u064a\u0641 \u0623\u062e\u0631\u0649" },
   "Ads": { en: "Ads", ar: "\u0627\u0644\u0625\u0639\u0644\u0627\u0646\u0627\u062a" },
   "pcs": { en: "pcs", ar: "\u0642\u0637\u0639\u0629" },
-  "margin": { en: "margin", ar: "\u0647\u0627\u0645\u0634" },
-  "Phase 1 \u00b7 Internal use only": { en: "Phase 1 \u00b7 Internal use only", ar: "\u0627\u0644\u0645\u0631\u062d\u0644\u0629 1 \u00b7 \u0644\u0644\u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0627\u0644\u062f\u0627\u062e\u0644\u064a \u0641\u0642\u0637" },
   "Ask the Owner if you need access to this section.": { en: "Ask the Owner if you need access to this section.", ar: "\u0627\u0633\u0623\u0644 \u0627\u0644\u0645\u0627\u0644\u0643 \u0625\u0630\u0627 \u0643\u0646\u062a \u0628\u062d\u0627\u062c\u0629 \u0625\u0644\u0649 \u0627\u0644\u0648\u0635\u0648\u0644 \u0644\u0647\u0630\u0627 \u0627\u0644\u0642\u0633\u0645." },
   "min": { en: "min", ar: "\u0627\u0644\u0623\u062f\u0646\u0649" },
-  "Not available for your role": { en: "Not available for your role", ar: "\u063a\u064a\u0631 \u0645\u062a\u0627\u062d \u0644\u062f\u0648\u0631\u0643" },
 };
 
 
