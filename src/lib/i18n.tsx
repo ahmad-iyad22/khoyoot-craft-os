@@ -48,6 +48,7 @@ export const DICT: Dict = {
   total: { en: "Total", ar: "الإجمالي" },
   platform: { en: "Platform", ar: "المنصة" },
   revenue: { en: "Revenue", ar: "الإيرادات" },
+  comparedLastMonth: { en: "vs last month", ar: "مقارنة بالشهر الماضي" },
   profit: { en: "Profit", ar: "الربح" },
   none: { en: "Nothing here yet", ar: "لا يوجد شيء بعد" },
   loading: { en: "Loading…", ar: "جارٍ التحميل…" },
