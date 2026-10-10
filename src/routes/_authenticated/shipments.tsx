@@ -346,7 +346,7 @@ function ShipmentsPage() {
 
             {items.map((it, idx) => (
               <div key={idx} className="grid gap-2 rounded-lg border p-3 sm:grid-cols-5">
-                <div className="flex min-w-0 items-center gap-2 sm:col-span-2"><ProductThumbnail url={productsQ.data?.find((p) => p.id === it.product_id)?.image_url} />
+                <div className="flex min-w-0 items-center gap-2 sm:col-span-2"><ProductThumbnail url={productsQ.data?.find((p) => p.id === it.product_id)?.image_url ?? null} />
                 <select
                   className="h-9 w-full min-w-0 rounded-md border bg-background px-2 text-sm"
                   value={it.product_id}
