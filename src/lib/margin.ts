@@ -29,66 +29,51 @@ export function formatPercent(value: number | null | undefined, digits = 1) {
 }
 
 /**
- * Shipment cost allocation, exactly as specified:
- * cost per kg = FULL shipping cost paid / total shipment weight (never prorated down),
- * allocated per line = cost per kg * line weight, per unit = line / quantity,
- * landed cost per unit = product cost per unit + allocated shipping per unit.
+ * Weight-based allocation (mirrors the database allocate_shipment function).
+ * cost per kg = (shipping + customs, in base) / total weight. Line amounts are rounded to 2 decimals
+ * and the rounding remainder goes on the last line so lines add up exactly to the shipment totals.
+ * The FULL cost paid is always used. Item cost (May's cost) is never reduced by shipping or customs.
  */
-export function allocateShipment(
-  totalShippingCost: number,
-  items: { quantity: number; total_weight_kg: number; unit_product_cost: number }[],
+export function allocateByWeight(
+  shippingBase: number,
+  customsBase: number,
+  lines: { quantity: number; weight_kg: number; product_cost: number | null }[],
 ) {
-  const totalWeight = items.reduce((s, i) => s + Number(i.total_weight_kg || 0), 0);
-  const costPerKg = totalWeight > 0 ? Number(totalShippingCost || 0) / totalWeight : 0;
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+  const totalWeight = lines.reduce((s, l) => s + (Number(l.weight_kg) || 0), 0);
+  let sa = 0;
+  let ca = 0;
+  const out = lines.map((l, i) => {
+    const w = Number(l.weight_kg) || 0;
+    let ship = 0;
+    let cust = 0;
+    if (totalWeight > 0) {
+      if (i === lines.length - 1) {
+        ship = r2(shippingBase - sa);
+        cust = r2(customsBase - ca);
+      } else {
+        ship = r2((shippingBase * w) / totalWeight);
+        cust = r2((customsBase * w) / totalWeight);
+      }
+    }
+    sa += ship;
+    ca += cust;
+    const q = Number(l.quantity) || 0;
+    const shipUnit = q > 0 ? ship / q : 0;
+    const custUnit = q > 0 ? cust / q : 0;
+    return {
+      weightShare: totalWeight > 0 ? (w / totalWeight) * 100 : 0,
+      shipLine: ship,
+      custLine: cust,
+      shipUnit,
+      custUnit,
+      landedUnit: l.product_cost === null ? null : r2(Number(l.product_cost) + shipUnit + custUnit),
+    };
+  });
   return {
     totalWeight,
-    costPerKg,
-    lines: items.map((i) => {
-      const line = costPerKg * Number(i.total_weight_kg || 0);
-      const perUnit = Number(i.quantity) > 0 ? line / Number(i.quantity) : 0;
-      return {
-        allocatedLine: line,
-        allocatedPerUnit: perUnit,
-        landedPerUnit: Number(i.unit_product_cost || 0) + perUnit,
-      };
-    }),
-  };
-}
-
-/**
- * Full allocation including customs/tax, both weight-based on the FULL amounts paid.
- * amountOwed = (supplier price × qty) − (allocated shipping + allocated customs) for the line.
- */
-export function allocateShipmentFull(
-  totalShippingCost: number,
-  totalCustomsCost: number,
-  items: { quantity: number; total_weight_kg: number; unit_product_cost: number }[],
-) {
-  const totalWeight = items.reduce((s, i) => s + Number(i.total_weight_kg || 0), 0);
-  const shippingPerKg = totalWeight > 0 ? Number(totalShippingCost || 0) / totalWeight : 0;
-  const customsPerKg = totalWeight > 0 ? Number(totalCustomsCost || 0) / totalWeight : 0;
-  return {
-    totalWeight,
-    shippingPerKg,
-    customsPerKg,
-    costPerKg: shippingPerKg + customsPerKg,
-    lines: items.map((i) => {
-      const qty = Number(i.quantity) || 0;
-      const weight = Number(i.total_weight_kg || 0);
-      const shipLine = shippingPerKg * weight;
-      const custLine = customsPerKg * weight;
-      const shipUnit = qty > 0 ? shipLine / qty : 0;
-      const custUnit = qty > 0 ? custLine / qty : 0;
-      const supplierPrice = Number(i.unit_product_cost || 0);
-      return {
-        allocatedShippingLine: shipLine,
-        allocatedCustomsLine: custLine,
-        allocatedShippingPerUnit: shipUnit,
-        allocatedCustomsPerUnit: custUnit,
-        landedPerUnit: supplierPrice + shipUnit + custUnit,
-        amountOwed: supplierPrice * qty - (shipLine + custLine),
-      };
-    }),
+    costPerKg: totalWeight > 0 ? (shippingBase + customsBase) / totalWeight : 0,
+    lines: out,
   };
 }
 

@@ -399,10 +399,10 @@ export const STATUS_LABELS: Record<string, { en: string; ar: string }> = {
   active: { en: "Active", ar: "نشط" },
   out_of_stock: { en: "Out of stock", ar: "نفد المخزون" },
   discontinued: { en: "Discontinued", ar: "موقوف" },
-  sent_from_palestine: { en: "Sent from Palestine", ar: "أُرسلت من فلسطين" },
+  sent_from_palestine: { en: "Shipped", ar: "تم الشحن" },
   in_transit: { en: "In transit", ar: "قيد النقل" },
   customs: { en: "Customs", ar: "الجمارك" },
-  arrived_in_malaysia: { en: "Arrived in Malaysia", ar: "وصلت إلى ماليزيا" },
+  arrived_in_malaysia: { en: "Arrived", ar: "وصلت" },
   added_to_inventory: { en: "Added to inventory", ar: "أُضيفت إلى المخزون" },
 };
 
