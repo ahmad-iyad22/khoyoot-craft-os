@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { tt, useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,7 +63,7 @@ function AuthPage() {
       return;
     }
     if (!data.session) {
-      toast.success("Account created. Check your email to confirm, then sign in.");
+      toast.success(tt("Account created. Check your email to confirm, then sign in."));
       return;
     }
     navigate({ to: "/dashboard", replace: true });
@@ -73,7 +74,7 @@ function AuthPage() {
       <div className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
         <div className="tatreez-band h-3 w-40 rounded-full" />
         <div>
-          <h1 className="font-display text-5xl leading-tight">Khoyoot</h1>
+          <h1 className="font-display text-5xl leading-tight">{tt("Khoyoot")}</h1>
           <p className="mt-2 font-display text-2xl text-sidebar-primary" dir="rtl">
             خيوط
           </p>
@@ -88,30 +89,30 @@ function AuthPage() {
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
             <div className="tatreez-band mb-4 h-2 w-24 rounded-full" />
-            <h1 className="font-display text-3xl">Khoyoot</h1>
+            <h1 className="font-display text-3xl">{tt("Khoyoot")}</h1>
           </div>
 
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Create account</TabsTrigger>
+              <TabsTrigger value="signin">{tt("Sign in")}</TabsTrigger>
+              <TabsTrigger value="signup">{tt("Create account")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={signIn} className="mt-6 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{tt("Email")}</Label>
                   <Input
                     id="email"
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@khoyoot.com"
+                    placeholder={tt("you@khoyoot.com")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{tt("Password")}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -129,7 +130,7 @@ function AuthPage() {
             <TabsContent value="signup">
               <form onSubmit={signUp} className="mt-6 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full name</Label>
+                  <Label htmlFor="name">{tt("Full name")}</Label>
                   <Input
                     id="name"
                     required
@@ -138,7 +139,7 @@ function AuthPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email2">Email</Label>
+                  <Label htmlFor="email2">{tt("Email")}</Label>
                   <Input
                     id="email2"
                     type="email"
@@ -148,7 +149,7 @@ function AuthPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password2">Password</Label>
+                  <Label htmlFor="password2">{tt("Password")}</Label>
                   <Input
                     id="password2"
                     type="password"
