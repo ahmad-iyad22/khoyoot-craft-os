@@ -198,7 +198,7 @@ function MarketingPage() {
                     <TableHead>{tt("Platform")}</TableHead>
                     <TableHead>{tt("Dates")}</TableHead>
                     <TableHead>{tt("Product")}</TableHead>
-                    <TableHead className="text-right">{tt("Budget")}</TableHead>
+                    <TableHead className="text-end">{tt("Budget")}</TableHead>
                     <TableHead>{tt("Status")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -211,7 +211,7 @@ function MarketingPage() {
                         {formatDate(c.start_date)} → {formatDate(c.end_date)}
                       </TableCell>
                       <TableCell>{productName(c.product_id)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{money(c.budget)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(c.budget)}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{titleCase(c.status)}</Badge>
                       </TableCell>

@@ -110,7 +110,7 @@ function SuppliersPage() {
                   <TableCell>{s.phone ?? "—"}</TableCell>
                   <TableCell className="rtl-content">{s.products_supplied ?? "—"}</TableCell>
                   <TableCell>{s.lead_time_notes ?? "—"}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <Button
                       variant="ghost"
                       size="sm"

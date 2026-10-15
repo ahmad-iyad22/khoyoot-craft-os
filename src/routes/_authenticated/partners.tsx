@@ -127,7 +127,7 @@ function PartnersPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="p-share">Share %</Label>
-                  <Input id="p-share" name="share_percent" type="number" step="0.01" defaultValue={33.33} />
+                  <Input id="p-share" name="share_percent" type="number" step="0.01" defaultValue={0} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="p-notes">{tt("Notes")}</Label>
@@ -148,9 +148,9 @@ function PartnersPage() {
             <CardHeader className="flex flex-row items-start justify-between gap-3">
               <div>
                 <CardTitle className="font-display text-xl">{p.name}</CardTitle>
-                <p className="mt-1 text-sm text-muted-foreground">Share {Number(p.share_percent)}%</p>
+                <p className="mt-1 text-sm text-muted-foreground">{tt("Share")} {Number(p.share_percent)}%</p>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">{tt("Balance")}</p>
                 <p className="font-display text-2xl">{money(balanceOf(p))}</p>
               </div>
@@ -161,7 +161,7 @@ function PartnersPage() {
                   <TableRow>
                     <TableHead>{tt("Date")}</TableHead>
                     <TableHead>{tt("Type")}</TableHead>
-                    <TableHead className="text-right">{tt("Amount")}</TableHead>
+                    <TableHead className="text-end">{tt("Amount")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -172,10 +172,10 @@ function PartnersPage() {
                         <TableCell>{formatDate(t.txn_date)}</TableCell>
                         <TableCell>
                           <Badge variant={t.txn_type === "withdrawal" ? "destructive" : "secondary"}>
-                            {t.txn_type}
+                            {tt(t.txn_type === "profit_share" ? "Profit share" : t.txn_type === "withdrawal" ? "Withdrawal" : "Contribution")}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{money(t.amount)}</TableCell>
+                        <TableCell className="text-end tabular-nums">{money(t.amount)}</TableCell>
                       </TableRow>
                     ))}
                   {(p.partner_transactions ?? []).length === 0 && (
@@ -201,7 +201,7 @@ function PartnersPage() {
       <Dialog open={!!txnFor} onOpenChange={(o) => !o && setTxnFor(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Transaction — {txnFor?.name}</DialogTitle>
+            <DialogTitle>{tt("Transaction")} — {txnFor?.name}</DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
