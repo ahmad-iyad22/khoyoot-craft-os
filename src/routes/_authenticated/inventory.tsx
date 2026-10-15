@@ -493,10 +493,10 @@ function InventoryPage() {
                 const change = Number(f.get("change"));
                 const reason = String(f.get("reason") ?? "");
                 const note = String(f.get("note") ?? "").trim();
-                if (!change) return toast.error(t("changeRequired"));
-                if (!reason) return toast.error(t("reasonRequired"));
-                if (reason === "other" && !note) return toast.error(t("noteRequired"));
-                if (Number(adjustFor.stock_qty) + change < 0) return toast.error(t("stockWouldBeNegative"));
+                if (!change) { toast.error(t("changeRequired")); return; }
+                if (!reason) { toast.error(t("reasonRequired")); return; }
+                if (reason === "other" && !note) { toast.error(t("noteRequired")); return; }
+                if (Number(adjustFor.stock_qty) + change < 0) { toast.error(t("stockWouldBeNegative")); return; }
                 adjust.mutate({ product_id: adjustFor.id, change, reason, note });
               }}
             >
