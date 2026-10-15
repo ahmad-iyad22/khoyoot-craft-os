@@ -544,7 +544,7 @@ function ShipmentsPage() {
                   <div key={idx} className="space-y-2 rounded-lg border p-3">
                     <div className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_1.4fr_auto]">
                       <div className="flex min-w-0 items-center gap-2">
-                        <ProductThumbnail url={p?.image_url ?? null} name={p?.name} />
+                        <ProductThumbnail url={p?.image_url ?? null} name={p?.name ?? null} />
                         <select
                           aria-label={t("product")}
                           className="h-9 w-full min-w-0 rounded-md border bg-background px-2 text-sm"
@@ -665,7 +665,7 @@ function ShipmentsPage() {
               const p = products.find((x) => x.id === l.product_id);
               return (
                 <li key={l.batch_id} className="flex items-center gap-2 rounded-md border p-2">
-                  <ProductThumbnail url={p?.image_url ?? null} name={p?.name} />
+                  <ProductThumbnail url={p?.image_url ?? null} name={p?.name ?? null} />
                   <div className="min-w-0">
                     <p className="truncate font-medium">{p?.name ?? l.product_id}</p>
                     <p className="text-xs text-muted-foreground">
