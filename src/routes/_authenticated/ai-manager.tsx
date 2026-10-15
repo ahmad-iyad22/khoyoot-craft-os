@@ -74,10 +74,10 @@ function AiManagerPage() {
     const trimmed = text.trim();
     if (busy || (!trimmed && !pendingImage)) return;
     setError(null);
-    const next = [
-      ...messages,
-      { role: "user" as const, content: trimmed, imageDataUrl: pendingImage ?? undefined },
-    ];
+    const userMsg: Msg = pendingImage
+      ? { role: "user", content: trimmed, imageDataUrl: pendingImage }
+      : { role: "user", content: trimmed };
+    const next = [...messages, userMsg];
     setMessages(next);
     setInput("");
     setPendingImage(null);
