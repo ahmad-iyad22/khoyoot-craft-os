@@ -708,7 +708,7 @@ function ShipmentsPage() {
                   for (const [id, q] of Object.entries(many)) {
                     const p: any = products.find((x: any) => x.id === id);
                     const ex = next.findIndex((l) => l.product_id === id);
-                    if (ex >= 0) next[ex] = { ...next[ex], quantity: String(num(next[ex].quantity) + Math.max(1, num(q))) };
+                    if (ex >= 0) { const cur = next[ex]!; next[ex] = { ...cur, quantity: String(num(cur.quantity) + Math.max(1, num(q))) }; }
                     else next.push({ product_id: id, quantity: String(Math.max(1, num(q))), grams: String(num(p?.weight_grams)), cost: "" });
                   }
                   return next;
