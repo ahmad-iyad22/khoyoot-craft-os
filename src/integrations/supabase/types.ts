@@ -782,6 +782,32 @@ export type Database = {
         }
         Relationships: []
       }
+      product_code_counters: {
+        Row: {
+          next_batch: number
+          next_serial: number
+          product_id: string
+        }
+        Insert: {
+          next_batch?: number
+          next_serial?: number
+          product_id: string
+        }
+        Update: {
+          next_batch?: number
+          next_serial?: number
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_code_counters_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           archived: boolean
@@ -813,6 +839,7 @@ export type Database = {
           target_margin: number
           tracks_serials: boolean
           updated_at: string
+          weight_grams: number
         }
         Insert: {
           archived?: boolean
@@ -844,6 +871,7 @@ export type Database = {
           target_margin?: number
           tracks_serials?: boolean
           updated_at?: string
+          weight_grams?: number
         }
         Update: {
           archived?: boolean
@@ -875,6 +903,7 @@ export type Database = {
           target_margin?: number
           tracks_serials?: boolean
           updated_at?: string
+          weight_grams?: number
         }
         Relationships: [
           {
@@ -1447,6 +1476,11 @@ export type Database = {
         Returns: undefined
       }
       claim_next_sku: { Args: { _code: string }; Returns: string }
+      create_order: { Args: { _lines: Json; _order: Json }; Returns: string }
+      generate_batch_codes: {
+        Args: { _batch_id: string; _product_id: string; _quantity: number }
+        Returns: Json
+      }
       get_products_basic: {
         Args: never
         Returns: {
@@ -1497,6 +1531,18 @@ export type Database = {
           _unit_cost: number
         }
         Returns: string
+      }
+      receive_stock_auto: {
+        Args: {
+          _notes?: string
+          _product_id: string
+          _quantity: number
+          _received_at?: string
+          _shipping_cost: number
+          _supplier_id?: string
+          _unit_cost: number
+        }
+        Returns: Json
       }
       save_partner_profit_period: {
         Args: {
