@@ -549,6 +549,9 @@ function ShipmentsPage() {
                 <Button type="button" variant="outline" size="sm" onClick={() => setLines((p) => [...p, { product_id: "", quantity: "1", grams: "0", cost: "" }])}>
                   <Plus className="size-4" /> {t("sh_addLine")}
                 </Button>
+                <Button type="button" size="sm" onClick={() => { setMany({}); setManyOpen(true); }}>
+                  <Plus className="size-4" /> {t("sh_addMany")}
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground">{t("sh_costPendingHint")} {t("sh_marginEditHint")}</p>
               {lines.map((l, idx) => {
@@ -654,6 +657,72 @@ function ShipmentsPage() {
         description={t("sh_deleteBody")}
         onConfirm={() => { if (toDelete) deleteM.mutate(toDelete.id); setToDelete(null); }}
       />
+
+      <AlertDialog open={!!toUndo} onOpenChange={(v) => !v && setToUndo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("sh_undo")} · {toUndo?.reference}</AlertDialogTitle>
+            <AlertDialogDescription>{t("sh_undoBody")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (toUndo) undoM.mutate(toUndo.id); setToUndo(null); }}>{t("sh_undo")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={manyOpen} onOpenChange={setManyOpen}>
+        <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t("sh_addMany")}</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground">{t("sh_addManyHint")}</p>
+          <ul className="space-y-1">
+            {products.map((p: any) => {
+              const on = many[p.id] !== undefined;
+              return (
+                <li key={p.id} className="flex items-center gap-2 rounded-md border p-2">
+                  <input
+                    type="checkbox"
+                    aria-label={p.name}
+                    checked={on}
+                    onChange={(e) => setMany((m) => { const n = { ...m }; if (e.target.checked) n[p.id] = "1"; else delete n[p.id]; return n; })}
+                  />
+                  <ProductThumbnail url={p.image_url ?? null} name={p.name ?? null} />
+                  <span className="min-w-0 flex-1 truncate text-sm">{p.sku} — {p.name}</span>
+                  {on && (
+                    <Input aria-label={t("sh_qty")} className="w-20" type="number" min="1" step="1" value={many[p.id]} onChange={(e) => setMany((m) => ({ ...m, [p.id]: e.target.value }))} />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setManyOpen(false)}>{t("cancel")}</Button>
+            <Button
+              type="button"
+              disabled={!Object.keys(many).length}
+              onClick={() => {
+                setLines((prev) => {
+                  const next = [...prev];
+                  for (const [id, q] of Object.entries(many)) {
+                    const p: any = products.find((x: any) => x.id === id);
+                    const ex = next.findIndex((l) => l.product_id === id);
+                    if (ex >= 0) next[ex] = { ...next[ex], quantity: String(num(next[ex].quantity) + Math.max(1, num(q))) };
+                    else next.push({ product_id: id, quantity: String(Math.max(1, num(q))), grams: String(num(p?.weight_grams)), cost: "" });
+                  }
+                  return next;
+                });
+                setMany({});
+                setManyOpen(false);
+              }}
+            >
+              {t("sh_addSelected")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       <AlertDialog open={!!toReceive} onOpenChange={(v) => !v && setToReceive(null)}>
         <AlertDialogContent>
