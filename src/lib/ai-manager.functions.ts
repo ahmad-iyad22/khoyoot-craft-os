@@ -65,7 +65,7 @@ export const askAiManager = createServerFn({ method: "POST" })
 
     const businessData = await gatherBusinessContext(supabase);
 
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI gateway key is not configured");
 
     const langInstruction =
