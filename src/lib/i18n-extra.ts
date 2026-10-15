@@ -292,4 +292,8 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   aiSuggest2: { en: "Which products need reordering?", ar: "ما هي المنتجات التي تحتاج إعادة طلب؟" },
   aiSuggest3: { en: "Should we ship now or wait?", ar: "هل نشحن الآن أم ننتظر؟" },
   aiSuggest4: { en: "How are partner balances looking?", ar: "كيف تبدو أرصدة الشركاء؟" },
+  aiAttachPhoto: { en: "Attach a photo", ar: "إرفاق صورة" },
+  aiRemovePhoto: { en: "Remove photo", ar: "إزالة الصورة" },
+  aiErrPhotoOnly: { en: "Please attach an image file", ar: "الرجاء إرفاق ملف صورة" },
+  aiErrPhotoTooLarge: { en: "Photo is too large", ar: "الصورة كبيرة جداً" },
 };
