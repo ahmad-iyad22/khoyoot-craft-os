@@ -53,8 +53,9 @@ function OrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("id, sku, name, image_url, sale_price, avg_cost, cost_price")
+        .select("id, sku, name, image_url, sale_price, avg_cost, cost_price, stock_qty, status")
         .eq("archived", false)
+        .in("status", ["active", "out_of_stock"])
         .order("name");
       if (error) throw error;
       return data ?? [];
@@ -75,33 +76,8 @@ function OrdersPage() {
 
   const create = useMutation({
     mutationFn: async (payload: any) => {
-      const { data: order, error } = await supabase
-        .from("orders")
-        .insert(payload.order)
-        .select("id")
-        .single();
+      const { error } = await supabase.rpc("create_order", { _order: payload.order, _lines: payload.lines } as never);
       if (error) throw error;
-      const items = payload.lines.map((l: Line) => {
-        const p = (productsQ.data ?? []).find((x: any) => x.id === l.product_id);
-        return {
-          order_id: order.id,
-          product_id: l.product_id,
-          quantity: l.quantity,
-          sale_price: l.sale_price,
-          unit_cost: Number(p?.avg_cost ?? p?.cost_price ?? 0),
-        };
-      });
-      const { error: itemsError } = await supabase.from("order_items").insert(items);
-      if (itemsError) throw itemsError;
-
-      for (const l of payload.lines) {
-        await supabase.rpc("adjust_stock", {
-          _product_id: l.product_id,
-          _change: -Math.abs(l.quantity),
-          _reason: "sale",
-          _note: "Order fulfilment",
-        });
-      }
     },
     onSuccess: () => {
       toast.success(tt("Order saved"));
@@ -109,7 +85,10 @@ function OrdersPage() {
       setLines([{ product_id: "", quantity: 1, sale_price: 0 }]);
       qc.invalidateQueries();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      const m = /INSUFFICIENT_STOCK: (\S+) \(available (-?\d+)\)/.exec(e.message);
+      toast.error(m ? t("notEnoughStock").replace("{sku}", m[1]!).replace("{n}", m[2]!) : e.message);
+    },
   });
 
   const setStatus = useMutation({
@@ -158,6 +137,16 @@ function OrdersPage() {
                   if (!valid.length) {
                     toast.error(tt("Add at least one product"));
                     return;
+                  }
+                  const totals = new Map<string, number>();
+                  for (const l of valid) totals.set(l.product_id, (totals.get(l.product_id) ?? 0) + l.quantity);
+                  for (const [pid, qty] of totals) {
+                    const p = products.find((x) => x.id === pid);
+                    const avail = Number(p?.stock_qty ?? 0);
+                    if (qty > avail) {
+                      toast.error(t("notEnoughStock").replace("{sku}", p?.sku ?? "").replace("{n}", String(avail)));
+                      return;
+                    }
                   }
                   create.mutate({
                     order: {
@@ -240,7 +229,7 @@ function OrdersPage() {
                         <SelectContent>
                           {products.map((p) => (
                             <SelectItem key={p.id} value={p.id}>
-                              <span className="flex min-w-0 items-center gap-2"><ProductThumbnail url={p.image_url} name={p.name} /><span className="truncate">{p.sku} · {p.name}</span></span>
+                              <span className="flex min-w-0 items-center gap-2"><ProductThumbnail url={p.image_url} name={p.name} /><span className="truncate">{p.sku} · {p.name}</span><span className={"ms-auto text-xs " + (Number(p.stock_qty) > 0 ? "text-muted-foreground" : "text-destructive")}>{t("available")}: {p.stock_qty}</span></span>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -248,6 +237,8 @@ function OrdersPage() {
                       <Input
                         type="number"
                         min={1}
+                        max={Number(products.find((x) => x.id === line.product_id)?.stock_qty ?? undefined) || undefined}
+                        aria-invalid={!!line.product_id && line.quantity > Number(products.find((x) => x.id === line.product_id)?.stock_qty ?? 0)}
                         value={line.quantity}
                         onChange={(e) =>
                           setLines((prev) =>
@@ -304,7 +295,7 @@ function OrdersPage() {
 
       <div className="card-surface overflow-x-auto">
         <table className="w-full min-w-[820px] text-sm">
-          <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3">{tt("Date")}</th>
               <th className="px-4 py-3">{tt("Platform")}</th>
@@ -366,7 +357,7 @@ function OrdersPage() {
           <DialogHeader>
             <DialogTitle>{tt("Order detail")}</DialogTitle>
             <DialogDescription>
-              {detail && `${formatDate(detail.order_date)} · ${detail.platform}`}
+              {detail && `${formatDate(detail.order_date)} · ${tt(detail.platform)}`}
             </DialogDescription>
           </DialogHeader>
           {detail && (
