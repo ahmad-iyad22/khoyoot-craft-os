@@ -1,4 +1,5 @@
 import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { EXTRA_DICT } from "./i18n-extra";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Lang = "en" | "ar";
@@ -376,7 +377,7 @@ export const DICT: Dict = {
   "Saving\u2026": { en: "Saving\u2026", ar: "\u062c\u0627\u0631\u064d \u0627\u0644\u062d\u0641\u0638\u2026" },
   "No products yet \u2014 add them in Settings \u2192 Product catalog.": { en: "No products yet \u2014 add them in Settings \u2192 Product catalog.", ar: "\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0646\u062a\u062c\u0627\u062a \u0628\u0639\u062f \u2014 \u0623\u0636\u0641\u0647\u0627 \u0641\u064a \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062f\u0627\u062a \u2190 \u0643\u062a\u0627\u0644\u0648\u062c \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a." },
   "Order fulfilment": { en: "Order fulfilment", ar: "\u062a\u0646\u0641\u064a\u0630 \u0627\u0644\u0637\u0644\u0628" },
-  "Revenue (orders)": { en: "Revenue (orders)", ar: "\u0627\u0644\u0625\u064a\u0631\u0627\u062f\u0627\u062f\u0627\u062a (\u0627\u0644\u0637\u0644\u0628\u0627\u062a)" },
+  "Revenue (orders)": { en: "Revenue (orders)", ar: "\u0627\u0644\u0625\u064a\u0631\u0627\u062f\u0627\u062a (\u0627\u0644\u0637\u0644\u0628\u0627\u062a)" },
   "Other income": { en: "Other income", ar: "\u062f\u062e\u0644 \u0622\u062e\u0631" },
   "Other expenses": { en: "Other expenses", ar: "\u0645\u0635\u0627\u0631\u064a\u0641 \u0623\u062e\u0631\u0649" },
   "Ads": { en: "Ads", ar: "\u0627\u0644\u0625\u0639\u0644\u0627\u0646\u0627\u062a" },
@@ -385,6 +386,9 @@ export const DICT: Dict = {
   "min": { en: "min", ar: "\u0627\u0644\u0623\u062f\u0646\u0649" },
 };
 
+
+for (const [k, v] of Object.entries(EXTRA_DICT)) if (!(k in DICT)) DICT[k] = v;
+DICT["role_owner"] = EXTRA_DICT["role_owner"]!;
 
 export const STATUS_LABELS: Record<string, { en: string; ar: string }> = {
   idea: { en: "Idea", ar: "فكرة" },
