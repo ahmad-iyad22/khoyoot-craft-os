@@ -281,4 +281,15 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   sh_g: { en: "g", ar: "غ" },
   sh_original: { en: "Original currency", ar: "العملة الأصلية" },
   sh_ok: { en: "Done", ar: "تم" },
+
+  // AI Manager
+  aiManagerSubtitle: { en: "Your read-only business advisor. It looks at your live numbers and gives advice — it never changes anything.", ar: "مستشارك التجاري للقراءة فقط. يطلع على أرقامك الحية ويقدم النصائح — ولا يغيّر أي شيء أبداً." },
+  aiManagerEmpty: { en: "Ask me anything about the business, or try one of these:", ar: "اسألني أي شيء عن العمل، أو جرّب أحد هذه:" },
+  aiAskPlaceholder: { en: "Ask about products, stock, shipping, partners…", ar: "اسأل عن المنتجات أو المخزون أو الشحن أو الشركاء…" },
+  aiThinking: { en: "Thinking…", ar: "يفكر…" },
+  send: { en: "Send", ar: "إرسال" },
+  aiSuggest1: { en: "Which products are most profitable?", ar: "ما هي المنتجات الأكثر ربحية؟" },
+  aiSuggest2: { en: "Which products need reordering?", ar: "ما هي المنتجات التي تحتاج إعادة طلب؟" },
+  aiSuggest3: { en: "Should we ship now or wait?", ar: "هل نشحن الآن أم ننتظر؟" },
+  aiSuggest4: { en: "How are partner balances looking?", ar: "كيف تبدو أرصدة الشركاء؟" },
 };
