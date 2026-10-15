@@ -13,11 +13,10 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Menu,
-  Languages,
-} from "lucide-react";
+  Languages, Ship } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { ROLE_LABELS, useRoles, useUser } from "@/lib/auth";
+import { useRoles, useUser } from "@/lib/auth";
 import { tt, useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -38,6 +37,7 @@ const NAV: NavItem[] = [
   { to: "/orders", labelKey: "orders", icon: ShoppingCart, show: (r) => r.isOperations },
   { to: "/finance", labelKey: "finance", icon: Wallet, show: (r) => r.isOwner },
   { to: "/partners", labelKey: "partners", icon: Users, show: (r) => r.isOwner },
+  { to: "/shipments", labelKey: "shipments", icon: Ship, show: (r) => r.isOperations },
   { to: "/suppliers", labelKey: "suppliers", icon: Truck, show: (r) => r.isOperations },
   { to: "/marketing", labelKey: "marketing", icon: Megaphone, show: (r) => r.isMarketing },
   { to: "/tasks", labelKey: "tasks", icon: CheckSquare, show: () => true },
@@ -148,7 +148,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
           <p className="truncate text-sm font-medium">{user?.email}</p>
           {primaryRole && (
             <Badge variant="secondary" className="mt-1 text-[11px]">
-              {ROLE_LABELS[primaryRole]}
+              {t(`role_${primaryRole}`)}
             </Badge>
           )}
         </div>
@@ -167,7 +167,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -183,7 +183,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Menu className="size-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 border-0 p-0">
+            <SheetContent side={lang === "ar" ? "right" : "left"} className="w-64 border-0 p-0">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <SidebarInner onNavigate={() => setOpen(false)} />
             </SheetContent>

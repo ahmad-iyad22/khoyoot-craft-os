@@ -78,11 +78,10 @@ function AuthPage() {
             خيوط
           </p>
           <p className="mt-6 max-w-sm text-sm text-sidebar-foreground/75">
-            One place for stock, orders, money, partners and marketing — built around the way three
-            partners actually run a heritage craft business.
+            {tt("One place for stock, orders, money, partners and marketing — built around the way three partners actually run a heritage craft business.")}
           </p>
         </div>
-        <p className="text-xs text-sidebar-foreground/50">Phase 1 · Internal use only</p>
+        <p className="text-xs text-sidebar-foreground/50">{tt("Phase 1 · Internal use only")}</p>
       </div>
 
       <div className="flex items-center justify-center px-6 py-12">
@@ -160,11 +159,10 @@ function AuthPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating…" : "Create account"}
+                  {tt(loading ? "Creating…" : "Create account")}
                 </Button>
                 <p className="text-xs text-muted-foreground">
-                  The first account created becomes the Owner. The Owner assigns roles to the other
-                  two partners in Settings.
+                  {tt("The first account created becomes the Owner. The Owner assigns roles to the other two partners in Settings.")}
                 </p>
               </form>
             </TabsContent>

@@ -269,7 +269,7 @@ function SettingsPage() {
                           <TableCell className="text-end tabular-nums">{money(p.cost_price)}</TableCell>
                           <TableCell className="text-end tabular-nums">{money(p.sale_price)}</TableCell>
                           <TableCell className="text-end tabular-nums">{p.reorder_threshold}</TableCell>
-                          <TableCell className="space-x-2 text-right">
+                          <TableCell className="text-end [&>*]:ms-2">
                             <Button
                               variant="ghost"
                               size="sm"

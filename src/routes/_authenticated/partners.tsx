@@ -126,7 +126,7 @@ function PartnersPage() {
                   <Input id="p-name" name="name" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="p-share">Share %</Label>
+                  <Label htmlFor="p-share">{tt("Share %")}</Label>
                   <Input id="p-share" name="share_percent" type="number" step="0.01" defaultValue={0} />
                 </div>
                 <div className="space-y-2">
