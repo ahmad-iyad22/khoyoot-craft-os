@@ -25,7 +25,6 @@ function AuthPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,29 +40,6 @@ function AuthPage() {
     setLoading(false);
     if (error) {
       toast.error(error.message);
-      return;
-    }
-    navigate({ to: "/dashboard", replace: true });
-  }
-
-  async function signUp(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { full_name: fullName },
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    if (!data.session) {
-      toast.success(tt("Account created. Check your email to confirm, then sign in."));
       return;
     }
     navigate({ to: "/dashboard", replace: true });
@@ -93,9 +69,8 @@ function AuthPage() {
           </div>
 
           <Tabs defaultValue="signin">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-1">
               <TabsTrigger value="signin">{tt("Sign in")}</TabsTrigger>
-              <TabsTrigger value="signup">{tt("Create account")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
@@ -127,46 +102,7 @@ function AuthPage() {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup">
-              <form onSubmit={signUp} className="mt-6 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">{tt("Full name")}</Label>
-                  <Input
-                    id="name"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email2">{tt("Email")}</Label>
-                  <Input
-                    id="email2"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password2">{tt("Password")}</Label>
-                  <Input
-                    id="password2"
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {tt(loading ? "Creating…" : "Create account")}
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  {tt("The first account created becomes the Owner. The Owner assigns roles to the other two partners in Settings.")}
-                </p>
-              </form>
-            </TabsContent>
+
           </Tabs>
         </div>
       </div>

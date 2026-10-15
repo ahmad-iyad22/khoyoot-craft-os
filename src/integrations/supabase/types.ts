@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          base_currency: string
+          currencies: string[]
+          id: boolean
+          updated_at: string
+        }
+        Insert: {
+          base_currency?: string
+          currencies?: string[]
+          id?: boolean
+          updated_at?: string
+        }
+        Update: {
+          base_currency?: string
+          currencies?: string[]
+          id?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -285,47 +306,75 @@ export type Database = {
       expenses: {
         Row: {
           amount: number
+          base_amount: number | null
+          campaign_id: string | null
           category: string
           created_at: string
           created_by: string | null
+          currency: string
           description: string | null
           entry_date: string
+          fx_rate_to_base: number
           id: string
           is_shared: boolean
           order_id: string | null
+          paid_by_business: boolean
           paid_by_partner_id: string | null
+          receipt_path: string | null
+          shipment_id: string | null
           split_mode: string
           updated_at: string
         }
         Insert: {
           amount: number
+          base_amount?: number | null
+          campaign_id?: string | null
           category?: string
           created_at?: string
           created_by?: string | null
+          currency?: string
           description?: string | null
           entry_date?: string
+          fx_rate_to_base?: number
           id?: string
           is_shared?: boolean
           order_id?: string | null
+          paid_by_business?: boolean
           paid_by_partner_id?: string | null
+          receipt_path?: string | null
+          shipment_id?: string | null
           split_mode?: string
           updated_at?: string
         }
         Update: {
           amount?: number
+          base_amount?: number | null
+          campaign_id?: string | null
           category?: string
           created_at?: string
           created_by?: string | null
+          currency?: string
           description?: string | null
           entry_date?: string
+          fx_rate_to_base?: number
           id?: string
           is_shared?: boolean
           order_id?: string | null
+          paid_by_business?: boolean
           paid_by_partner_id?: string | null
+          receipt_path?: string | null
+          shipment_id?: string | null
           split_mode?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "expenses_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "expenses_order_id_fkey"
             columns: ["order_id"]
@@ -340,14 +389,24 @@ export type Database = {
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "expenses_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
         ]
       }
       income: {
         Row: {
           amount: number
+          base_amount: number | null
           created_at: string
           created_by: string | null
+          currency: string
           entry_date: string
+          fx_rate_to_base: number
           id: string
           notes: string | null
           order_id: string | null
@@ -355,9 +414,12 @@ export type Database = {
         }
         Insert: {
           amount: number
+          base_amount?: number | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           entry_date?: string
+          fx_rate_to_base?: number
           id?: string
           notes?: string | null
           order_id?: string | null
@@ -365,9 +427,12 @@ export type Database = {
         }
         Update: {
           amount?: number
+          base_amount?: number | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           entry_date?: string
+          fx_rate_to_base?: number
           id?: string
           notes?: string | null
           order_id?: string | null
@@ -621,33 +686,48 @@ export type Database = {
       partner_transactions: {
         Row: {
           amount: number
+          base_amount: number | null
           created_at: string
+          currency: string
+          fx_rate_to_base: number
           id: string
           notes: string | null
           partner_id: string
           profit_period_id: string | null
+          receipt_path: string | null
           txn_date: string
           txn_type: string
+          updated_at: string
         }
         Insert: {
           amount: number
+          base_amount?: number | null
           created_at?: string
+          currency?: string
+          fx_rate_to_base?: number
           id?: string
           notes?: string | null
           partner_id: string
           profit_period_id?: string | null
+          receipt_path?: string | null
           txn_date?: string
           txn_type?: string
+          updated_at?: string
         }
         Update: {
           amount?: number
+          base_amount?: number | null
           created_at?: string
+          currency?: string
+          fx_rate_to_base?: number
           id?: string
           notes?: string | null
           partner_id?: string
           profit_period_id?: string | null
+          receipt_path?: string | null
           txn_date?: string
           txn_type?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -763,22 +843,40 @@ export type Database = {
       }
       platform_fees: {
         Row: {
+          commission_percent: number
           fee_percent: number
+          fixed_fee: number
           id: string
+          note: string | null
           platform: string
+          sst_percent: number
+          transaction_fee_percent: number
           updated_at: string
+          waiver_until: string | null
         }
         Insert: {
+          commission_percent?: number
           fee_percent?: number
+          fixed_fee?: number
           id?: string
+          note?: string | null
           platform: string
+          sst_percent?: number
+          transaction_fee_percent?: number
           updated_at?: string
+          waiver_until?: string | null
         }
         Update: {
+          commission_percent?: number
           fee_percent?: number
+          fixed_fee?: number
           id?: string
+          note?: string | null
           platform?: string
+          sst_percent?: number
+          transaction_fee_percent?: number
           updated_at?: string
+          waiver_until?: string | null
         }
         Relationships: []
       }
@@ -1506,6 +1604,7 @@ export type Database = {
           units_sold: number
         }[]
       }
+      has_any_role: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1553,6 +1652,10 @@ export type Database = {
           _shares: Json
           _start: string
         }
+        Returns: string
+      }
+      save_shared_expense: {
+        Args: { _e: Json; _id: string; _splits: Json }
         Returns: string
       }
     }
