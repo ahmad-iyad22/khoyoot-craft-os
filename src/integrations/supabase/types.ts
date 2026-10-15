@@ -451,52 +451,75 @@ export type Database = {
       inventory_batches: {
         Row: {
           batch_code: string | null
+          cost_owed_partner_id: string | null
           created_at: string
           created_by: string | null
           id: string
           landed_unit_cost: number
           notes: string | null
           product_id: string
+          profit_split: Json | null
           quantity: number
           received_at: string
+          shipment_id: string | null
           shipping_cost: number
           supplier_id: string | null
           unit_cost: number
         }
         Insert: {
           batch_code?: string | null
+          cost_owed_partner_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           landed_unit_cost?: number
           notes?: string | null
           product_id: string
+          profit_split?: Json | null
           quantity: number
           received_at?: string
+          shipment_id?: string | null
           shipping_cost?: number
           supplier_id?: string | null
           unit_cost?: number
         }
         Update: {
           batch_code?: string | null
+          cost_owed_partner_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           landed_unit_cost?: number
           notes?: string | null
           product_id?: string
+          profit_split?: Json | null
           quantity?: number
           received_at?: string
+          shipment_id?: string | null
           shipping_cost?: number
           supplier_id?: string | null
           unit_cost?: number
         }
         Relationships: [
           {
+            foreignKeyName: "inventory_batches_cost_owed_partner_id_fkey"
+            columns: ["cost_owed_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "inventory_batches_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_batches_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
           {
@@ -695,6 +718,8 @@ export type Database = {
           partner_id: string
           profit_period_id: string | null
           receipt_path: string | null
+          shipment_cost_kind: string | null
+          shipment_id: string | null
           txn_date: string
           txn_type: string
           updated_at: string
@@ -710,6 +735,8 @@ export type Database = {
           partner_id: string
           profit_period_id?: string | null
           receipt_path?: string | null
+          shipment_cost_kind?: string | null
+          shipment_id?: string | null
           txn_date?: string
           txn_type?: string
           updated_at?: string
@@ -725,6 +752,8 @@ export type Database = {
           partner_id?: string
           profit_period_id?: string | null
           receipt_path?: string | null
+          shipment_cost_kind?: string | null
+          shipment_id?: string | null
           txn_date?: string
           txn_type?: string
           updated_at?: string
@@ -742,6 +771,13 @@ export type Database = {
             columns: ["profit_period_id"]
             isOneToOne: false
             referencedRelation: "partner_profit_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_transactions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -1098,48 +1134,88 @@ export type Database = {
       }
       shipment_items: {
         Row: {
+          allocated_customs_line: number
           allocated_customs_per_unit: number
+          allocated_shipping_line: number
           allocated_shipping_per_unit: number
+          batch_code: string | null
+          batch_id: string | null
           created_at: string
+          customs_unit: number
+          first_serial: string | null
           id: string
           landed_unit_cost: number
+          last_serial: string | null
+          product_cost: number | null
           product_id: string
           quantity: number
+          ship_unit: number
           shipment_id: string
+          sort_order: number
           supplier_amount_owed: number
           supplier_id: string | null
           total_weight_kg: number
           unit_product_cost: number
+          unit_weight_grams: number
         }
         Insert: {
+          allocated_customs_line?: number
           allocated_customs_per_unit?: number
+          allocated_shipping_line?: number
           allocated_shipping_per_unit?: number
+          batch_code?: string | null
+          batch_id?: string | null
           created_at?: string
+          customs_unit?: number
+          first_serial?: string | null
           id?: string
           landed_unit_cost?: number
+          last_serial?: string | null
+          product_cost?: number | null
           product_id: string
           quantity?: number
+          ship_unit?: number
           shipment_id: string
+          sort_order?: number
           supplier_amount_owed?: number
           supplier_id?: string | null
           total_weight_kg?: number
           unit_product_cost?: number
+          unit_weight_grams?: number
         }
         Update: {
+          allocated_customs_line?: number
           allocated_customs_per_unit?: number
+          allocated_shipping_line?: number
           allocated_shipping_per_unit?: number
+          batch_code?: string | null
+          batch_id?: string | null
           created_at?: string
+          customs_unit?: number
+          first_serial?: string | null
           id?: string
           landed_unit_cost?: number
+          last_serial?: string | null
+          product_cost?: number | null
           product_id?: string
           quantity?: number
+          ship_unit?: number
           shipment_id?: string
+          sort_order?: number
           supplier_amount_owed?: number
           supplier_id?: string | null
           total_weight_kg?: number
           unit_product_cost?: number
+          unit_weight_grams?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "shipment_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_batches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shipment_items_product_id_fkey"
             columns: ["product_id"]
@@ -1172,14 +1248,26 @@ export type Database = {
       }
       shipments: {
         Row: {
+          cost_owed_partner_id: string | null
           created_at: string
           created_by: string | null
           currency: string
+          customs_base: number
           customs_cost: number
+          customs_currency: string
+          customs_fx: number
+          customs_paid_by_partner_id: string | null
           id: string
           notes: string | null
+          profit_split: Json | null
+          receipt_path: string | null
           received_at: string | null
           reference: string
+          sender_partner_id: string | null
+          sender_supplier_id: string | null
+          shipping_base: number
+          shipping_fx: number
+          shipping_paid_by_partner_id: string | null
           status: Database["public"]["Enums"]["shipment_status"]
           status_dates: Json
           total_paid_weight_kg: number
@@ -1187,14 +1275,26 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cost_owed_partner_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          customs_base?: number
           customs_cost?: number
+          customs_currency?: string
+          customs_fx?: number
+          customs_paid_by_partner_id?: string | null
           id?: string
           notes?: string | null
+          profit_split?: Json | null
+          receipt_path?: string | null
           received_at?: string | null
           reference: string
+          sender_partner_id?: string | null
+          sender_supplier_id?: string | null
+          shipping_base?: number
+          shipping_fx?: number
+          shipping_paid_by_partner_id?: string | null
           status?: Database["public"]["Enums"]["shipment_status"]
           status_dates?: Json
           total_paid_weight_kg?: number
@@ -1202,21 +1302,76 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cost_owed_partner_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          customs_base?: number
           customs_cost?: number
+          customs_currency?: string
+          customs_fx?: number
+          customs_paid_by_partner_id?: string | null
           id?: string
           notes?: string | null
+          profit_split?: Json | null
+          receipt_path?: string | null
           received_at?: string | null
           reference?: string
+          sender_partner_id?: string | null
+          sender_supplier_id?: string | null
+          shipping_base?: number
+          shipping_fx?: number
+          shipping_paid_by_partner_id?: string | null
           status?: Database["public"]["Enums"]["shipment_status"]
           status_dates?: Json
           total_paid_weight_kg?: number
           total_shipping_cost?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "shipments_cost_owed_partner_id_fkey"
+            columns: ["cost_owed_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_customs_paid_by_partner_id_fkey"
+            columns: ["customs_paid_by_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_sender_partner_id_fkey"
+            columns: ["sender_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_sender_supplier_id_fkey"
+            columns: ["sender_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_balances"
+            referencedColumns: ["supplier_id"]
+          },
+          {
+            foreignKeyName: "shipments_sender_supplier_id_fkey"
+            columns: ["sender_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_shipping_paid_by_partner_id_fkey"
+            columns: ["shipping_paid_by_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sku_prefixes: {
         Row: {
@@ -1573,8 +1728,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      allocate_shipment: { Args: { _shipment_id: string }; Returns: undefined }
       claim_next_sku: { Args: { _code: string }; Returns: string }
       create_order: { Args: { _lines: Json; _order: Json }; Returns: string }
+      delete_shipment: { Args: { _id: string }; Returns: undefined }
       generate_batch_codes: {
         Args: { _batch_id: string; _product_id: string; _quantity: number }
         Returns: Json
@@ -1616,7 +1773,7 @@ export type Database = {
       is_ops: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
       next_sku_preview: { Args: { _code: string }; Returns: string }
-      receive_shipment: { Args: { _shipment_id: string }; Returns: undefined }
+      receive_shipment: { Args: { _shipment_id: string }; Returns: Json }
       receive_stock: {
         Args: {
           _batch_code?: string
@@ -1656,6 +1813,10 @@ export type Database = {
       }
       save_shared_expense: {
         Args: { _e: Json; _id: string; _splits: Json }
+        Returns: string
+      }
+      save_shipment: {
+        Args: { _id: string; _items: Json; _s: Json }
         Returns: string
       }
     }
