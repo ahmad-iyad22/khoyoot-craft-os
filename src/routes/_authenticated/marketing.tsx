@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { tt, useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
@@ -87,7 +88,7 @@ function MarketingPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Post planned");
+      toast.success(tt("Post planned"));
       setPostOpen(false);
       qc.invalidateQueries({ queryKey: ["content"] });
     },
@@ -100,7 +101,7 @@ function MarketingPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Campaign added");
+      toast.success(tt("Campaign added"));
       setCampaignOpen(false);
       qc.invalidateQueries({ queryKey: ["campaigns"] });
     },
@@ -117,7 +118,7 @@ function MarketingPage() {
   });
 
   if (!roles.isLoading && !roles.isMarketing) {
-    return <AccessDenied message="Marketing is available to Owner and Marketing roles." />;
+    return <AccessDenied message={tt("Marketing is available to Owner and Marketing roles.")} />;
   }
 
   const productName = (id: string | null) =>
@@ -125,28 +126,28 @@ function MarketingPage() {
 
   return (
     <div>
-      <PageHeader title="Marketing" description="Content calendar and campaign tracking." />
+      <PageHeader title={tt("Marketing")} description={tt("Content calendar and campaign tracking.")} />
 
       <Tabs defaultValue="content">
         <TabsList>
-          <TabsTrigger value="content">Content calendar</TabsTrigger>
-          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="content">{tt("Content calendar")}</TabsTrigger>
+          <TabsTrigger value="campaigns">{tt("Campaigns")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="mt-4">
           <div className="mb-4">
-            <Button onClick={() => setPostOpen(true)}>Plan a post</Button>
+            <Button onClick={() => setPostOpen(true)}>{tt("Plan a post")}</Button>
           </div>
           <Card>
             <CardContent className="pt-6">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Platform</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{tt("Date")}</TableHead>
+                    <TableHead>{tt("Title")}</TableHead>
+                    <TableHead>{tt("Platform")}</TableHead>
+                    <TableHead>{tt("Product")}</TableHead>
+                    <TableHead>{tt("Status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -174,7 +175,7 @@ function MarketingPage() {
                   {(contentQ.data ?? []).length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        Nothing planned yet.
+                        {tt("Nothing planned yet.")}
                       </TableCell>
                     </TableRow>
                   )}
@@ -186,19 +187,19 @@ function MarketingPage() {
 
         <TabsContent value="campaigns" className="mt-4">
           <div className="mb-4">
-            <Button onClick={() => setCampaignOpen(true)}>New campaign</Button>
+            <Button onClick={() => setCampaignOpen(true)}>{tt("New campaign")}</Button>
           </div>
           <Card>
             <CardContent className="pt-6">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Campaign</TableHead>
-                    <TableHead>Platform</TableHead>
-                    <TableHead>Dates</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead className="text-right">Budget</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{tt("Campaign")}</TableHead>
+                    <TableHead>{tt("Platform")}</TableHead>
+                    <TableHead>{tt("Dates")}</TableHead>
+                    <TableHead>{tt("Product")}</TableHead>
+                    <TableHead className="text-end">{tt("Budget")}</TableHead>
+                    <TableHead>{tt("Status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -210,7 +211,7 @@ function MarketingPage() {
                         {formatDate(c.start_date)} → {formatDate(c.end_date)}
                       </TableCell>
                       <TableCell>{productName(c.product_id)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{money(c.budget)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(c.budget)}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{titleCase(c.status)}</Badge>
                       </TableCell>
@@ -219,7 +220,7 @@ function MarketingPage() {
                   {(campaignsQ.data ?? []).length === 0 && (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center text-muted-foreground">
-                        No campaigns yet.
+                        {tt("No campaigns yet.")}
                       </TableCell>
                     </TableRow>
                   )}
@@ -233,7 +234,7 @@ function MarketingPage() {
       <Dialog open={postOpen} onOpenChange={setPostOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Plan a post</DialogTitle>
+            <DialogTitle>{tt("Plan a post")}</DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -251,12 +252,12 @@ function MarketingPage() {
             }}
           >
             <div className="space-y-2">
-              <Label htmlFor="c-title">Title</Label>
+              <Label htmlFor="c-title">{tt("Title")}</Label>
               <Input id="c-title" name="title" required />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="c-platform">Platform</Label>
+                <Label htmlFor="c-platform">{tt("Platform")}</Label>
                 <select
                   id="c-platform"
                   name="platform"
@@ -270,19 +271,19 @@ function MarketingPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="c-date">Date</Label>
+                <Label htmlFor="c-date">{tt("Date")}</Label>
                 <Input id="c-date" name="scheduled_date" type="date" defaultValue={today} required />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="c-product">Product</Label>
+                <Label htmlFor="c-product">{tt("Product")}</Label>
                 <select
                   id="c-product"
                   name="product_id"
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  <option value="">None</option>
+                  <option value="">{tt("None")}</option>
                   {(productsQ.data ?? []).map((p: any) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -291,7 +292,7 @@ function MarketingPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="c-status">Status</Label>
+                <Label htmlFor="c-status">{tt("Status")}</Label>
                 <select
                   id="c-status"
                   name="status"
@@ -306,11 +307,11 @@ function MarketingPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="c-notes">Notes</Label>
+              <Label htmlFor="c-notes">{tt("Notes")}</Label>
               <Textarea id="c-notes" name="notes" />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={addPost.isPending}>Save</Button>
+              <Button type="submit" disabled={addPost.isPending}>{tt("Save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -319,7 +320,7 @@ function MarketingPage() {
       <Dialog open={campaignOpen} onOpenChange={setCampaignOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New campaign</DialogTitle>
+            <DialogTitle>{tt("New campaign")}</DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -338,12 +339,12 @@ function MarketingPage() {
             }}
           >
             <div className="space-y-2">
-              <Label htmlFor="k-name">Name</Label>
+              <Label htmlFor="k-name">{tt("Name")}</Label>
               <Input id="k-name" name="name" required />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="k-platform">Platform</Label>
+                <Label htmlFor="k-platform">{tt("Platform")}</Label>
                 <select
                   id="k-platform"
                   name="platform"
@@ -357,29 +358,29 @@ function MarketingPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="k-budget">Budget</Label>
+                <Label htmlFor="k-budget">{tt("Budget")}</Label>
                 <Input id="k-budget" name="budget" type="number" step="0.01" defaultValue={0} />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="k-start">Start</Label>
+                <Label htmlFor="k-start">{tt("Start")}</Label>
                 <Input id="k-start" name="start_date" type="date" defaultValue={today} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="k-end">End</Label>
+                <Label htmlFor="k-end">{tt("End")}</Label>
                 <Input id="k-end" name="end_date" type="date" />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="k-product">Product</Label>
+                <Label htmlFor="k-product">{tt("Product")}</Label>
                 <select
                   id="k-product"
                   name="product_id"
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  <option value="">None</option>
+                  <option value="">{tt("None")}</option>
                   {(productsQ.data ?? []).map((p: any) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -388,7 +389,7 @@ function MarketingPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="k-status">Status</Label>
+                <Label htmlFor="k-status">{tt("Status")}</Label>
                 <select
                   id="k-status"
                   name="status"
@@ -403,7 +404,7 @@ function MarketingPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={addCampaign.isPending}>Save</Button>
+              <Button type="submit" disabled={addCampaign.isPending}>{tt("Save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

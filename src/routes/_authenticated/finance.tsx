@@ -333,13 +333,13 @@ function FinancePage() {
                   ].map(([label, value]) => (
                     <TableRow key={label as string}>
                       <TableCell>{label as string}</TableCell>
-                      <TableCell className="text-right tabular-nums">{money(value as number)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(value as number)}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="font-semibold">
                     <TableCell>{tt("Net profit")}</TableCell>
                     <TableCell
-                      className={`text-right tabular-nums ${pnl.net >= 0 ? "text-primary" : "text-destructive"}`}
+                      className={`text-end tabular-nums ${pnl.net >= 0 ? "text-primary" : "text-destructive"}`}
                     >
                       {money(pnl.net)}
                     </TableCell>
@@ -359,7 +359,7 @@ function FinancePage() {
                     <TableHead>{tt("Date")}</TableHead>
                     <TableHead>{tt("Category")}</TableHead>
                     <TableHead>{tt("Description")}</TableHead>
-                    <TableHead className="text-right">{tt("Amount")}</TableHead>
+                    <TableHead className="text-end">{tt("Amount")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -370,7 +370,7 @@ function FinancePage() {
                         <Badge variant="secondary">{tt(titleCase(e.category))}</Badge>
                       </TableCell>
                       <TableCell className="rtl-content">{e.description ?? "—"}</TableCell>
-                      <TableCell className="text-right tabular-nums">{money(e.amount)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(e.amount)}</TableCell>
                     </TableRow>
                   ))}
                   {filteredExpenses.length === 0 && (
@@ -395,7 +395,7 @@ function FinancePage() {
                     <TableHead>{tt("Date")}</TableHead>
                     <TableHead>{tt("Source")}</TableHead>
                     <TableHead>{tt("Notes")}</TableHead>
-                    <TableHead className="text-right">{tt("Amount")}</TableHead>
+                    <TableHead className="text-end">{tt("Amount")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -404,7 +404,7 @@ function FinancePage() {
                       <TableCell>{formatDate(i.entry_date)}</TableCell>
                       <TableCell>{tt(titleCase(i.source))}</TableCell>
                       <TableCell className="rtl-content">{i.notes ?? "—"}</TableCell>
-                      <TableCell className="text-right tabular-nums">{money(i.amount)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(i.amount)}</TableCell>
                     </TableRow>
                   ))}
                   {(incomeQ.data ?? []).length === 0 && (

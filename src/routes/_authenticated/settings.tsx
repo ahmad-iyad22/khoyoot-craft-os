@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ProductThumbnail } from "@/components/product-thumbnail";
+import { ImageUploadError, uploadProductImage } from "@/lib/product-images";
 import { ROLE_LABELS, useRoles, type AppRole } from "@/lib/auth";
 import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -242,9 +244,9 @@ function SettingsPage() {
                         <TableHead>{t("sku")}</TableHead>
                         <TableHead>{t("name")}</TableHead>
                         <TableHead>{t("category")}</TableHead>
-                        <TableHead className="text-right">{t("cost")}</TableHead>
-                        <TableHead className="text-right">{t("sellingPrice")}</TableHead>
-                        <TableHead className="text-right">{t("reorderThreshold")}</TableHead>
+                        <TableHead className="text-end">{t("cost")}</TableHead>
+                        <TableHead className="text-end">{t("sellingPrice")}</TableHead>
+                        <TableHead className="text-end">{t("reorderThreshold")}</TableHead>
                         <TableHead />
                       </TableRow>
                     </TableHeader>
@@ -254,19 +256,20 @@ function SettingsPage() {
                           <TableCell>{p.sku}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              {p.image_url ? (
-                                <img src={p.image_url} alt={p.name} className="h-9 w-9 rounded-md border object-cover" />
-                              ) : (
-                                <div className="h-9 w-9 rounded-md border bg-muted" />
-                              )}
-                              <p className="font-medium">{p.name}</p>
+                              <ProductThumbnail url={p.image_url} name={p.name} />
+                              <div>
+                                <p className="font-medium">{p.name}</p>
+                                {Number(p.weight_grams) > 0 && (
+                                  <p className="text-xs text-muted-foreground">{(Number(p.weight_grams) / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 })} {t("kg")}</p>
+                                )}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>{(lang === "ar" ? p.categories?.name_ar || p.categories?.name : p.categories?.name) ?? "—"}</TableCell>
-                          <TableCell className="text-right tabular-nums">{money(p.cost_price)}</TableCell>
-                          <TableCell className="text-right tabular-nums">{money(p.sale_price)}</TableCell>
-                          <TableCell className="text-right tabular-nums">{p.reorder_threshold}</TableCell>
-                          <TableCell className="space-x-2 text-right">
+                          <TableCell className="text-end tabular-nums">{money(p.cost_price)}</TableCell>
+                          <TableCell className="text-end tabular-nums">{money(p.sale_price)}</TableCell>
+                          <TableCell className="text-end tabular-nums">{p.reorder_threshold}</TableCell>
+                          <TableCell className="text-end [&>*]:ms-2">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -531,6 +534,7 @@ function SettingsPage() {
                 sale_price: Number(f.get("sale_price") || 0),
                 reorder_threshold: Number(f.get("reorder_threshold") || 0),
                 image_url: String(f.get("image_url") || "").trim(),
+                weight_grams: Math.max(0, Number(f.get("weight_grams") || 0)),
               });
             }}
           >
@@ -577,6 +581,10 @@ function SettingsPage() {
               <Label htmlFor="pr-name">{t("name")}</Label>
               <Input id="pr-name" name="name" defaultValue={editing?.name ?? ""} required />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="pr-weight">{t("weightGrams")}</Label>
+              <Input id="pr-weight" name="weight_grams" type="number" min={0} step="1" defaultValue={editing?.weight_grams ?? 0} />
+            </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="pr-cost">{t("cost")}</Label>
@@ -608,23 +616,7 @@ function SettingsPage() {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="pr-image">{t("photoUrl")}</Label>
-              <Input
-                id="pr-image"
-                name="image_url"
-                type="url"
-                placeholder="https://…"
-                defaultValue={editing?.image_url ?? ""}
-              />
-              {editing?.image_url && (
-                <img
-                  src={editing.image_url}
-                  alt={editing.name}
-                  className="h-16 w-16 rounded-md border object-cover"
-                />
-              )}
-            </div>
+            <ProductImageField defaultValue={editing?.image_url ?? ""} name={editing?.name ?? ""} />
             <div className="space-y-2">
               <Label htmlFor="pr-desc">{t("description")}</Label>
               <Textarea id="pr-desc" name="description" defaultValue={editing?.description ?? ""} />
@@ -639,6 +631,50 @@ function SettingsPage() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function ProductImageField({ defaultValue, name }: { defaultValue: string; name: string }) {
+  const { t } = useI18n();
+  const [value, setValue] = useState(defaultValue);
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="pr-photo">{t("photo")}</Label>
+      <input type="hidden" name="image_url" value={value} />
+      <div className="flex items-center gap-3">
+        <ProductThumbnail url={value} name={name} size="size-16" />
+        <div className="flex flex-col gap-2">
+          <Input
+            id="pr-photo"
+            type="file"
+            accept="image/*"
+            disabled={busy}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setBusy(true);
+              try {
+                setValue(await uploadProductImage(file));
+                toast.success(t("photoUploaded"));
+              } catch (err) {
+                const code = err instanceof ImageUploadError ? err.message : "";
+                toast.error(code === "IMAGE_ONLY" ? t("imageOnly") : code === "IMAGE_TOO_LARGE" ? t("imageTooLarge") : (err as Error).message);
+              } finally {
+                setBusy(false);
+                e.target.value = "";
+              }
+            }}
+          />
+          <p className="text-xs text-muted-foreground">{busy ? t("uploading") : t("photoHint")}</p>
+          {value && (
+            <Button type="button" variant="ghost" size="sm" className="w-fit" onClick={() => setValue("")}>
+              {t("removePhoto")}
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, tt } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { ProductThumbnail } from "@/components/product-thumbnail";
@@ -157,7 +157,7 @@ function ShipmentsPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Shipment saved");
+      toast.success(tt("Shipment saved"));
       qc.invalidateQueries({ queryKey: ["shipments"] });
       setOpen(false);
       reset();
@@ -186,7 +186,7 @@ function ShipmentsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Shipment updated");
+      toast.success(tt("Shipment updated"));
       qc.invalidateQueries({ queryKey: ["shipments"] });
       qc.invalidateQueries({ queryKey: ["products"] });
     },

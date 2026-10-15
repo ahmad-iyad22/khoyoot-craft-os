@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { tt, useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/auth";
 import { PageHeader } from "@/components/app-shell";
@@ -70,7 +71,7 @@ function TasksPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Task created");
+      toast.success(tt("Task created"));
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
@@ -93,16 +94,16 @@ function TasksPage() {
   return (
     <div>
       <PageHeader
-        title="Tasks"
-        description="Who is doing what, and by when."
+        title={tt("Tasks")}
+        description={tt("Who is doing what, and by when.")}
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button>New task</Button>
+              <Button>{tt("New task")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>New task</DialogTitle>
+                <DialogTitle>{tt("New task")}</DialogTitle>
               </DialogHeader>
               <form
                 className="space-y-4"
@@ -121,22 +122,22 @@ function TasksPage() {
                 }}
               >
                 <div className="space-y-2">
-                  <Label htmlFor="t-title">Title</Label>
+                  <Label htmlFor="t-title">{tt("Title")}</Label>
                   <Input id="t-title" name="title" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="t-desc">Description</Label>
+                  <Label htmlFor="t-desc">{tt("Description")}</Label>
                   <Textarea id="t-desc" name="description" />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="t-assignee">Assignee</Label>
+                    <Label htmlFor="t-assignee">{tt("Assignee")}</Label>
                     <select
                       id="t-assignee"
                       name="assignee_id"
                       className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                     >
-                      <option value="">Unassigned</option>
+                      <option value="">{tt("Unassigned")}</option>
                       {(peopleQ.data ?? []).map((p: any) => (
                         <option key={p.id} value={p.id}>
                           {p.full_name || p.email}
@@ -145,25 +146,25 @@ function TasksPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="t-priority">Priority</Label>
+                    <Label htmlFor="t-priority">{tt("Priority")}</Label>
                     <select
                       id="t-priority"
                       name="priority"
                       defaultValue="normal"
                       className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                     >
-                      <option value="low">Low</option>
-                      <option value="normal">Normal</option>
-                      <option value="high">High</option>
+                      <option value="low">{tt("Low")}</option>
+                      <option value="normal">{tt("Normal")}</option>
+                      <option value="high">{tt("High")}</option>
                     </select>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="t-due">Due date</Label>
+                  <Label htmlFor="t-due">{tt("Due date")}</Label>
                   <Input id="t-due" name="due_date" type="date" />
                 </div>
                 <DialogFooter>
-                  <Button type="submit" disabled={create.isPending}>Save</Button>
+                  <Button type="submit" disabled={create.isPending}>{tt("Save")}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -177,7 +178,7 @@ function TasksPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Everyone</SelectItem>
+            <SelectItem value="all">{tt("Everyone")}</SelectItem>
             {(peopleQ.data ?? []).map((p: any) => (
               <SelectItem key={p.id} value={p.id}>
                 {p.full_name || p.email}
@@ -192,11 +193,11 @@ function TasksPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Task</TableHead>
-                <TableHead>Assignee</TableHead>
-                <TableHead>Due</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{tt("Task")}</TableHead>
+                <TableHead>{tt("Assignee")}</TableHead>
+                <TableHead>{tt("Due")}</TableHead>
+                <TableHead>{tt("Priority")}</TableHead>
+                <TableHead>{tt("Status")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -233,7 +234,7 @@ function TasksPage() {
               {tasks.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    No tasks yet.
+                    {tt("No tasks yet.")}
                   </TableCell>
                 </TableRow>
               )}

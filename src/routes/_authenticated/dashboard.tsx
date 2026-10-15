@@ -192,7 +192,7 @@ function Dashboard() {
         />
         <div className="card-surface overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
+            <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">{t("product")}</th>
                 <th className="px-4 py-3">{t("unitsSold")}</th>
@@ -242,7 +242,7 @@ function Dashboard() {
               .map((p) => `${p.name} (${p.stock_qty})`)
               .join(", ")}
           </span>
-          <Link to="/inventory" className="ml-auto text-sm font-medium text-primary underline">
+          <Link to="/inventory" className="ms-auto text-sm font-medium text-primary underline">
             {tt("Open inventory")}
           </Link>
         </div>
@@ -320,7 +320,7 @@ function Dashboard() {
           </Link>
         </div>
         <table className="w-full min-w-[540px] text-sm">
-          <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3">{tt("Date")}</th>
               <th className="px-4 py-3">{tt("Platform")}</th>

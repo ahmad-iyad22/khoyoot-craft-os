@@ -8,6 +8,7 @@ import { useRoles } from "@/lib/auth";
 import { useI18n , tt } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { TatreezEmptyState } from "@/components/tatreez";
+import { ProductThumbnail } from "@/components/product-thumbnail";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +45,7 @@ function InventoryPage() {
   const queryClient = useQueryClient();
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [adjustFor, setAdjustFor] = useState<any | null>(null);
 
   const productsQ = useQuery({
     queryKey: ["products"],
@@ -88,7 +90,7 @@ function InventoryPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("serial_numbers")
-        .select("*, products(name, sku)")
+        .select("*, products(name, sku, image_url)")
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;
@@ -112,10 +114,8 @@ function InventoryPage() {
       unit_cost: number;
       shipping_cost: number;
       supplier_id: string | null;
-      batch_code: string | null;
       received_at: string;
       notes: string | null;
-      serials: string[] | null;
     }) => {
       const args: Record<string, unknown> = {
         _product_id: form.product_id,
@@ -125,14 +125,16 @@ function InventoryPage() {
         _received_at: form.received_at,
       };
       if (form.supplier_id) args["_supplier_id"] = form.supplier_id;
-      if (form.batch_code) args["_batch_code"] = form.batch_code;
       if (form.notes) args["_notes"] = form.notes;
-      if (form.serials?.length) args["_serials"] = form.serials;
-      const { error } = await supabase.rpc("receive_stock", args as never);
+      const { data, error } = await supabase.rpc("receive_stock_auto", args as never);
       if (error) throw error;
+      return data as unknown as { batch_code: string; first_serial: string; last_serial: string };
     },
-    onSuccess: () => {
-      toast.success(tt("Stock received"));
+    onSuccess: (r) => {
+      toast.success(tt("Stock received"), {
+        description: `${t("batch")} ${r.batch_code} · ${t("serials")} ${r.first_serial} → ${r.last_serial}`,
+        duration: 12000,
+      });
       setReceiveOpen(false);
       queryClient.invalidateQueries();
     },
@@ -151,6 +153,7 @@ function InventoryPage() {
     },
     onSuccess: () => {
       toast.success(tt("Stock adjusted"));
+      setAdjustFor(null);
       queryClient.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -193,17 +196,14 @@ function InventoryPage() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   const f = new FormData(e.currentTarget as HTMLFormElement);
-                  const serialsRaw = String(f.get("serials") ?? "").trim();
                   receive.mutate({
                     product_id: String(f.get("product_id")),
                     quantity: Number(f.get("quantity")),
                     unit_cost: Number(f.get("unit_cost")),
                     shipping_cost: Number(f.get("shipping_cost") || 0),
                     supplier_id: (f.get("supplier_id") as string) || null,
-                    batch_code: (f.get("batch_code") as string) || null,
                     received_at: String(f.get("received_at")),
                     notes: (f.get("notes") as string) || null,
-                    serials: serialsRaw ? serialsRaw.split(/[\n,]+/).map((s) => s.trim()) : null,
                   });
                 }}
               >
@@ -262,14 +262,7 @@ function InventoryPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>{tt("Batch code (optional)")}</Label>
-                  <Input name="batch_code" placeholder="NAB-2026-04" />
-                </div>
-                <div className="space-y-2">
-                  <Label>{tt("Serial numbers (optional, one per line)")}</Label>
-                  <Textarea name="serials" rows={3} placeholder="KH-0001&#10;KH-0002" />
-                </div>
+                <p className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">{t("autoCodesHint")}</p>
                 <div className="space-y-2">
                   <Label>{tt("Notes")}</Label>
                   <Textarea name="notes" rows={2} dir="auto" />
@@ -291,7 +284,7 @@ function InventoryPage() {
           <TabsTrigger value="batches">{tt("Batches")}</TabsTrigger>
           <TabsTrigger value="serials">{tt("Serials")}</TabsTrigger>
           <TabsTrigger value="history">
-            <History className="mr-1 size-3.5" /> {tt("Movements")}
+            <History className="me-1 size-3.5" /> {tt("Movements")}
           </TabsTrigger>
         </TabsList>
 
@@ -305,7 +298,7 @@ function InventoryPage() {
           />
           <div className="card-surface overflow-x-auto">
             <table className="w-full min-w-[860px] text-sm">
-              <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
+              <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">{tt("SKU")}</th>
                   <th className="px-4 py-3">{tt("Product")}</th>
@@ -325,11 +318,7 @@ function InventoryPage() {
                       <td className="px-4 py-3 font-mono text-xs">{p.sku}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          {p.image_url ? (
-                            <img src={p.image_url} alt={p.name} className="h-9 w-9 rounded-md border object-cover" />
-                          ) : (
-                            <div className="h-9 w-9 shrink-0 rounded-md border bg-muted" />
-                          )}
+                          <ProductThumbnail url={p.image_url} name={p.name} />
                           <div>
                             <div className="font-medium">{p.name}</div>
                             {p.name_ar && (
@@ -350,26 +339,9 @@ function InventoryPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              adjust.mutate({ product_id: p.id, change: -1, reason: "manual_adjustment", note: "-1 via inventory" })
-                            }
-                          >
-                            −
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              adjust.mutate({ product_id: p.id, change: 1, reason: "manual_adjustment", note: "+1 via inventory" })
-                            }
-                          >
-                            +
-                          </Button>
-                        </div>
+                        <Button size="sm" variant="outline" onClick={() => setAdjustFor(p)}>
+                          {t("correction")}
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -389,7 +361,7 @@ function InventoryPage() {
         <TabsContent value="batches">
           <div className="card-surface overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
-              <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
+              <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">{tt("Received")}</th>
                   <th className="px-4 py-3">{tt("Product")}</th>
@@ -427,7 +399,7 @@ function InventoryPage() {
         <TabsContent value="serials">
           <div className="card-surface overflow-x-auto">
             <table className="w-full min-w-[560px] text-sm">
-              <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
+              <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">{tt("Serial")}</th>
                   <th className="px-4 py-3">{tt("Product")}</th>
@@ -439,7 +411,13 @@ function InventoryPage() {
                 {((serialsQ.data ?? []) as any[]).map((s) => (
                   <tr key={s.id} className="border-t">
                     <td className="px-4 py-3 font-mono text-xs">{s.serial}</td>
-                    <td className="px-4 py-3">{s.products?.name}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <ProductThumbnail url={s.products?.image_url} name={s.products?.name} size="size-7" />
+                        <span>{s.products?.name}</span>
+                        <span className="font-mono text-xs text-muted-foreground">{s.products?.sku}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <Badge variant="secondary">{tt(titleCase(s.status))}</Badge>
                     </td>
@@ -461,7 +439,7 @@ function InventoryPage() {
         <TabsContent value="history">
           <div className="card-surface overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
-              <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
+              <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">{tt("When")}</th>
                   <th className="px-4 py-3">{tt("Product")}</th>
@@ -483,7 +461,7 @@ function InventoryPage() {
                       {m.change_qty > 0 ? "+" : ""}
                       {m.change_qty}
                     </td>
-                    <td className="px-4 py-3">{tt(titleCase(m.reason))}</td>
+                    <td className="px-4 py-3">{t(`reason_${m.reason}`) === `reason_${m.reason}` ? tt(titleCase(m.reason)) : t(`reason_${m.reason}`)}{m.note ? <span className="block text-xs text-muted-foreground" dir="auto">{m.note}</span> : null}</td>
                     <td className="px-4 py-3">{m.profiles?.full_name ?? "—"}</td>
                   </tr>
                 ))}
@@ -499,6 +477,64 @@ function InventoryPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!adjustFor} onOpenChange={(v) => !v && setAdjustFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("stockCorrection")}</DialogTitle>
+            <DialogDescription>{t("stockCorrectionHint")}</DialogDescription>
+          </DialogHeader>
+          {adjustFor && (
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget as HTMLFormElement);
+                const change = Number(f.get("change"));
+                const reason = String(f.get("reason") ?? "");
+                const note = String(f.get("note") ?? "").trim();
+                if (!change) { toast.error(t("changeRequired")); return; }
+                if (!reason) { toast.error(t("reasonRequired")); return; }
+                if (reason === "other" && !note) { toast.error(t("noteRequired")); return; }
+                if (Number(adjustFor.stock_qty) + change < 0) { toast.error(t("stockWouldBeNegative")); return; }
+                adjust.mutate({ product_id: adjustFor.id, change, reason, note });
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <ProductThumbnail url={adjustFor.image_url} name={adjustFor.name} />
+                <div>
+                  <p className="font-medium">{adjustFor.name}</p>
+                  <p className="text-xs text-muted-foreground">{t("available")}: {adjustFor.stock_qty}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("changeQty")}</Label>
+                <Input name="change" type="number" step={1} required placeholder="-1 / +1" />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("reason")}</Label>
+                <Select name="reason" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("chooseReason")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["count_correction", "damaged", "lost", "returned", "other"].map((r) => (
+                      <SelectItem key={r} value={r}>{t(`reason_${r}`)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{tt("Notes")}</Label>
+                <Textarea name="note" rows={2} dir="auto" />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={adjust.isPending}>{t("save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
