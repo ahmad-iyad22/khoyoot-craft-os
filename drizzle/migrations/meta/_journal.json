@@ -43,6 +43,13 @@
       "when": 1792048908987,
       "tag": "0005_shipping_rebuild",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792048924875,
+      "tag": "0006_delete_shipment_unlink_expenses",
+      "breakpoints": true
     }
   ]
 }
