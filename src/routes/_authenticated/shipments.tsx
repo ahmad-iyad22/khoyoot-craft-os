@@ -85,6 +85,9 @@ function ShipmentsPage() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [toDelete, setToDelete] = useState<any>(null);
+  const [toUndo, setToUndo] = useState<any>(null);
+  const [manyOpen, setManyOpen] = useState(false);
+  const [many, setMany] = useState<Record<string, string>>({});
   const [toReceive, setToReceive] = useState<any>(null);
   const [result, setResult] = useState<any>(null);
 
@@ -278,6 +281,18 @@ function ShipmentsPage() {
     onError: (e) => toast.error(errMsg(e)),
   });
 
+  const undoM = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("undo_shipment_receipt" as any, { _id: id } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(tt("sh_undone"));
+      invalidate();
+    },
+    onError: (e) => toast.error(errMsg(e)),
+  });
+
   const stageM = useMutation({
     mutationFn: async ({ s, next }: { s: any; next: string }) => {
       const { error } = await supabase
@@ -401,7 +416,10 @@ function ShipmentsPage() {
             <Button variant="ghost" size="icon" aria-label={t("delete")} onClick={() => setToDelete(s)}><Trash2 className="size-4" /></Button>
           </div>
         ) : (
-          <p className="mt-auto flex items-start gap-1 text-xs text-muted-foreground"><Lock className="mt-0.5 size-3.5 shrink-0" /> {t("sh_locked")}</p>
+          <div className="mt-auto space-y-2">
+            <p className="flex items-start gap-1 text-xs text-muted-foreground"><Lock className="mt-0.5 size-3.5 shrink-0" /> {t("sh_locked")}</p>
+            <Button variant="outline" size="sm" disabled={undoM.isPending} onClick={() => setToUndo(s)}>{t("sh_undo")}</Button>
+          </div>
         )}
       </div>
     );
