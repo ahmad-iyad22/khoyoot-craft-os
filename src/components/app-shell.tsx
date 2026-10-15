@@ -13,7 +13,7 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Menu,
-  Languages, Ship, Receipt } from "lucide-react";
+  Languages, Ship, Receipt, Bot } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles, useUser } from "@/lib/auth";
