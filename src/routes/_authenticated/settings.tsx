@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PlatformFeesSettings, CurrencySettings } from "@/components/money-settings";
 import { ProductThumbnail } from "@/components/product-thumbnail";
 import { ImageUploadError, uploadProductImage } from "@/lib/product-images";
 import { ROLE_LABELS, useRoles, type AppRole } from "@/lib/auth";
@@ -75,15 +76,6 @@ function SettingsPage() {
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase.from("categories").select("*").order("name");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const feesQ = useQuery({
-    queryKey: ["platform-fees"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("platform_fees").select("*").order("platform");
       if (error) throw error;
       return data ?? [];
     },
@@ -176,21 +168,6 @@ function SettingsPage() {
     onSuccess: () => {
       toast.success(tt("Category deleted"));
       qc.invalidateQueries({ queryKey: ["categories"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const saveFee = useMutation({
-    mutationFn: async (v: { id: string; fee_percent: number }) => {
-      const { error } = await supabase
-        .from("platform_fees")
-        .update({ fee_percent: v.fee_percent })
-        .eq("id", v.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success(tt("Fee updated"));
-      qc.invalidateQueries({ queryKey: ["platform-fees"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -407,41 +384,9 @@ function SettingsPage() {
         </TabsContent>
 
 
-        <TabsContent value="fees" className="mt-4">
-          <Card>
-            <CardContent className="pt-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("platform")}</TableHead>
-                    <TableHead>{t("feePercent")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(feesQ.data ?? []).map((f: any) => (
-                    <TableRow key={f.id}>
-                      <TableCell>{f.platform}</TableCell>
-                      <TableCell>
-                        {roles.isOwner ? (
-                          <Input
-                            type="number"
-                            step="0.01"
-                            className="w-32"
-                            defaultValue={Number(f.fee_percent)}
-                            onBlur={(e) =>
-                              saveFee.mutate({ id: f.id, fee_percent: Number(e.target.value) })
-                            }
-                          />
-                        ) : (
-                          `${Number(f.fee_percent)}%`
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+        <TabsContent value="fees" className="mt-4 space-y-6">
+          <CurrencySettings canEdit={roles.isOwner} />
+          <PlatformFeesSettings canEdit={roles.isOwner} />
         </TabsContent>
 
         <TabsContent value="team" className="mt-4">

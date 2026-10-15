@@ -24,7 +24,7 @@ export async function resolveImageUrl(url?: string | null): Promise<string | nul
   return data.signedUrl;
 }
 
-async function compress(file: File): Promise<Blob> {
+export async function compressImage(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
@@ -41,7 +41,7 @@ export class ImageUploadError extends Error {}
 export async function uploadProductImage(file: File): Promise<string> {
   if (!file.type.startsWith("image/")) throw new ImageUploadError("IMAGE_ONLY");
   if (file.size > MAX_INPUT_BYTES) throw new ImageUploadError("IMAGE_TOO_LARGE");
-  const blob = await compress(file);
+  const blob = await compressImage(file);
   if (blob.size > MAX_OUTPUT_BYTES) throw new ImageUploadError("IMAGE_TOO_LARGE");
   const path = `${crypto.randomUUID()}.jpg`;
   const { error } = await supabase.storage.from(IMAGE_BUCKET).upload(path, blob, { contentType: "image/jpeg" });

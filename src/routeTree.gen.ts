@@ -19,6 +19,7 @@ import { Route as AuthenticatedMarketingRouteImport } from './routes/_authentica
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated/partners'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSharedExpensesRouteImport } from './routes/_authenticated/shared-expenses'
 import { Route as AuthenticatedShipmentsRouteImport } from './routes/_authenticated/shipments'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
@@ -72,6 +73,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSharedExpensesRoute =
+  AuthenticatedSharedExpensesRouteImport.update({
+    id: '/shared-expenses',
+    path: '/shared-expenses',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedShipmentsRoute = AuthenticatedShipmentsRouteImport.update({
   id: '/shipments',
   path: '/shipments',
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedOrdersRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/shared-expenses': typeof AuthenticatedSharedExpensesRoute
   '/shipments': typeof AuthenticatedShipmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/tasks': typeof AuthenticatedTasksRoute
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedOrdersRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/shared-expenses': typeof AuthenticatedSharedExpensesRoute
   '/shipments': typeof AuthenticatedShipmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/tasks': typeof AuthenticatedTasksRoute
@@ -128,6 +137,7 @@ export interface FileRoutesById {
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/shared-expenses': typeof AuthenticatedSharedExpensesRoute
   '/_authenticated/shipments': typeof AuthenticatedShipmentsRoute
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/partners'
     | '/settings'
+    | '/shared-expenses'
     | '/shipments'
     | '/suppliers'
     | '/tasks'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/partners'
     | '/settings'
+    | '/shared-expenses'
     | '/shipments'
     | '/suppliers'
     | '/tasks'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orders'
     | '/_authenticated/partners'
     | '/_authenticated/settings'
+    | '/_authenticated/shared-expenses'
     | '/_authenticated/shipments'
     | '/_authenticated/suppliers'
     | '/_authenticated/tasks'
@@ -256,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/shared-expenses': {
+      id: '/_authenticated/shared-expenses'
+      path: '/shared-expenses'
+      fullPath: '/shared-expenses'
+      preLoaderRoute: typeof AuthenticatedSharedExpensesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/shipments': {
       id: '/_authenticated/shipments'
       path: '/shipments'
@@ -288,6 +308,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSharedExpensesRoute: typeof AuthenticatedSharedExpensesRoute
   AuthenticatedShipmentsRoute: typeof AuthenticatedShipmentsRoute
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
@@ -301,6 +322,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSharedExpensesRoute: AuthenticatedSharedExpensesRoute,
   AuthenticatedShipmentsRoute: AuthenticatedShipmentsRoute,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,

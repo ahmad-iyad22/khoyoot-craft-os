@@ -23,7 +23,9 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { EXPENSE_CATEGORIES, formatDate, money, monthRange, titleCase } from "@/lib/format";
+import { formatDate, money, monthRange, titleCase } from "@/lib/format";
+import { MoneyFields, categoryLabel, readMoney, useExpenseCategories } from "@/lib/money";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/finance")({
   head: () => ({
@@ -41,6 +43,9 @@ const today = new Date().toISOString().slice(0, 10);
 
 function FinancePage() {
   const roles = useRoles();
+  const { lang } = useI18n();
+  const catsQ = useExpenseCategories();
+  const cats = catsQ.data ?? [];
   const qc = useQueryClient();
   const thisMonth = monthRange(0);
 
@@ -141,16 +146,20 @@ function FinancePage() {
     const byCat = (c: string) =>
       (expensesQ.data ?? [])
         .filter((e: any) => e.category === c)
-        .reduce((s: number, e: any) => s + Number(e.amount), 0);
+        .reduce((s: number, e: any) => s + Number(e.base_amount ?? e.amount), 0);
+    const allExp = (expensesQ.data ?? []).reduce((s: number, e: any) => s + Number(e.base_amount ?? e.amount), 0);
 
     const manualIncome = (incomeQ.data ?? [])
       .filter((i: any) => i.source !== "sale")
-      .reduce((s: number, i: any) => s + Number(i.amount), 0);
+      .reduce((s: number, i: any) => s + Number(i.base_amount ?? i.amount), 0);
 
-    const shipping = orderShipping + byCat("shipping");
-    const fees = orderFees + byCat("platform_fees");
-    const ads = byCat("ads");
-    const other = byCat("supplies") + byCat("other");
+    const shipExp = byCat("shipping") + byCat("international_shipping");
+    const feeExp = byCat("platform_fees");
+    const adsExp = byCat("ads") + byCat("advertising");
+    const shipping = orderShipping + shipExp;
+    const fees = orderFees + feeExp;
+    const ads = adsExp;
+    const other = allExp - shipExp - feeExp - adsExp;
     const net = revenue + manualIncome - productCost - shipping - fees - ads - other;
     return { revenue, manualIncome, productCost, shipping, fees, ads, other, net };
   }, [ordersQ.data, expensesQ.data, incomeQ.data]);
@@ -185,7 +194,7 @@ function FinancePage() {
                     const f = new FormData(e.currentTarget);
                     addIncome.mutate({
                       entry_date: String(f.get("entry_date")),
-                      amount: Number(f.get("amount")),
+                      ...readMoney(f),
                       source: String(f.get("source")),
                       notes: String(f.get("notes") || "") || null,
                     });
@@ -196,11 +205,8 @@ function FinancePage() {
                       <Label htmlFor="i-date">{tt("Date")}</Label>
                       <Input id="i-date" name="entry_date" type="date" defaultValue={today} required />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="i-amount">{tt("Amount")}</Label>
-                      <Input id="i-amount" name="amount" type="number" step="0.01" required />
-                    </div>
                   </div>
+                  <MoneyFields idPrefix="i" />
                   <div className="space-y-2">
                     <Label htmlFor="i-source">{tt("Source")}</Label>
                     <Input id="i-source" name="source" defaultValue="sale" required />
@@ -231,7 +237,7 @@ function FinancePage() {
                     const f = new FormData(e.currentTarget);
                     addExpense.mutate({
                       entry_date: String(f.get("entry_date")),
-                      amount: Number(f.get("amount")),
+                      ...readMoney(f),
                       category: String(f.get("category")),
                       description: String(f.get("description") || "") || null,
                     });
@@ -242,22 +248,19 @@ function FinancePage() {
                       <Label htmlFor="e-date">{tt("Date")}</Label>
                       <Input id="e-date" name="entry_date" type="date" defaultValue={today} required />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="e-amount">{tt("Amount")}</Label>
-                      <Input id="e-amount" name="amount" type="number" step="0.01" required />
-                    </div>
                   </div>
+                  <MoneyFields idPrefix="e" />
                   <div className="space-y-2">
                     <Label htmlFor="e-cat">{tt("Category")}</Label>
                     <select
                       id="e-cat"
                       name="category"
-                      defaultValue="other"
+                      defaultValue={cats.find((c) => c.code === "other") ? "other" : cats[0]?.code}
                       className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                     >
-                      {EXPENSE_CATEGORIES.map((c) => (
-                        <option key={c} value={c}>
-                          {tt(titleCase(c))}
+                      {cats.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {categoryLabel(cats, c.code, lang)}
                         </option>
                       ))}
                     </select>
@@ -294,9 +297,9 @@ function FinancePage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{tt("All categories")}</SelectItem>
-                {EXPENSE_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {tt(titleCase(c))}
+                {cats.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {categoryLabel(cats, c.code, lang)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -367,10 +370,10 @@ function FinancePage() {
                     <TableRow key={e.id}>
                       <TableCell>{formatDate(e.entry_date)}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{tt(titleCase(e.category))}</Badge>
+                        <Badge variant="secondary">{categoryLabel(cats, e.category, lang)}</Badge>
                       </TableCell>
                       <TableCell className="rtl-content">{e.description ?? "—"}</TableCell>
-                      <TableCell className="text-end tabular-nums">{money(e.amount)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(e.base_amount ?? e.amount)}{e.currency && e.currency !== "MYR" ? <span className="block text-xs text-muted-foreground">{e.currency} {Number(e.amount).toFixed(2)}</span> : null}</TableCell>
                     </TableRow>
                   ))}
                   {filteredExpenses.length === 0 && (
@@ -404,7 +407,7 @@ function FinancePage() {
                       <TableCell>{formatDate(i.entry_date)}</TableCell>
                       <TableCell>{tt(titleCase(i.source))}</TableCell>
                       <TableCell className="rtl-content">{i.notes ?? "—"}</TableCell>
-                      <TableCell className="text-end tabular-nums">{money(i.amount)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(i.base_amount ?? i.amount)}</TableCell>
                     </TableRow>
                   ))}
                   {(incomeQ.data ?? []).length === 0 && (
