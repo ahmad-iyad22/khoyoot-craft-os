@@ -50,6 +50,13 @@
       "when": 1792048924875,
       "tag": "0006_delete_shipment_unlink_expenses",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792051145765,
+      "tag": "0007_undo_shipment_receipt",
+      "breakpoints": true
     }
   ]
 }

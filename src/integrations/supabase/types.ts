@@ -1819,6 +1819,7 @@ export type Database = {
         Args: { _id: string; _items: Json; _s: Json }
         Returns: string
       }
+      undo_shipment_receipt: { Args: { _id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "owner" | "operations" | "marketing"
