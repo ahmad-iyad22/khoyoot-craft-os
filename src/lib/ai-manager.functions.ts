@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type ChatMessage = { role: "user" | "assistant"; content: string };
+type ChatMessage = { role: "user" | "assistant"; content: string; imageDataUrl?: string };
 
 async function gatherBusinessContext(supabase: any): Promise<string> {
   const [products, orders, shipments, partners, expenses, income, analytics] = await Promise.all([
@@ -79,10 +79,32 @@ You are READ-ONLY: you analyze and recommend, but you can never change data, pri
 
 Your job: analyze the live business data below and give practical, specific advice — profitable products, reorder needs, whether to ship now or wait, best posting times, partner balances, profit-split scenarios, margin concerns. Use the actual numbers. Be concise and concrete. When data is missing for a question, say so.
 
+The user may attach photos (for example to count pieces in a box, check stock on a shelf, or read a receipt or invoice). Analyze the attached photo carefully: when asked to count, count precisely and state what you counted and the number; when reading text, quote the relevant figures. Combine what you see in the photo with the live data below.
+
 ${langInstruction}
 
 Live business data (JSON):
 ${businessData}`;
+
+    const recent = data.messages.slice(-12);
+    const input: any[] = [{ role: "system", content: systemPrompt }];
+    for (const m of recent) {
+      if (m.role === "user" && m.imageDataUrl) {
+        const url = m.imageDataUrl;
+        if (!/^data:image\/(png|jpe?g|webp|gif);base64,/.test(url) || url.length > 9_000_000) {
+          throw new Error("Unsupported or oversized attached image");
+        }
+        input.push({
+          role: "user",
+          content: [
+            { type: "input_text", text: m.content || "" },
+            { type: "input_image", image_url: url },
+          ],
+        });
+      } else {
+        input.push({ role: m.role, content: m.content });
+      }
+    }
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
@@ -97,10 +119,7 @@ ${businessData}`;
         store: false,
         reasoning: { effort: "medium", summary: "auto" },
         include: ["reasoning.encrypted_content"],
-        input: [
-          { role: "system", content: systemPrompt },
-          ...data.messages.slice(-12),
-        ],
+        input,
       }),
     });
 
