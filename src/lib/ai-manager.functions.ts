@@ -84,6 +84,26 @@ ${langInstruction}
 Live business data (JSON):
 ${businessData}`;
 
+    const recent = data.messages.slice(-12);
+    const input: any[] = [{ role: "system", content: systemPrompt }];
+    for (const m of recent) {
+      if (m.role === "user" && m.imageDataUrl) {
+        const url = m.imageDataUrl;
+        if (!/^data:image\/(png|jpe?g|webp|gif);base64,/.test(url) || url.length > 9_000_000) {
+          throw new Error("Unsupported or oversized attached image");
+        }
+        input.push({
+          role: "user",
+          content: [
+            { type: "input_text", text: m.content || "" },
+            { type: "input_image", image_url: url },
+          ],
+        });
+      } else {
+        input.push({ role: m.role, content: m.content });
+      }
+    }
+
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
       headers: {
@@ -92,31 +112,6 @@ ${businessData}`;
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "openai/gpt-6-astra",
-        stream: true,
-        store: false,
-        reasoning: { effort: "medium", summary: "auto" },
-        include: ["reasoning.encrypted_content"],
-        const recent = data.messages.slice(-12);
-        const input: any[] = [{ role: "system", content: systemPrompt }];
-        for (const m of recent) {
-          if (m.role === "user" && m.imageDataUrl) {
-            const url = m.imageDataUrl;
-            if (!/^data:image\/(png|jpe?g|webp|gif);base64,/.test(url) || url.length > 9_000_000) {
-              throw new Error("Unsupported or oversized attached image");
-            }
-            input.push({
-              role: "user",
-              content: [
-                { type: "input_text", text: m.content || "" },
-                { type: "input_image", image_url: url },
-              ],
-            });
-          } else {
-            input.push({ role: m.role, content: m.content });
-          }
-        }
-        body: JSON.stringify({
         model: "openai/gpt-6-astra",
         stream: true,
         store: false,
