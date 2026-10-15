@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { tt, useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
@@ -59,7 +60,7 @@ function SuppliersPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Supplier saved");
+      toast.success(tt("Supplier saved"));
       setOpen(false);
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["suppliers"] });
@@ -68,14 +69,14 @@ function SuppliersPage() {
   });
 
   if (!roles.isLoading && !roles.isOperations) {
-    return <AccessDenied message="Suppliers are available to Owner and Operations roles." />;
+    return <AccessDenied message={tt("Suppliers are available to Owner and Operations roles.")} />;
   }
 
   return (
     <div>
       <PageHeader
-        title="Suppliers"
-        description="Who you buy from, and how long they take."
+        title={tt("Suppliers")}
+        description={tt("Who you buy from, and how long they take.")}
         action={
           <Button
             onClick={() => {
@@ -83,7 +84,7 @@ function SuppliersPage() {
               setOpen(true);
             }}
           >
-            Add supplier
+            {tt("Add supplier")}
           </Button>
         }
       />
@@ -93,11 +94,11 @@ function SuppliersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Products supplied</TableHead>
-                <TableHead>Lead time</TableHead>
+                <TableHead>{tt("Name")}</TableHead>
+                <TableHead>{tt("Contact")}</TableHead>
+                <TableHead>{tt("Phone")}</TableHead>
+                <TableHead>{tt("Products supplied")}</TableHead>
+                <TableHead>{tt("Lead time")}</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -118,7 +119,7 @@ function SuppliersPage() {
                         setOpen(true);
                       }}
                     >
-                      Edit
+                      {tt("Edit")}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -126,7 +127,7 @@ function SuppliersPage() {
               {(suppliersQ.data ?? []).length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    No suppliers yet.
+                    {tt("No suppliers yet.")}
                   </TableCell>
                 </TableRow>
               )}
@@ -157,29 +158,29 @@ function SuppliersPage() {
             }}
           >
             <div className="space-y-2">
-              <Label htmlFor="s-name">Name</Label>
+              <Label htmlFor="s-name">{tt("Name")}</Label>
               <Input id="s-name" name="name" defaultValue={editing?.name ?? ""} required />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="s-contact">Contact person</Label>
+                <Label htmlFor="s-contact">{tt("Contact person")}</Label>
                 <Input id="s-contact" name="contact_name" defaultValue={editing?.contact_name ?? ""} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="s-phone">Phone</Label>
+                <Label htmlFor="s-phone">{tt("Phone")}</Label>
                 <Input id="s-phone" name="phone" defaultValue={editing?.phone ?? ""} />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="s-email">Email</Label>
+              <Label htmlFor="s-email">{tt("Email")}</Label>
               <Input id="s-email" name="email" type="email" defaultValue={editing?.email ?? ""} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="s-address">Address</Label>
+              <Label htmlFor="s-address">{tt("Address")}</Label>
               <Textarea id="s-address" name="address" defaultValue={editing?.address ?? ""} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="s-products">Products supplied</Label>
+              <Label htmlFor="s-products">{tt("Products supplied")}</Label>
               <Textarea
                 id="s-products"
                 name="products_supplied"
@@ -187,11 +188,11 @@ function SuppliersPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="s-lead">Lead time notes</Label>
+              <Label htmlFor="s-lead">{tt("Lead time notes")}</Label>
               <Input id="s-lead" name="lead_time_notes" defaultValue={editing?.lead_time_notes ?? ""} />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={save.isPending}>Save</Button>
+              <Button type="submit" disabled={save.isPending}>{tt("Save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

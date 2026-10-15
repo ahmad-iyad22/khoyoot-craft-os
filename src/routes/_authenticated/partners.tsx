@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { tt, useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
@@ -64,7 +65,7 @@ function PartnersPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Partner added");
+      toast.success(tt("Partner added"));
       setPartnerOpen(false);
       qc.invalidateQueries({ queryKey: ["partners"] });
     },
@@ -77,7 +78,7 @@ function PartnersPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Transaction recorded");
+      toast.success(tt("Transaction recorded"));
       setTxnFor(null);
       qc.invalidateQueries({ queryKey: ["partners"] });
     },
@@ -85,7 +86,7 @@ function PartnersPage() {
   });
 
   if (!roles.isLoading && !roles.isOwner) {
-    return <AccessDenied message="Partner capital records are limited to the Owner / Finance role." />;
+    return <AccessDenied message={tt("Partner capital records are limited to the Owner / Finance role.")} />;
   }
 
   const balanceOf = (p: any) =>
@@ -97,16 +98,16 @@ function PartnersPage() {
   return (
     <div>
       <PageHeader
-        title="Partners"
-        description="Capital contributions, withdrawals and running balances."
+        title={tt("Partners")}
+        description={tt("Capital contributions, withdrawals and running balances.")}
         action={
           <Dialog open={partnerOpen} onOpenChange={setPartnerOpen}>
             <DialogTrigger asChild>
-              <Button>Add partner</Button>
+              <Button>{tt("Add partner")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add partner</DialogTitle>
+                <DialogTitle>{tt("Add partner")}</DialogTitle>
               </DialogHeader>
               <form
                 className="space-y-4"
@@ -121,7 +122,7 @@ function PartnersPage() {
                 }}
               >
                 <div className="space-y-2">
-                  <Label htmlFor="p-name">Name</Label>
+                  <Label htmlFor="p-name">{tt("Name")}</Label>
                   <Input id="p-name" name="name" required />
                 </div>
                 <div className="space-y-2">
@@ -129,11 +130,11 @@ function PartnersPage() {
                   <Input id="p-share" name="share_percent" type="number" step="0.01" defaultValue={33.33} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="p-notes">Notes</Label>
+                  <Label htmlFor="p-notes">{tt("Notes")}</Label>
                   <Textarea id="p-notes" name="notes" />
                 </div>
                 <DialogFooter>
-                  <Button type="submit" disabled={addPartner.isPending}>Save</Button>
+                  <Button type="submit" disabled={addPartner.isPending}>{tt("Save")}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -150,7 +151,7 @@ function PartnersPage() {
                 <p className="mt-1 text-sm text-muted-foreground">Share {Number(p.share_percent)}%</p>
               </div>
               <div className="text-right">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Balance</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">{tt("Balance")}</p>
                 <p className="font-display text-2xl">{money(balanceOf(p))}</p>
               </div>
             </CardHeader>
@@ -158,9 +159,9 @@ function PartnersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>{tt("Date")}</TableHead>
+                    <TableHead>{tt("Type")}</TableHead>
+                    <TableHead className="text-right">{tt("Amount")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -180,20 +181,20 @@ function PartnersPage() {
                   {(p.partner_transactions ?? []).length === 0 && (
                     <TableRow>
                       <TableCell colSpan={3} className="text-center text-muted-foreground">
-                        No transactions yet.
+                        {tt("No transactions yet.")}
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
               <Button variant="outline" size="sm" className="mt-4" onClick={() => setTxnFor(p)}>
-                Add transaction
+                {tt("Add transaction")}
               </Button>
             </CardContent>
           </Card>
         ))}
         {(partnersQ.data ?? []).length === 0 && (
-          <p className="text-sm text-muted-foreground">No partners yet — add the three partners to start.</p>
+          <p className="text-sm text-muted-foreground">{tt("No partners yet — add the three partners to start.")}</p>
         )}
       </div>
 
@@ -218,32 +219,32 @@ function PartnersPage() {
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="t-type">Type</Label>
+                <Label htmlFor="t-type">{tt("Type")}</Label>
                 <select
                   id="t-type"
                   name="txn_type"
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  <option value="contribution">Contribution</option>
-                  <option value="withdrawal">Withdrawal</option>
-                  <option value="profit_share">Profit share</option>
+                  <option value="contribution">{tt("Contribution")}</option>
+                  <option value="withdrawal">{tt("Withdrawal")}</option>
+                  <option value="profit_share">{tt("Profit share")}</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="t-amount">Amount</Label>
+                <Label htmlFor="t-amount">{tt("Amount")}</Label>
                 <Input id="t-amount" name="amount" type="number" step="0.01" required />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="t-date">Date</Label>
+              <Label htmlFor="t-date">{tt("Date")}</Label>
               <Input id="t-date" name="txn_date" type="date" defaultValue={today} required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="t-notes">Notes</Label>
+              <Label htmlFor="t-notes">{tt("Notes")}</Label>
               <Textarea id="t-notes" name="notes" />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={addTxn.isPending}>Save</Button>
+              <Button type="submit" disabled={addTxn.isPending}>{tt("Save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
