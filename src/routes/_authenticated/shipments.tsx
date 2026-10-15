@@ -50,6 +50,7 @@ type Cost = { amount: string; currency: string; fx: string; payer: string };
 const ERR_CODES = [
   "REFERENCE_REQUIRED", "INVALID_AMOUNT", "SPLIT_NOT_100", "SHIPMENT_LOCKED", "ALREADY_ADDED", "COST_PENDING",
   "NO_LINES", "NO_WEIGHT", "INVALID_QUANTITY", "INVALID_WEIGHT", "OWNER_REQUIRED_PARTNER_PAYER", "USE_ADD_TO_INVENTORY",
+  "STOCK_ALREADY_SOLD",
 ];
 function errMsg(e: unknown) {
   const m = (e as Error)?.message ?? String(e);
