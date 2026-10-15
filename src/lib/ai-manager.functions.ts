@@ -84,29 +84,62 @@ ${langInstruction}
 Live business data (JSON):
 ${businessData}`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
       headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "Lovable-API-Key": apiKey,
+        "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
+        model: "openai/gpt-6-astra",
+        stream: true,
+        store: false,
+        reasoning: { effort: "medium", summary: "auto" },
+        include: ["reasoning.encrypted_content"],
+        input: [
           { role: "system", content: systemPrompt },
           ...data.messages.slice(-12),
         ],
       }),
     });
 
-    if (!res.ok) {
+    if (!res.ok || !res.body) {
       const text = await res.text();
       console.error("AI gateway error", res.status, text);
       throw new Error(`AI request failed (${res.status})`);
     }
 
-    const json = await res.json();
-    const reply = json?.choices?.[0]?.message?.content;
+    // Consume the SSE stream and accumulate the answer text.
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let reply = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split("\n\n");
+      buffer = events.pop() ?? "";
+      for (const evt of events) {
+        for (const line of evt.split("\n")) {
+          if (!line.startsWith("data:")) continue;
+          const payload = line.slice(5).trim();
+          if (!payload || payload === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(payload);
+            if (parsed.type === "response.output_text.delta" && typeof parsed.delta === "string") {
+              reply += parsed.delta;
+            } else if (parsed.type === "response.failed" || parsed.type === "error") {
+              throw new Error(parsed.error?.message ?? "AI stream failed");
+            }
+          } catch (e) {
+            if (e instanceof SyntaxError) continue;
+            throw e;
+          }
+        }
+      }
+    }
     if (!reply) throw new Error("AI returned an empty reply");
     return { reply };
   });
