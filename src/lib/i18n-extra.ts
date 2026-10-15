@@ -273,4 +273,5 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   sh_kg: { en: "kg", ar: "كغ" },
   sh_g: { en: "g", ar: "غ" },
   sh_original: { en: "Original currency", ar: "العملة الأصلية" },
+  sh_ok: { en: "Done", ar: "تم" },
 };

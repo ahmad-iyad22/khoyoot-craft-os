@@ -73,7 +73,7 @@ function lineAlloc(s: any) {
 
 function ShipmentsPage() {
   const roles = useRoles();
-  const { t, ts, lang } = useI18n();
+  const { t, ts } = useI18n();
   const qc = useQueryClient();
   const base = useAppSettings().data?.base_currency ?? "MYR";
   const currencies = useAppSettings().data?.currencies ?? [base];
@@ -676,10 +676,9 @@ function ShipmentsPage() {
               );
             })}
           </ul>
-          <DialogFooter><Button onClick={() => setResult(null)}>{t("close") === "close" ? "OK" : t("close")}</Button></DialogFooter>
+          <DialogFooter><Button onClick={() => setResult(null)}>{t("sh_ok")}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
-      <span className="hidden">{lang}</span>
     </div>
   );
 }
