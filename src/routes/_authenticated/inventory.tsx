@@ -617,8 +617,40 @@ function InventoryPage() {
               </DialogFooter>
             </form>
           )}
+          {writeOffFor && <WriteOffHistory productId={writeOffFor.id} />}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function WriteOffHistory({ productId }: { productId: string }) {
+  const { t } = useI18n();
+  const q = useQuery({
+    queryKey: ["wo-history", productId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("stock_losses").select("id, loss_date, quantity, reason, loss_amount, notes")
+        .eq("product_id", productId).order("loss_date", { ascending: false }).limit(5);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const rows = q.data ?? [];
+  return (
+    <div className="border-t pt-3">
+      <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">{t("wo_history")}</p>
+      {rows.length === 0 ? (
+        <p className="text-xs text-muted-foreground">{t("wo_noHistory")}</p>
+      ) : (
+        <ul className="space-y-1 text-sm">
+          {rows.map((r) => (
+            <li key={r.id} className="flex flex-wrap justify-between gap-2">
+              <span>{formatDate(r.loss_date)} · {t(`wo_reason_${r.reason}`)} × {r.quantity}</span>
+              <span className="text-muted-foreground">{money(Number(r.loss_amount))}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
