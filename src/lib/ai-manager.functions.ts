@@ -219,7 +219,7 @@ async function runTool(sb: any, name: string, a: any): Promise<string> {
     case "set_platform_fee": {
       const patch: Record<string, unknown> = {};
       for (const k of ["commission_percent", "transaction_fee_percent", "fixed_fee", "sst_percent"]) if (typeof a[k] === "number") patch[k] = a[k];
-      if (a.waiver_until !== undefined) patch.waiver_until = a.waiver_until || null;
+      if (a.waiver_until !== undefined) patch["waiver_until"] = a.waiver_until || null;
       if (!Object.keys(patch).length) throw new Error("Nothing to change");
       const { data, error } = await sb.from("platform_fees").update(patch).ilike("platform", a.platform).select("platform");
       if (error) throw new Error(error.message);
