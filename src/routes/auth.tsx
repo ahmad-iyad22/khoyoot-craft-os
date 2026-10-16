@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LanguageToggle, ThemeToggle } from "@/components/app-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,6 +65,7 @@ function AuthPage() {
 
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
+          <div className="mb-6 flex gap-2 rounded-lg bg-sidebar p-1 text-sidebar-foreground"><div className="flex-1"><LanguageToggle /></div><div className="w-28"><ThemeToggle /></div></div>
           <div className="mb-8 lg:hidden">
             <div className="tatreez-band mb-4 h-2 w-24 rounded-full" />
             <h1 className="font-display text-3xl">{tt("Khoyoot")}</h1>
@@ -97,7 +100,7 @@ function AuthPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in…" : "Sign in"}
+                  {loading ? t("signingIn") : tt("Sign in")}
                 </Button>
               </form>
             </TabsContent>
