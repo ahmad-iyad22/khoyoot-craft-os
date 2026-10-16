@@ -17,18 +17,21 @@ export type Database = {
       app_settings: {
         Row: {
           base_currency: string
+          counting_statuses: string[]
           currencies: string[]
           id: boolean
           updated_at: string
         }
         Insert: {
           base_currency?: string
+          counting_statuses?: string[]
           currencies?: string[]
           id?: boolean
           updated_at?: string
         }
         Update: {
           base_currency?: string
+          counting_statuses?: string[]
           currencies?: string[]
           id?: boolean
           updated_at?: string
@@ -461,6 +464,7 @@ export type Database = {
           profit_split: Json | null
           quantity: number
           received_at: string
+          remaining_qty: number | null
           shipment_id: string | null
           shipping_cost: number
           supplier_id: string | null
@@ -478,6 +482,7 @@ export type Database = {
           profit_split?: Json | null
           quantity: number
           received_at?: string
+          remaining_qty?: number | null
           shipment_id?: string | null
           shipping_cost?: number
           supplier_id?: string | null
@@ -495,6 +500,7 @@ export type Database = {
           profit_split?: Json | null
           quantity?: number
           received_at?: string
+          remaining_qty?: number | null
           shipment_id?: string | null
           shipping_cost?: number
           supplier_id?: string | null
@@ -586,33 +592,138 @@ export type Database = {
           },
         ]
       }
+      order_allocations: {
+        Row: {
+          batch_code: string | null
+          batch_id: string | null
+          cost_owed_partner_id: string | null
+          created_at: string
+          fee_refunded: number
+          id: string
+          order_id: string
+          order_item_id: string
+          product_id: string | null
+          profit_split: Json | null
+          quantity: number
+          refund_amount: number
+          returned_qty: number
+          returned_serials: string[]
+          serials: string[]
+          unit_item_cost: number
+          unit_landed_cost: number
+        }
+        Insert: {
+          batch_code?: string | null
+          batch_id?: string | null
+          cost_owed_partner_id?: string | null
+          created_at?: string
+          fee_refunded?: number
+          id?: string
+          order_id: string
+          order_item_id: string
+          product_id?: string | null
+          profit_split?: Json | null
+          quantity: number
+          refund_amount?: number
+          returned_qty?: number
+          returned_serials?: string[]
+          serials?: string[]
+          unit_item_cost?: number
+          unit_landed_cost?: number
+        }
+        Update: {
+          batch_code?: string | null
+          batch_id?: string | null
+          cost_owed_partner_id?: string | null
+          created_at?: string
+          fee_refunded?: number
+          id?: string
+          order_id?: string
+          order_item_id?: string
+          product_id?: string | null
+          profit_split?: Json | null
+          quantity?: number
+          refund_amount?: number
+          returned_qty?: number
+          returned_serials?: string[]
+          serials?: string[]
+          unit_item_cost?: number
+          unit_landed_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_allocations_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_cost_owed_partner_id_fkey"
+            columns: ["cost_owed_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
           id: string
           order_id: string
+          packaging_unit_cost: number
           product_id: string | null
           quantity: number
           sale_price: number
           unit_cost: number
+          unit_item_cost: number
+          unit_landed_cost: number
         }
         Insert: {
           created_at?: string
           id?: string
           order_id: string
+          packaging_unit_cost?: number
           product_id?: string | null
           quantity?: number
           sale_price?: number
           unit_cost?: number
+          unit_item_cost?: number
+          unit_landed_cost?: number
         }
         Update: {
           created_at?: string
           id?: string
           order_id?: string
+          packaging_unit_cost?: number
           product_id?: string | null
           quantity?: number
           sale_price?: number
           unit_cost?: number
+          unit_item_cost?: number
+          unit_landed_cost?: number
         }
         Relationships: [
           {
@@ -631,47 +742,128 @@ export type Database = {
           },
         ]
       }
+      order_returns: {
+        Row: {
+          action: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          order_id: string
+          order_item_id: string
+          platform_fee_refunded: number
+          quantity: number
+          refund_amount: number
+          refund_platform_fee: boolean
+          return_date: string
+          serials: string[]
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          order_item_id: string
+          platform_fee_refunded?: number
+          quantity: number
+          refund_amount?: number
+          refund_platform_fee?: boolean
+          return_date?: string
+          serials?: string[]
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          order_item_id?: string
+          platform_fee_refunded?: number
+          quantity?: number
+          refund_amount?: number
+          refund_platform_fee?: boolean
+          return_date?: string
+          serials?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_returns_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_returns_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
           created_by: string | null
           customer_name: string | null
+          fee_snapshot: Json | null
           id: string
           notes: string | null
           order_date: string
           order_number: string | null
+          packaging_cost: number
           platform: string
           platform_fee: number
+          platform_fee_auto: number
+          platform_fee_manual: boolean
           shipping_cost: number
+          split_override: Json | null
           status: string
+          tax_amount: number
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           customer_name?: string | null
+          fee_snapshot?: Json | null
           id?: string
           notes?: string | null
           order_date?: string
           order_number?: string | null
+          packaging_cost?: number
           platform?: string
           platform_fee?: number
+          platform_fee_auto?: number
+          platform_fee_manual?: boolean
           shipping_cost?: number
+          split_override?: Json | null
           status?: string
+          tax_amount?: number
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
           customer_name?: string | null
+          fee_snapshot?: Json | null
           id?: string
           notes?: string | null
           order_date?: string
           order_number?: string | null
+          packaging_cost?: number
           platform?: string
           platform_fee?: number
+          platform_fee_auto?: number
+          platform_fee_manual?: boolean
           shipping_cost?: number
+          split_override?: Json | null
           status?: string
+          tax_amount?: number
           updated_at?: string
         }
         Relationships: []
@@ -962,6 +1154,7 @@ export type Database = {
           name: string
           name_ar: string | null
           notes: string | null
+          packaging_cost_per_unit: number
           photos: Json
           prefix_code: string | null
           reorder_threshold: number
@@ -994,6 +1187,7 @@ export type Database = {
           name: string
           name_ar?: string | null
           notes?: string | null
+          packaging_cost_per_unit?: number
           photos?: Json
           prefix_code?: string | null
           reorder_threshold?: number
@@ -1026,6 +1220,7 @@ export type Database = {
           name?: string
           name_ar?: string | null
           notes?: string | null
+          packaging_cost_per_unit?: number
           photos?: Json
           prefix_code?: string | null
           reorder_threshold?: number
@@ -1093,6 +1288,7 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          order_item_id: string | null
           product_id: string
           serial: string
           status: string
@@ -1102,6 +1298,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          order_item_id?: string | null
           product_id: string
           serial: string
           status?: string
@@ -1111,6 +1308,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          order_item_id?: string | null
           product_id?: string
           serial?: string
           status?: string
@@ -1121,6 +1319,13 @@ export type Database = {
             columns: ["batch_id"]
             isOneToOne: false
             referencedRelation: "inventory_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "serial_numbers_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
             referencedColumns: ["id"]
           },
           {
@@ -1400,6 +1605,108 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_losses: {
+        Row: {
+          batch_code: string | null
+          batch_id: string | null
+          cost_owed_partner_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_marketing: boolean
+          loss_amount: number
+          loss_date: string
+          notes: string | null
+          order_id: string | null
+          product_id: string | null
+          profit_split: Json | null
+          quantity: number
+          reason: string
+          return_id: string | null
+          serials: string[]
+          unit_item_cost: number
+          unit_landed_cost: number
+        }
+        Insert: {
+          batch_code?: string | null
+          batch_id?: string | null
+          cost_owed_partner_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_marketing?: boolean
+          loss_amount?: number
+          loss_date?: string
+          notes?: string | null
+          order_id?: string | null
+          product_id?: string | null
+          profit_split?: Json | null
+          quantity: number
+          reason: string
+          return_id?: string | null
+          serials?: string[]
+          unit_item_cost?: number
+          unit_landed_cost?: number
+        }
+        Update: {
+          batch_code?: string | null
+          batch_id?: string | null
+          cost_owed_partner_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_marketing?: boolean
+          loss_amount?: number
+          loss_date?: string
+          notes?: string | null
+          order_id?: string | null
+          product_id?: string | null
+          profit_split?: Json | null
+          quantity?: number
+          reason?: string
+          return_id?: string | null
+          serials?: string[]
+          unit_item_cost?: number
+          unit_landed_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_losses_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_losses_cost_owed_partner_id_fkey"
+            columns: ["cost_owed_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_losses_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_losses_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_losses_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "order_returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movements: {
         Row: {
           batch_id: string | null
@@ -1657,6 +1964,72 @@ export type Database = {
       }
     }
     Views: {
+      order_line_profit: {
+        Row: {
+          allocation_id: string | null
+          batch_code: string | null
+          batch_id: string | null
+          cost_owed_partner_id: string | null
+          effective_split: Json | null
+          item_cost_owed: number | null
+          landed_cost: number | null
+          net_revenue: number | null
+          order_date: string | null
+          order_id: string | null
+          order_item_id: string | null
+          packaging_cost: number | null
+          platform_fee_share: number | null
+          product_id: string | null
+          profit: number | null
+          quantity: number | null
+          returned_qty: number | null
+          returned_serials: string[] | null
+          sale_price: number | null
+          serials: string[] | null
+          shipping_tax_share: number | null
+          split_missing: boolean | null
+          status: string | null
+          unit_item_cost: number | null
+          unit_landed_cost: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_allocations_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_cost_owed_partner_id_fkey"
+            columns: ["cost_owed_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_allocations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_line_costs: {
         Row: {
           allocated_customs_line: number | null
@@ -1719,6 +2092,28 @@ export type Database = {
       }
     }
     Functions: {
+      _alloc_item: {
+        Args: {
+          _item_id: string
+          _order_id: string
+          _pid: string
+          _qty: number
+          _serials: string[]
+        }
+        Returns: undefined
+      }
+      _apply_order_header: {
+        Args: { _id: string; _order: Json }
+        Returns: undefined
+      }
+      _insert_order_lines: {
+        Args: { _allocate: boolean; _lines: Json; _order_id: string }
+        Returns: undefined
+      }
+      _release_order: {
+        Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
       adjust_stock: {
         Args: {
           _change: number
@@ -1730,7 +2125,12 @@ export type Database = {
       }
       allocate_shipment: { Args: { _shipment_id: string }; Returns: undefined }
       claim_next_sku: { Args: { _code: string }; Returns: string }
+      compute_platform_fee: {
+        Args: { _date: string; _platform: string; _revenue: number }
+        Returns: Json
+      }
       create_order: { Args: { _lines: Json; _order: Json }; Returns: string }
+      delete_order: { Args: { _id: string }; Returns: undefined }
       delete_shipment: { Args: { _id: string }; Returns: undefined }
       generate_batch_codes: {
         Args: { _batch_id: string; _product_id: string; _quantity: number }
@@ -1773,6 +2173,11 @@ export type Database = {
       is_ops: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
       next_sku_preview: { Args: { _code: string }; Returns: string }
+      partner_month_summary: { Args: { _month: string }; Returns: Json }
+      preview_allocation: {
+        Args: { _product_id: string; _qty: number; _serials?: string[] }
+        Returns: Json
+      }
       receive_shipment: { Args: { _shipment_id: string }; Returns: Json }
       receive_stock: {
         Args: {
@@ -1800,6 +2205,18 @@ export type Database = {
         }
         Returns: Json
       }
+      record_return: {
+        Args: {
+          _action: string
+          _date: string
+          _item_id: string
+          _notes: string
+          _qty: number
+          _refund: number
+          _refund_fee: boolean
+        }
+        Returns: string
+      }
       save_partner_profit_period: {
         Args: {
           _end: string
@@ -1819,7 +2236,26 @@ export type Database = {
         Args: { _id: string; _items: Json; _s: Json }
         Returns: string
       }
+      set_order_status: {
+        Args: { _id: string; _status: string }
+        Returns: undefined
+      }
+      split_valid: { Args: { _s: Json }; Returns: boolean }
       undo_shipment_receipt: { Args: { _id: string }; Returns: undefined }
+      update_order: {
+        Args: { _id: string; _lines: Json; _order: Json }
+        Returns: undefined
+      }
+      write_off_stock: {
+        Args: {
+          _date: string
+          _notes: string
+          _product_id: string
+          _qty: number
+          _reason: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "owner" | "operations" | "marketing"
