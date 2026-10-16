@@ -111,11 +111,6 @@ function Dashboard() {
     return d;
   });
 
-  const inMonth = (dateStr: string, d: Date) => {
-    const t = new Date(dateStr);
-    return t.getFullYear() === d.getFullYear() && t.getMonth() === d.getMonth();
-  };
-
   const monthly = months.map((d, i) => {
     const m = sumQ.data?.months?.[i];
     return {
