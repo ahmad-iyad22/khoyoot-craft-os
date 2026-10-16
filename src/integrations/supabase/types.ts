@@ -2344,6 +2344,7 @@ export type Database = {
         Returns: Json
       }
       create_order: { Args: { _lines: Json; _order: Json }; Returns: string }
+      dashboard_summary: { Args: { _month: string }; Returns: Json }
       delete_order: { Args: { _id: string }; Returns: undefined }
       delete_shipment: { Args: { _id: string }; Returns: undefined }
       generate_batch_codes: {
