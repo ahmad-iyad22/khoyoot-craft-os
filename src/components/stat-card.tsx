@@ -13,7 +13,7 @@ export function StatCard({
   value: string;
   previous?: number | null;
   invertColor?: boolean;
-  hint?: string;
+  hint?: string | undefined;
 }) {
   const { t } = useI18n();
   const hasDelta = previous !== undefined && previous !== null && Number.isFinite(previous);
