@@ -64,6 +64,13 @@
       "when": 1792114408545,
       "tag": "0008_orders_profit_returns_losses",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792115043254,
+      "tag": "0009_month_end_bank_cash",
+      "breakpoints": true
     }
   ]
 }

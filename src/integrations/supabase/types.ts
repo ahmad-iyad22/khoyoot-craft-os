@@ -74,6 +74,145 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_accounts: {
+        Row: {
+          actual_balance: number | null
+          actual_checked_at: string | null
+          created_at: string
+          currency: string
+          id: string
+          kind: string
+          name: string
+          notes: string | null
+          opening_balance: number
+          opening_date: string
+          opening_fx: number
+          partner_id: string | null
+          pending_payout: number
+          updated_at: string
+        }
+        Insert: {
+          actual_balance?: number | null
+          actual_checked_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          kind: string
+          name: string
+          notes?: string | null
+          opening_balance?: number
+          opening_date?: string
+          opening_fx?: number
+          partner_id?: string | null
+          pending_payout?: number
+          updated_at?: string
+        }
+        Update: {
+          actual_balance?: number | null
+          actual_checked_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          kind?: string
+          name?: string
+          notes?: string | null
+          opening_balance?: number
+          opening_date?: string
+          opening_fx?: number
+          partner_id?: string | null
+          pending_payout?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          base_amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          fx_rate_to_base: number
+          id: string
+          note: string | null
+          receipt_path: string | null
+          to_account_id: string | null
+          txn_date: string
+          txn_type: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          base_amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          fx_rate_to_base?: number
+          id?: string
+          note?: string | null
+          receipt_path?: string | null
+          to_account_id?: string | null
+          txn_date?: string
+          txn_type: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          base_amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          fx_rate_to_base?: number
+          id?: string
+          note?: string | null
+          receipt_path?: string | null
+          to_account_id?: string | null
+          txn_date?: string
+          txn_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_account_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_account_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           budget: number
@@ -592,6 +731,30 @@ export type Database = {
           },
         ]
       }
+      month_closures: {
+        Row: {
+          closed_at: string
+          closed_by: string | null
+          id: string
+          month: string
+          snapshot: Json
+        }
+        Insert: {
+          closed_at?: string
+          closed_by?: string | null
+          id?: string
+          month: string
+          snapshot: Json
+        }
+        Update: {
+          closed_at?: string
+          closed_by?: string | null
+          id?: string
+          month?: string
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       order_allocations: {
         Row: {
           batch_code: string | null
@@ -910,6 +1073,7 @@ export type Database = {
           partner_id: string
           profit_period_id: string | null
           receipt_path: string | null
+          settles_month: string | null
           shipment_cost_kind: string | null
           shipment_id: string | null
           txn_date: string
@@ -927,6 +1091,7 @@ export type Database = {
           partner_id: string
           profit_period_id?: string | null
           receipt_path?: string | null
+          settles_month?: string | null
           shipment_cost_kind?: string | null
           shipment_id?: string | null
           txn_date?: string
@@ -944,6 +1109,7 @@ export type Database = {
           partner_id?: string
           profit_period_id?: string | null
           receipt_path?: string | null
+          settles_month?: string | null
           shipment_cost_kind?: string | null
           shipment_id?: string | null
           txn_date?: string
@@ -1964,6 +2130,53 @@ export type Database = {
       }
     }
     Views: {
+      bank_account_balances: {
+        Row: {
+          actual_balance: number | null
+          actual_checked_at: string | null
+          balance_base: number | null
+          balance_native: number | null
+          currency: string | null
+          id: string | null
+          kind: string | null
+          name: string | null
+          partner_id: string | null
+          pending_payout: number | null
+        }
+        Insert: {
+          actual_balance?: number | null
+          actual_checked_at?: string | null
+          balance_base?: never
+          balance_native?: never
+          currency?: string | null
+          id?: string | null
+          kind?: string | null
+          name?: string | null
+          partner_id?: string | null
+          pending_payout?: number | null
+        }
+        Update: {
+          actual_balance?: number | null
+          actual_checked_at?: string | null
+          balance_base?: never
+          balance_native?: never
+          currency?: string | null
+          id?: string | null
+          kind?: string | null
+          name?: string | null
+          partner_id?: string | null
+          pending_payout?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_line_profit: {
         Row: {
           allocation_id: string | null
@@ -2125,6 +2338,7 @@ export type Database = {
       }
       allocate_shipment: { Args: { _shipment_id: string }; Returns: undefined }
       claim_next_sku: { Args: { _code: string }; Returns: string }
+      close_month: { Args: { _month: string }; Returns: undefined }
       compute_platform_fee: {
         Args: { _date: string; _platform: string; _revenue: number }
         Returns: Json
@@ -2172,6 +2386,7 @@ export type Database = {
       is_marketing: { Args: never; Returns: boolean }
       is_ops: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
+      month_statement: { Args: { _month: string }; Returns: Json }
       next_sku_preview: { Args: { _code: string }; Returns: string }
       partner_month_summary: { Args: { _month: string }; Returns: Json }
       preview_allocation: {
@@ -2217,6 +2432,7 @@ export type Database = {
         }
         Returns: string
       }
+      reopen_month: { Args: { _month: string }; Returns: undefined }
       save_partner_profit_period: {
         Args: {
           _end: string
@@ -2239,6 +2455,17 @@ export type Database = {
       set_order_status: {
         Args: { _id: string; _status: string }
         Returns: undefined
+      }
+      settle_partner: {
+        Args: {
+          _amount: number
+          _date: string
+          _month: string
+          _notes: string
+          _partner_id: string
+          _receipt: string
+        }
+        Returns: string
       }
       split_valid: { Args: { _s: Json }; Returns: boolean }
       undo_shipment_receipt: { Args: { _id: string }; Returns: undefined }
