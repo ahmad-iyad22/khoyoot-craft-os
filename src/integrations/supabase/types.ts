@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_action_log: {
+        Row: {
+          args: Json
+          created_at: string
+          id: string
+          result: Json | null
+          tool: string
+          user_id: string
+        }
+        Insert: {
+          args?: Json
+          created_at?: string
+          id?: string
+          result?: Json | null
+          tool: string
+          user_id: string
+        }
+        Update: {
+          args?: Json
+          created_at?: string
+          id?: string
+          result?: Json | null
+          tool?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           base_currency: string
