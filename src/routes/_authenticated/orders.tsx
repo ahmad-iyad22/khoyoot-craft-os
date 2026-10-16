@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ORDER_STATUSES, PLATFORMS, formatDate, money } from "@/lib/format";
+import { ORDER_STATUSES, formatDate, money } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/orders")({
   head: () => ({
@@ -462,6 +462,15 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
     },
   });
   const products = productsQ.data ?? [];
+  const platformsQ = useQuery({
+    queryKey: ["platform-fees-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("platform_fees").select("platform").order("platform");
+      if (error) throw error;
+      return (data ?? []).map((x) => x.platform as string);
+    },
+  });
+  const platforms = Array.from(new Set([...(platformsQ.data ?? []), "Manual", ...(order?.platform ? [order.platform] : [])]));
   const inOrder = useMemo(() => {
     const m = new Map<string, number>();
     if (order && order.status !== "cancelled") for (const i of order.order_items) m.set(i.product_id, (m.get(i.product_id) ?? 0) + num(i.quantity));
@@ -586,7 +595,7 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
               <Select value={platform} onValueChange={setPlatform}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{p === "Manual" ? t("ord_Manual") : p}</SelectItem>)}
+                  {platforms.map((p) => <SelectItem key={p} value={p}>{p === "Manual" ? t("ord_Manual") : p}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
