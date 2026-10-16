@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAiManagerRouteImport } from './routes/_authenticated/ai-manager'
+import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
 import { Route as AuthenticatedBankRouteImport } from './routes/_authenticated/bank'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
@@ -44,6 +45,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedAiManagerRoute = AuthenticatedAiManagerRouteImport.update({
   id: '/ai-manager',
   path: '/ai-manager',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAuditLogRoute = AuthenticatedAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBankRoute = AuthenticatedBankRouteImport.update({
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/ai-manager': typeof AuthenticatedAiManagerRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/finance': typeof AuthenticatedFinanceRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/ai-manager': typeof AuthenticatedAiManagerRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/finance': typeof AuthenticatedFinanceRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/ai-manager': typeof AuthenticatedAiManagerRoute
+  '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
   '/_authenticated/bank': typeof AuthenticatedBankRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/ai-manager'
+    | '/audit-log'
     | '/bank'
     | '/dashboard'
     | '/finance'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/ai-manager'
+    | '/audit-log'
     | '/bank'
     | '/dashboard'
     | '/finance'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/ai-manager'
+    | '/_authenticated/audit-log'
     | '/_authenticated/bank'
     | '/_authenticated/dashboard'
     | '/_authenticated/finance'
@@ -261,6 +273,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-manager'
       fullPath: '/ai-manager'
       preLoaderRoute: typeof AuthenticatedAiManagerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/audit-log': {
+      id: '/_authenticated/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AuthenticatedAuditLogRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bank': {
@@ -359,6 +378,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiManagerRoute: typeof AuthenticatedAiManagerRoute
+  AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
   AuthenticatedBankRoute: typeof AuthenticatedBankRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
@@ -376,6 +396,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiManagerRoute: AuthenticatedAiManagerRoute,
+  AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
   AuthenticatedBankRoute: AuthenticatedBankRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,

@@ -13,7 +13,7 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Menu,
-  Languages, Ship, Receipt, Bot, CalendarCheck, Landmark } from "lucide-react";
+  Languages, Ship, Receipt, Bot, CalendarCheck, Landmark, ScrollText } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles, useUser } from "@/lib/auth";
@@ -45,10 +45,11 @@ const NAV: NavItem[] = [
   { to: "/marketing", labelKey: "marketing", icon: Megaphone, show: (r) => r.isMarketing },
   { to: "/ai-manager", labelKey: "aiManager", icon: Bot, show: (r) => r.isOwner || r.isOperations || r.isMarketing },
   { to: "/tasks", labelKey: "tasks", icon: CheckSquare, show: () => true },
+  { to: "/audit-log", labelKey: "auditLog", icon: ScrollText, show: (r) => r.isOwner },
   { to: "/settings", labelKey: "settings", icon: SettingsIcon, show: () => true },
 ];
 
-function LanguageToggle() {
+export function LanguageToggle() {
   const { lang, setLang, t } = useI18n();
   return (
     <div className="flex items-center gap-1 rounded-lg bg-sidebar-accent/40 p-1">
@@ -73,7 +74,7 @@ function LanguageToggle() {
 }
 
 
-function ThemeToggle() {
+export function ThemeToggle() {
   const { theme, toggle } = useTheme();
   const { t } = useI18n();
   return (
