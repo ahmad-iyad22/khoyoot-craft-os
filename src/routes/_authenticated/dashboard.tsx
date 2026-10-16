@@ -18,6 +18,7 @@ import { useI18n , tt } from "@/lib/i18n";
 import { PageHeader } from "@/components/app-shell";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
+import { MonthEndCards } from "@/components/month-end-cards";
 import { compactMoney, formatDate, money, pct, titleCase } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -227,6 +228,8 @@ function Dashboard() {
         title={t("dashboard")}
         description={`${new Date().toLocaleString(lang === "ar" ? "ar" : "en", { month: "long", year: "numeric" })} · ${t("dashboardSubtitle")}`}
       />
+
+      {roles.isOwner && <MonthEndCards />}
 
       {lowStock.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-warning/40 bg-warning/15 px-4 py-3 text-sm">

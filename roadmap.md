@@ -6,3 +6,4 @@
 - [ ] Verify the updated flows and latest build log.
 - [ ] AI Manager page built (read-only chat advisor, EN/AR) — needs on-screen verification with approved sign-in.
 - [x] Batch 4: orders FIFO allocation, platform fees, per-partner profit, returns, write-offs (needs on-screen check)
+- [x] Batch 5: month-end statement, settlement, bank & cash, dashboard cards (needs on-screen check)
