@@ -49,7 +49,7 @@ export const EXPENSE_CATEGORIES = [
 
 export const PLATFORMS = ["Shopee", "Lazada", "TikTok Shop", "Manual"] as const;
 
-export const ORDER_STATUSES = ["pending", "shipped", "completed", "cancelled"] as const;
+export const ORDER_STATUSES = ["pending", "shipped", "delivered", "completed", "cancelled"] as const;
 
 export function titleCase(value: string) {
   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
