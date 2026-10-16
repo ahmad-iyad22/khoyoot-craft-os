@@ -57,6 +57,13 @@
       "when": 1792051145765,
       "tag": "0007_undo_shipment_receipt",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792114408545,
+      "tag": "0008_orders_profit_returns_losses",
+      "breakpoints": true
     }
   ]
 }

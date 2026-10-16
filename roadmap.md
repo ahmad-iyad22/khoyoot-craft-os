@@ -5,3 +5,4 @@
 - [ ] Rebuild Partners with editable partner records and period-specific profit splitting (May's share entered by Owner; Ahmad and Nur split the remainder).
 - [ ] Verify the updated flows and latest build log.
 - [ ] AI Manager page built (read-only chat advisor, EN/AR) — needs on-screen verification with approved sign-in.
+- [x] Batch 4: orders FIFO allocation, platform fees, per-partner profit, returns, write-offs (needs on-screen check)

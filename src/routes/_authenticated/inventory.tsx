@@ -141,6 +141,23 @@ function InventoryPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [writeOffFor, setWriteOffFor] = useState<any | null>(null);
+  const writeOff = useMutation({
+    mutationFn: async (v: { product_id: string; qty: number; reason: string; date: string; notes: string }) => {
+      const { data, error } = await supabase.rpc("write_off_stock" as never, {
+        _product_id: v.product_id, _qty: v.qty, _reason: v.reason, _date: v.date, _notes: v.notes,
+      } as never);
+      if (error) throw error;
+      return data as unknown as { loss_amount: number };
+    },
+    onSuccess: (r) => {
+      toast.success(tt("wo_saved").replace("{amt}", money(r?.loss_amount ?? 0)));
+      setWriteOffFor(null);
+      queryClient.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const adjust = useMutation({
     mutationFn: async (v: { product_id: string; change: number; reason: string; note: string }) => {
       const { error } = await supabase.rpc("adjust_stock", {
@@ -339,9 +356,14 @@ function InventoryPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
-                        <Button size="sm" variant="outline" onClick={() => setAdjustFor(p)}>
-                          {t("correction")}
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="outline" onClick={() => setAdjustFor(p)}>
+                            {t("correction")}
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={Number(p.stock_qty) <= 0} onClick={() => setWriteOffFor(p)}>
+                            {t("wo_button")}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -530,6 +552,68 @@ function InventoryPage() {
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={adjust.isPending}>{t("save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!writeOffFor} onOpenChange={(v) => !v && setWriteOffFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("wo_title")}</DialogTitle>
+            <DialogDescription>{t("wo_hint")}</DialogDescription>
+          </DialogHeader>
+          {writeOffFor && (
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget as HTMLFormElement);
+                const qty = Number(f.get("qty"));
+                const reason = String(f.get("reason") ?? "");
+                if (!qty || qty < 1) { toast.error(t("changeRequired")); return; }
+                if (!reason) { toast.error(t("reasonRequired")); return; }
+                if (qty > Number(writeOffFor.stock_qty)) { toast.error(t("stockWouldBeNegative")); return; }
+                writeOff.mutate({ product_id: writeOffFor.id, qty, reason, date: String(f.get("date")), notes: String(f.get("notes") ?? "") });
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <ProductThumbnail url={writeOffFor.image_url} name={writeOffFor.name} />
+                <div>
+                  <p className="font-medium">{writeOffFor.name}</p>
+                  <p className="text-xs text-muted-foreground">{t("available")}: {writeOffFor.stock_qty}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>{t("quantity")}</Label>
+                  <Input name="qty" type="number" min={1} max={Number(writeOffFor.stock_qty)} step={1} defaultValue={1} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("date")}</Label>
+                  <Input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("reason")}</Label>
+                <Select name="reason" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("chooseReason")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["damaged", "lost", "sample", "gift"].map((r) => (
+                      <SelectItem key={r} value={r}>{t(`wo_reason_${r}`)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">{t("wo_marketingNote")}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("notes")}</Label>
+                <Textarea name="notes" rows={2} dir="auto" />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={writeOff.isPending}>{t("save")}</Button>
               </DialogFooter>
             </form>
           )}

@@ -8,3 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- Order stock, serials, fees and returns change only through DB RPCs (create_order/update_order/delete_order/set_order_status/record_return/write_off_stock); profit per line is read from the order_line_profit view so UI and month summaries share one formula.

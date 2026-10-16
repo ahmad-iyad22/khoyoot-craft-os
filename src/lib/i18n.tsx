@@ -404,6 +404,11 @@ export const STATUS_LABELS: Record<string, { en: string; ar: string }> = {
   customs: { en: "Customs", ar: "الجمارك" },
   arrived_in_malaysia: { en: "Arrived", ar: "وصلت" },
   added_to_inventory: { en: "Added to inventory", ar: "أُضيفت إلى المخزون" },
+  pending: { en: "Pending", ar: "قيد الانتظار" },
+  shipped: { en: "Shipped", ar: "تم الشحن" },
+  delivered: { en: "Delivered", ar: "تم التسليم" },
+  completed: { en: "Completed", ar: "مكتمل" },
+  cancelled: { en: "Cancelled", ar: "ملغى" },
 };
 
 type Ctx = {
