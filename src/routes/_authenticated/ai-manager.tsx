@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/ai-manager")({
   component: AiManagerPage,
 });
 
-type Msg = { role: "user" | "assistant"; content: string; imageDataUrl?: string };
+type Msg = { role: "user" | "assistant"; content: string; imageDataUrl?: string; actions?: { tool: string; summary: string }[] };
 
 const MAX_PHOTO_BYTES = 20 * 1024 * 1024; // raw camera photo before compression
 
@@ -83,8 +83,8 @@ function AiManagerPage() {
     setPendingImage(null);
     setBusy(true);
     try {
-      const res = await askAiManager({ data: { messages: next, language: lang } });
-      setMessages([...next, { role: "assistant", content: res.reply }]);
+      const res = await askAiManager({ data: { messages: next.map(({ actions: _a, ...m }) => m), language: lang } });
+      setMessages([...next, { role: "assistant", content: res.reply, actions: res.actions }]);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -98,6 +98,7 @@ function AiManagerPage() {
       <div>
         <h1 className="text-2xl font-bold">{t("aiManager")}</h1>
         <p className="text-sm text-muted-foreground">{t("aiManagerSubtitle")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t("aiCanActNote")}</p>
       </div>
 
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto rounded-md border p-4 min-h-[40vh]">
@@ -122,6 +123,14 @@ function AiManagerPage() {
                   <img src={m.imageDataUrl} alt="" className="mb-2 max-h-48 rounded-md" />
                 )}
                 <div className="whitespace-pre-wrap">{m.content}</div>
+                {!!m.actions?.length && (
+                  <div className="mt-2 border-t pt-2">
+                    <p className="text-xs font-semibold text-primary">{t("aiActionsDone")}</p>
+                    <ul className="mt-1 list-disc space-y-0.5 ps-4 text-xs" dir="auto">
+                      {m.actions.map((a, j) => <li key={j}>{a.summary}</li>)}
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
             {m.role === "user" && <User className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />}

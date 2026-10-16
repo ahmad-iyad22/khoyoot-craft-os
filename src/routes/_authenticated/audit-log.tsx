@@ -78,7 +78,17 @@ function AuditLogPage() {
       if (to) r = r.lt("created_at", new Date(new Date(to).getTime() + 864e5).toISOString());
       const { data, error, count } = await r.range(page * PAGE, page * PAGE + PAGE - 1);
       if (error) throw error;
-      return { rows: data ?? [], count: count ?? 0 };
+      const list = data ?? [];
+      let ai: { user_id: string; created_at: string }[] = [];
+      if (list.length) {
+        const ts = list.map((x) => new Date(x.created_at).getTime());
+        const { data: a } = await supabase.from("ai_action_log").select("user_id, created_at")
+          .gte("created_at", new Date(Math.min(...ts) - 5000).toISOString())
+          .lte("created_at", new Date(Math.max(...ts) + 5000).toISOString());
+        ai = a ?? [];
+      }
+      const byAi = new Set(list.filter((x) => ai.some((y) => y.user_id === x.user_id && Math.abs(new Date(y.created_at).getTime() - new Date(x.created_at).getTime()) <= 5000)).map((x) => x.id));
+      return { rows: list, count: count ?? 0, byAi };
     },
   });
 
@@ -142,7 +152,7 @@ function AuditLogPage() {
                 <td className="whitespace-nowrap px-4 py-3">{new Date(r.created_at).toLocaleString()}</td>
                 <td className="px-4 py-3">
                   {name(r.user_id)}
-                  {/* reserved slot for a future "by AI" tag */}
+                  {q.data?.byAi.has(r.id) && <Badge variant="outline" className="ms-2 text-[10px]">{t("al_byAi")}</Badge>}
                 </td>
                 <td className="px-4 py-3" dir="ltr">{r.table_name}</td>
                 <td className="px-4 py-3">
