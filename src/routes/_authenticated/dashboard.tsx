@@ -81,16 +81,13 @@ function Dashboard() {
     },
   });
 
-  const expensesQ = useQuery({
-    queryKey: ["dash-expenses", sinceIso],
+  const sumQ = useQuery({
+    queryKey: ["dash-summary", sinceIso],
     enabled: roles.isOwner,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("expenses")
-        .select("entry_date, category, amount")
-        .gte("entry_date", sinceIso);
+      const { data, error } = await supabase.rpc("dashboard_summary" as never, { _month: new Date().toISOString().slice(0, 8) + "01" } as never);
       if (error) throw error;
-      return data ?? [];
+      return data as unknown as { months: any[]; top: { name: string; profit: number }[] };
     },
   });
 
@@ -106,7 +103,6 @@ function Dashboard() {
 
   const orders = ordersQ.data ?? [];
   const products = productsQ.data ?? [];
-  const expenses = expensesQ.data ?? [];
 
   const months = Array.from({ length: 6 }, (_, i) => {
     const d = new Date();
@@ -120,55 +116,25 @@ function Dashboard() {
     return t.getFullYear() === d.getFullYear() && t.getMonth() === d.getMonth();
   };
 
-  const monthly = months.map((d) => {
-    const monthOrders = orders.filter((o) => inMonth(o.order_date, d) && o.status !== "cancelled");
-    const revenue = monthOrders.reduce(
-      (s, o) => s + o.order_items.reduce((x, i) => x + Number(i.quantity) * Number(i.sale_price), 0),
-      0,
-    );
-    const cogs = monthOrders.reduce(
-      (s, o) => s + o.order_items.reduce((x, i) => x + Number(i.quantity) * Number(i.unit_cost), 0),
-      0,
-    );
-    const monthExp = expenses.filter((e) => inMonth(e.entry_date, d));
-    const expenseTotal = monthExp.reduce((s, e) => s + Number(e.amount), 0);
-    const adSpend = monthExp.filter((e) => e.category === "ads").reduce((s, e) => s + Number(e.amount), 0);
+  const monthly = months.map((d, i) => {
+    const m = sumQ.data?.months?.[i];
     return {
       label: monthLabel(d, lang),
-      revenue,
-      cogs,
-      expenseTotal,
-      adSpend,
-      orders: monthOrders.length,
-      profit: revenue - cogs - expenseTotal,
+      revenue: Number(m?.revenue ?? 0),
+      orders: Number(m?.orders ?? 0),
+      profit: Number(m?.net_profit ?? 0),
+      shared: Number(m?.shared_costs ?? 0),
+      unallocated: Number(m?.unallocated ?? 0),
     };
   });
 
-  const emptyMonth = { label: "", revenue: 0, cogs: 0, expenseTotal: 0, adSpend: 0, orders: 0, profit: 0 };
+  const emptyMonth = { label: "", revenue: 0, orders: 0, profit: 0, shared: 0, unallocated: 0 };
   const cur = monthly[monthly.length - 1] ?? emptyMonth;
   const prev = monthly[monthly.length - 2] ?? emptyMonth;
   const stockValue = products.reduce((s, p) => s + Number(p.stock_qty) * Number(p.avg_cost), 0);
   const lowStock = products.filter((p) => Number(p.stock_qty) <= Number(p.reorder_threshold));
 
-  const profitByProduct = (() => {
-    const map = new Map<string, number>();
-    orders
-      .filter((o) => o.status !== "cancelled")
-      .forEach((o) =>
-        o.order_items.forEach((i) => {
-          if (!i.product_id) return;
-          const margin = Number(i.quantity) * (Number(i.sale_price) - Number(i.unit_cost));
-          map.set(i.product_id, (map.get(i.product_id) ?? 0) + margin);
-        }),
-      );
-    return [...map.entries()]
-      .map(([id, profit]) => ({
-        name: products.find((p) => p.id === id)?.name ?? tt("Unknown"),
-        profit: Math.round(profit),
-      }))
-      .sort((a, b) => b.profit - a.profit)
-      .slice(0, 5);
-  })();
+  const profitByProduct = (sumQ.data?.top ?? []).map((r) => ({ name: r.name, profit: Number(r.profit) }));
 
   if (!roles.isOperations && roles.isMarketing) {
     const rows = (salesQ.data ?? []) as {
@@ -252,23 +218,16 @@ function Dashboard() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard label={tt("Revenue")} value={money(cur.revenue)} previous={pct(cur.revenue, prev.revenue)} />
+        {roles.isOwner && <StatCard label={tt("Revenue")} value={money(cur.revenue)} previous={pct(cur.revenue, prev.revenue)} />}
         {roles.isOwner && (
-          <StatCard
-            label={tt("Total expenses")}
-            value={money(cur.expenseTotal)}
-            previous={pct(cur.expenseTotal, prev.expenseTotal)}
-            invertColor
-          />
+          <StatCard label={tt("Net profit")} value={money(cur.profit)} previous={pct(cur.profit, prev.profit)}
+            hint={cur.unallocated ? `${t("dash_unallocated")}: ${money(cur.unallocated)}` : undefined} />
         )}
         {roles.isOwner && (
-          <StatCard label={tt("Net profit")} value={money(cur.profit)} previous={pct(cur.profit, prev.profit)} />
+          <StatCard label={t("dash_sharedCosts")} value={money(cur.shared)} previous={pct(cur.shared, prev.shared)} invertColor />
         )}
-        <StatCard label={tt("Orders")} value={String(cur.orders)} previous={pct(cur.orders, prev.orders)} />
+        {roles.isOwner && <StatCard label={tt("Orders")} value={String(cur.orders)} previous={pct(cur.orders, prev.orders)} />}
         <StatCard label={tt("Stock value")} value={money(stockValue)} hint={tt("At weighted average cost")} />
-        {roles.isOwner && (
-          <StatCard label={tt("Ad spend")} value={money(cur.adSpend)} previous={pct(cur.adSpend, prev.adSpend)} invertColor />
-        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -300,7 +259,7 @@ function Dashboard() {
         </div>
 
         <div className="card-surface p-4">
-          <h2 className="mb-4 font-display text-lg">{tt("Top 5 products by margin")}</h2>
+          <h2 className="mb-4 font-display text-lg">{t("dash_top5Profit")}</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={profitByProduct} layout="vertical" margin={{ left: 12 }}>
