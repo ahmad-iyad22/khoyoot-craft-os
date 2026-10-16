@@ -690,7 +690,7 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
               {t("ord_feeAuto").replace("{amt}", money(autoFee))}
               {snap && ` (${num(snap.commission_percent)}% + ${num(snap.transaction_fee_percent)}% + ${money(snap.fixed_fee)}, SST ${num(snap.sst_percent)}%)`}
             </p>
-            {snap?.waived && <p className="text-xs text-success">{t("ord_feeWaived").replace("{d}", formatDate(snap.waiver_until))}</p>}
+            {snap?.waived && <p className="text-xs text-primary">{t("ord_feeWaived").replace("{d}", formatDate(snap.waiver_until))}</p>}
             <label className="flex items-center gap-2 text-sm">
               <Checkbox checked={feeManual} onCheckedChange={(v) => { setFeeManual(!!v); if (v) setFeeValue(String(autoFee)); }} /> {t("ord_feeManual")}
             </label>

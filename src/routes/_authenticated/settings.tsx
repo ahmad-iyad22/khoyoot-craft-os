@@ -480,6 +480,7 @@ function SettingsPage() {
                 reorder_threshold: Number(f.get("reorder_threshold") || 0),
                 image_url: String(f.get("image_url") || "").trim(),
                 weight_grams: Math.max(0, Number(f.get("weight_grams") || 0)),
+                packaging_cost_per_unit: Math.max(0, Number(f.get("packaging_cost_per_unit") || 0)),
               });
             }}
           >
@@ -529,6 +530,10 @@ function SettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="pr-weight">{t("weightGrams")}</Label>
               <Input id="pr-weight" name="weight_grams" type="number" min={0} step="1" defaultValue={editing?.weight_grams ?? 0} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pr-pack">{t("ord_packagingPerUnit")}</Label>
+              <Input id="pr-pack" name="packaging_cost_per_unit" type="number" min={0} step="0.01" defaultValue={editing?.packaging_cost_per_unit ?? 0} />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
