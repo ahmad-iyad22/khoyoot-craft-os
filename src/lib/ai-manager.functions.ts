@@ -144,7 +144,42 @@ const TOOLS = [
       required: ["platform"],
     },
   },
+  {
+    type: "function",
+    name: "add_bank_transaction",
+    description: "Add one bank/cash transaction row (e.g. from a GXBank screenshot). Duplicates (same account, date, amount, note) are skipped.",
+    parameters: {
+      type: "object",
+      properties: {
+        account: { type: "string", description: "bank account name" },
+        type: { type: "string", enum: ["deposit", "platform_payout", "withdrawal", "expense_payment", "adjustment"] },
+        date: { type: "string", description: "YYYY-MM-DD" },
+        ...money,
+        note: { type: "string" },
+      },
+      required: ["account", "type", "date", "amount"],
+    },
+  },
+  {
+    type: "function",
+    name: "record_balance_check",
+    description: "Record the actual balance shown by the bank for an account.",
+    parameters: {
+      type: "object",
+      properties: { account: { type: "string" }, actual_balance: { type: "number" }, date: { type: "string", description: "YYYY-MM-DD" } },
+      required: ["account", "actual_balance", "date"],
+    },
+  },
 ];
+
+async function findAccount(sb: any, name: string) {
+  const { data } = await sb.from("bank_accounts").select("id, name, currency");
+  const n = String(name).toLowerCase().trim();
+  const exact = (data ?? []).filter((a: any) => a.name.toLowerCase() === n);
+  const hits = exact.length ? exact : (data ?? []).filter((a: any) => a.name.toLowerCase().includes(n));
+  if (hits.length !== 1) throw new Error(`Bank account "${name}" not found or ambiguous`);
+  return hits[0] as { id: string; name: string; currency: string };
+}
 
 type Action = { tool: string; summary: string; ok: boolean };
 
@@ -226,6 +261,29 @@ async function runTool(sb: any, name: string, a: any): Promise<string> {
       if (!data?.length) throw new Error(`Platform ${a.platform} not found`);
       return `Updated ${data[0].platform} fees: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`;
     }
+    case "add_bank_transaction": {
+      const mm = m(a);
+      const acc = await findAccount(sb, a.account);
+      const note = a.note ? String(a.note).trim() : null;
+      let q = sb.from("bank_transactions").select("id").eq("account_id", acc.id).eq("txn_date", a.date).eq("amount", mm.amount);
+      q = note ? q.eq("note", note) : q.is("note", null);
+      const { data: dup } = await q.limit(1);
+      if (dup?.length) return `SKIPPED duplicate: ${acc.name} ${a.date} ${fmt(mm.amount, mm.currency)}${note ? ` "${note}"` : ""}`;
+      const { error } = await sb.from("bank_transactions").insert({ account_id: acc.id, to_account_id: null, txn_type: a.type, txn_date: a.date, note, receipt_path: null, ...mm });
+      if (error) throw new Error(error.message);
+      return `Added ${a.type} ${fmt(mm.amount, mm.currency)} to ${acc.name} on ${a.date}${note ? ` "${note}"` : ""}`;
+    }
+    case "record_balance_check": {
+      const acc = await findAccount(sb, a.account);
+      const actual = Number(a.actual_balance);
+      if (!Number.isFinite(actual)) throw new Error("actual_balance must be a number");
+      const { error } = await sb.from("bank_accounts").update({ actual_balance: actual, actual_checked_at: a.date }).eq("id", acc.id);
+      if (error) throw new Error(error.message);
+      const { data: bal } = await sb.from("bank_account_balances").select("balance_native").eq("id", acc.id).maybeSingle();
+      const sys = Number(bal?.balance_native ?? 0);
+      const diff = Math.round((actual - sys) * 100) / 100;
+      return `Balance check ${acc.name} on ${a.date}: actual ${fmt(actual, acc.currency)}, system ${fmt(sys, acc.currency)}, difference ${fmt(diff, acc.currency)}`;
+    }
   }
   throw new Error(`Unknown tool ${name}`);
 }
@@ -248,7 +306,8 @@ export const askAiManager = createServerFn({ method: "POST" })
 
     const systemPrompt = `You are the AI Manager of Khoyoot, an internal business operating system for a small Palestinian heritage-goods business run by three partners (Ahmad and Nur in Malaysia, May in Palestine who makes the products). Sales happen on TikTok Shop, Shopee and Lazada. Today is ${today}.
 
-ACTIONS: When the Owner explicitly instructs you (typed, or from a photo of a receipt/invoice), perform the action directly with your tools — no confirmation step — then report exactly what you did with the numbers. You can add shared expenses, add partner transactions, edit products (name, sale price, weight, notes, min stock), archive/restore products, and update platform fees. You can NEVER hard delete anything, and never change SKUs, stock, orders or shipments. NEVER invent numbers: if an amount, currency rate, partner, product, category or date is missing or ambiguous, ask ONE short question instead of acting. Rates, prices and fees change all the time — never assume fixed values; use only what the user gave or what is in the data. Profit shares are set per shipment, not per partner. Only act on explicit instructions; for questions just analyze.
+ACTIONS: When the Owner explicitly instructs you (typed, or from a photo of a receipt/invoice), perform the action directly with your tools — no confirmation step — then report exactly what you did with the numbers. You can add shared expenses, add partner transactions, edit products (name, sale price, weight, notes, min stock), archive/restore products, update platform fees, add bank transactions and record bank balance checks. You can NEVER hard delete anything, and never change SKUs, stock, orders or shipments. NEVER invent numbers: if an amount, currency rate, partner, product, category, account or date is missing or ambiguous, ask ONE short question instead of acting. Rates, prices and fees change all the time — never assume fixed values; use only what the user gave or what is in the data. Profit shares are set per shipment, not per partner. Only act on explicit instructions; for questions just analyze.
+GXBank transaction screenshots can be entered with add_bank_transaction (one call per row; money in = deposit or platform_payout, money out = withdrawal or expense_payment; use the row's description as note); enter only rows that are clearly readable, list unreadable rows back instead of guessing, and confirm what was entered and what was skipped as duplicate.
 
 ANALYSIS: Analyze the live data below and give practical, specific advice (profitable products, reorder needs, ship now or wait, posting times, partner balances, profit-split scenarios, margins). Use the actual numbers; say when data is missing. For attached photos, count precisely or quote the figures you read.
 
@@ -268,7 +327,8 @@ ${businessData}`;
 
     const actions: Action[] = [];
     let runId: string | undefined;
-    for (let i = 0; i < 6; i++) {
+    let toolCalls = 0;
+    for (let i = 0; i < 10; i++) {
       const headers: Record<string, string> = { "Content-Type": "application/json", "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "fetch" };
       if (runId) headers["X-Lovable-AIG-Run-ID"] = runId;
       const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
@@ -304,6 +364,10 @@ ${businessData}`;
       }
       input.push(...items);
       for (const c of calls) {
+        if (++toolCalls > 30) {
+          input.push({ type: "function_call_output", call_id: c.call_id, output: JSON.stringify({ ok: false, error: "Tool call limit (30) reached for this message; not executed" }) });
+          continue;
+        }
         let args: any = {};
         let result: any;
         try {
