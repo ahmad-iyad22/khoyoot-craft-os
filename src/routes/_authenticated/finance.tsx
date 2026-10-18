@@ -407,6 +407,7 @@ function FinancePage() {
                     <TableHead>{tt("Category")}</TableHead>
                     <TableHead>{tt("Description")}</TableHead>
                     <TableHead className="text-end">{tt("Amount")}</TableHead>
+                    <TableHead className="text-end">{tt("Actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -418,11 +419,21 @@ function FinancePage() {
                       </TableCell>
                       <TableCell className="rtl-content">{e.description ?? "—"}</TableCell>
                       <TableCell className="text-end tabular-nums">{money(e.base_amount ?? e.amount)}{e.currency && e.currency !== "MYR" ? <span className="block text-xs text-muted-foreground">{e.currency} {Number(e.amount).toFixed(2)}</span> : null}</TableCell>
+                      <TableCell className="text-end">
+                        <div className="flex justify-end gap-1">
+                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => setEditExpense(e)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDelTarget({ kind: "expenses", id: e.id })}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                   {filteredExpenses.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
                         {tt("No expenses in this range.")}
                       </TableCell>
                     </TableRow>
