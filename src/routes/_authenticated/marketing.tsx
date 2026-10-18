@@ -44,10 +44,9 @@ export const Route = createFileRoute("/_authenticated/marketing")({
 const today = new Date().toISOString().slice(0, 10);
 const CONTENT_STATUS = ["idea", "scripted", "posted"];
 const CAMPAIGN_STATUS = ["planned", "running", "finished"];
-const CHANNELS = ["Instagram", "TikTok", "Facebook", "Shopee", "Lazada"];
 
 function MarketingPage() {
-  const { t, ts, lang } = useI18n();
+  const { t, lang } = useI18n();
   const roles = useRoles();
   const base = useAppSettings().data?.base_currency ?? "MYR";
   const [editingPost, setEditingPost] = useState<any>(null);
@@ -99,7 +98,8 @@ function MarketingPage() {
     if (error) throw error;
     return data ?? [];
   } });
-  const channels = Array.from(new Set([...(channelsQ.data ?? []).map((p) => p.platform), ...CHANNELS,
+  const channels = Array.from(new Set([...(channelsQ.data ?? []).map((p) => p.platform),
+    ...(contentQ.data ?? []).map((p) => p.platform), ...(campaignsQ.data ?? []).map((p) => p.platform),
     editingPost?.platform, editingCampaign?.platform].filter((p): p is string => Boolean(p))));
   const partnersQ = useQuery({ queryKey: ["marketing-partners"], enabled: roles.isOwner, queryFn: async () => {
     const { data, error } = await supabase.from("partners").select("id, name, active").order("created_at");
@@ -170,6 +170,7 @@ function MarketingPage() {
   return (
     <div>
       <PageHeader title={tt("Marketing")} description={tt("Content calendar and campaign tracking.")} />
+      {[contentQ.error, campaignsQ.error, channelsQ.error, partnersQ.error].filter(Boolean).map((error, i) => <p key={i} className="mb-3 text-sm text-destructive">{error?.message}</p>)}
 
       <Tabs defaultValue="content">
         <TabsList>
