@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { tt } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
+import { ConfirmDelete } from "@/components/confirm-delete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +56,9 @@ function FinancePage() {
   const [category, setCategory] = useState<string>("all");
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [incomeOpen, setIncomeOpen] = useState(false);
+  const [editExpense, setEditExpense] = useState<any>(null);
+  const [editIncome, setEditIncome] = useState<any>(null);
+  const [delTarget, setDelTarget] = useState<{ kind: "expenses" | "income"; id: string } | null>(null);
 
   const enabled = roles.isOwner;
 
@@ -122,6 +127,45 @@ function FinancePage() {
     onSuccess: () => {
       toast.success(tt("Income recorded"));
       setIncomeOpen(false);
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateExpense = useMutation({
+    mutationFn: async ({ id, ...payload }: Record<string, unknown>) => {
+      const { error } = await supabase.from("expenses").update(payload as never).eq("id", id as string);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(tt("Expense updated"));
+      setEditExpense(null);
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateIncome = useMutation({
+    mutationFn: async ({ id, ...payload }: Record<string, unknown>) => {
+      const { error } = await supabase.from("income").update(payload as never).eq("id", id as string);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(tt("Income updated"));
+      setEditIncome(null);
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteRow = useMutation({
+    mutationFn: async ({ kind, id }: { kind: "expenses" | "income"; id: string }) => {
+      const { error } = await supabase.from(kind).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(tt("Deleted"));
+      setDelTarget(null);
       qc.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -363,6 +407,7 @@ function FinancePage() {
                     <TableHead>{tt("Category")}</TableHead>
                     <TableHead>{tt("Description")}</TableHead>
                     <TableHead className="text-end">{tt("Amount")}</TableHead>
+                    <TableHead className="text-end">{tt("Actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -374,11 +419,21 @@ function FinancePage() {
                       </TableCell>
                       <TableCell className="rtl-content">{e.description ?? "—"}</TableCell>
                       <TableCell className="text-end tabular-nums">{money(e.base_amount ?? e.amount)}{e.currency && e.currency !== "MYR" ? <span className="block text-xs text-muted-foreground">{e.currency} {Number(e.amount).toFixed(2)}</span> : null}</TableCell>
+                      <TableCell className="text-end">
+                        <div className="flex justify-end gap-1">
+                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => setEditExpense(e)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDelTarget({ kind: "expenses", id: e.id })}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                   {filteredExpenses.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
                         {tt("No expenses in this range.")}
                       </TableCell>
                     </TableRow>
@@ -399,6 +454,7 @@ function FinancePage() {
                     <TableHead>{tt("Source")}</TableHead>
                     <TableHead>{tt("Notes")}</TableHead>
                     <TableHead className="text-end">{tt("Amount")}</TableHead>
+                    <TableHead className="text-end">{tt("Actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -408,11 +464,21 @@ function FinancePage() {
                       <TableCell>{tt(titleCase(i.source))}</TableCell>
                       <TableCell className="rtl-content">{i.notes ?? "—"}</TableCell>
                       <TableCell className="text-end tabular-nums">{money(i.base_amount ?? i.amount)}</TableCell>
+                      <TableCell className="text-end">
+                        <div className="flex justify-end gap-1">
+                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => setEditIncome(i)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDelTarget({ kind: "income", id: i.id })}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                   {(incomeQ.data ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
                         {tt("No income entries in this range.")}
                       </TableCell>
                     </TableRow>
@@ -423,6 +489,100 @@ function FinancePage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!editExpense} onOpenChange={(v) => !v && setEditExpense(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{tt("Edit expense")}</DialogTitle>
+          </DialogHeader>
+          {editExpense && (
+            <form
+              key={editExpense.id}
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                updateExpense.mutate({
+                  id: editExpense.id,
+                  entry_date: String(f.get("entry_date")),
+                  ...readMoney(f),
+                  category: String(f.get("category")),
+                  description: String(f.get("description") || "") || null,
+                });
+              }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="ee-date">{tt("Date")}</Label>
+                <Input id="ee-date" name="entry_date" type="date" defaultValue={editExpense.entry_date} required />
+              </div>
+              <MoneyFields idPrefix="ee" defaultAmount={editExpense.amount} defaultCurrency={editExpense.currency} defaultFx={editExpense.fx_rate_to_base} />
+              <div className="space-y-2">
+                <Label htmlFor="ee-cat">{tt("Category")}</Label>
+                <select id="ee-cat" name="category" defaultValue={editExpense.category} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  {cats.map((c) => (
+                    <option key={c.code} value={c.code}>{categoryLabel(cats, c.code, lang)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ee-desc">{tt("Description")}</Label>
+                <Textarea id="ee-desc" name="description" defaultValue={editExpense.description ?? ""} />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={updateExpense.isPending}>{tt("Save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editIncome} onOpenChange={(v) => !v && setEditIncome(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{tt("Edit income")}</DialogTitle>
+          </DialogHeader>
+          {editIncome && (
+            <form
+              key={editIncome.id}
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                updateIncome.mutate({
+                  id: editIncome.id,
+                  entry_date: String(f.get("entry_date")),
+                  ...readMoney(f),
+                  source: String(f.get("source")),
+                  notes: String(f.get("notes") || "") || null,
+                });
+              }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="ei-date">{tt("Date")}</Label>
+                <Input id="ei-date" name="entry_date" type="date" defaultValue={editIncome.entry_date} required />
+              </div>
+              <MoneyFields idPrefix="ei" defaultAmount={editIncome.amount} defaultCurrency={editIncome.currency} defaultFx={editIncome.fx_rate_to_base} />
+              <div className="space-y-2">
+                <Label htmlFor="ei-source">{tt("Source")}</Label>
+                <Input id="ei-source" name="source" defaultValue={editIncome.source} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ei-notes">{tt("Notes")}</Label>
+                <Textarea id="ei-notes" name="notes" defaultValue={editIncome.notes ?? ""} />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={updateIncome.isPending}>{tt("Save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDelete
+        open={!!delTarget}
+        onOpenChange={(v) => !v && setDelTarget(null)}
+        onConfirm={() => delTarget && deleteRow.mutate(delTarget)}
+      />
     </div>
   );
 }
