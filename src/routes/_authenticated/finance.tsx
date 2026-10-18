@@ -132,6 +132,45 @@ function FinancePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const updateExpense = useMutation({
+    mutationFn: async ({ id, ...payload }: Record<string, unknown>) => {
+      const { error } = await supabase.from("expenses").update(payload as never).eq("id", id as string);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(tt("Expense updated"));
+      setEditExpense(null);
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateIncome = useMutation({
+    mutationFn: async ({ id, ...payload }: Record<string, unknown>) => {
+      const { error } = await supabase.from("income").update(payload as never).eq("id", id as string);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(tt("Income updated"));
+      setEditIncome(null);
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteRow = useMutation({
+    mutationFn: async ({ kind, id }: { kind: "expenses" | "income"; id: string }) => {
+      const { error } = await supabase.from(kind).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(tt("Deleted"));
+      setDelTarget(null);
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const pnl = useMemo(() => {
     const orders = ordersQ.data ?? [];
     const live = orders.filter((o: any) => o.status !== "cancelled");
