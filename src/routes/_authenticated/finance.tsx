@@ -56,6 +56,9 @@ function FinancePage() {
   const [category, setCategory] = useState<string>("all");
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [incomeOpen, setIncomeOpen] = useState(false);
+  const [editExpense, setEditExpense] = useState<any>(null);
+  const [editIncome, setEditIncome] = useState<any>(null);
+  const [delTarget, setDelTarget] = useState<{ kind: "expenses" | "income"; id: string } | null>(null);
 
   const enabled = roles.isOwner;
 
