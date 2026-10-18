@@ -489,6 +489,100 @@ function FinancePage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!editExpense} onOpenChange={(v) => !v && setEditExpense(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{tt("Edit expense")}</DialogTitle>
+          </DialogHeader>
+          {editExpense && (
+            <form
+              key={editExpense.id}
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                updateExpense.mutate({
+                  id: editExpense.id,
+                  entry_date: String(f.get("entry_date")),
+                  ...readMoney(f),
+                  category: String(f.get("category")),
+                  description: String(f.get("description") || "") || null,
+                });
+              }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="ee-date">{tt("Date")}</Label>
+                <Input id="ee-date" name="entry_date" type="date" defaultValue={editExpense.entry_date} required />
+              </div>
+              <MoneyFields idPrefix="ee" defaultAmount={editExpense.amount} defaultCurrency={editExpense.currency} defaultFx={editExpense.fx_rate_to_base} />
+              <div className="space-y-2">
+                <Label htmlFor="ee-cat">{tt("Category")}</Label>
+                <select id="ee-cat" name="category" defaultValue={editExpense.category} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  {cats.map((c) => (
+                    <option key={c.code} value={c.code}>{categoryLabel(cats, c.code, lang)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ee-desc">{tt("Description")}</Label>
+                <Textarea id="ee-desc" name="description" defaultValue={editExpense.description ?? ""} />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={updateExpense.isPending}>{tt("Save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editIncome} onOpenChange={(v) => !v && setEditIncome(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{tt("Edit income")}</DialogTitle>
+          </DialogHeader>
+          {editIncome && (
+            <form
+              key={editIncome.id}
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                updateIncome.mutate({
+                  id: editIncome.id,
+                  entry_date: String(f.get("entry_date")),
+                  ...readMoney(f),
+                  source: String(f.get("source")),
+                  notes: String(f.get("notes") || "") || null,
+                });
+              }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="ei-date">{tt("Date")}</Label>
+                <Input id="ei-date" name="entry_date" type="date" defaultValue={editIncome.entry_date} required />
+              </div>
+              <MoneyFields idPrefix="ei" defaultAmount={editIncome.amount} defaultCurrency={editIncome.currency} defaultFx={editIncome.fx_rate_to_base} />
+              <div className="space-y-2">
+                <Label htmlFor="ei-source">{tt("Source")}</Label>
+                <Input id="ei-source" name="source" defaultValue={editIncome.source} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ei-notes">{tt("Notes")}</Label>
+                <Textarea id="ei-notes" name="notes" defaultValue={editIncome.notes ?? ""} />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={updateIncome.isPending}>{tt("Save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDelete
+        open={!!delTarget}
+        onOpenChange={(v) => !v && setDelTarget(null)}
+        onConfirm={() => delTarget && deleteRow.mutate(delTarget)}
+      />
     </div>
   );
 }
