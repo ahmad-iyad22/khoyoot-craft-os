@@ -1,0 +1,2 @@
+CREATE TRIGGER audit_campaigns AFTER INSERT OR UPDATE OR DELETE ON public.campaigns FOR EACH ROW EXECUTE FUNCTION public.audit_sensitive();
+CREATE TRIGGER audit_content_calendar AFTER INSERT OR UPDATE OR DELETE ON public.content_calendar FOR EACH ROW EXECUTE FUNCTION public.audit_sensitive();
