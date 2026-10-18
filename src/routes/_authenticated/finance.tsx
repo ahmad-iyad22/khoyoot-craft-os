@@ -454,6 +454,7 @@ function FinancePage() {
                     <TableHead>{tt("Source")}</TableHead>
                     <TableHead>{tt("Notes")}</TableHead>
                     <TableHead className="text-end">{tt("Amount")}</TableHead>
+                    <TableHead className="text-end">{tt("Actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -463,11 +464,21 @@ function FinancePage() {
                       <TableCell>{tt(titleCase(i.source))}</TableCell>
                       <TableCell className="rtl-content">{i.notes ?? "—"}</TableCell>
                       <TableCell className="text-end tabular-nums">{money(i.base_amount ?? i.amount)}</TableCell>
+                      <TableCell className="text-end">
+                        <div className="flex justify-end gap-1">
+                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => setEditIncome(i)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDelTarget({ kind: "income", id: i.id })}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                   {(incomeQ.data ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
                         {tt("No income entries in this range.")}
                       </TableCell>
                     </TableRow>
