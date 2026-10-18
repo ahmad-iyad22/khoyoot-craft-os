@@ -327,7 +327,8 @@ ${businessData}`;
 
     const actions: Action[] = [];
     let runId: string | undefined;
-    for (let i = 0; i < 6; i++) {
+    let toolCalls = 0;
+    for (let i = 0; i < 10; i++) {
       const headers: Record<string, string> = { "Content-Type": "application/json", "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "fetch" };
       if (runId) headers["X-Lovable-AIG-Run-ID"] = runId;
       const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
@@ -363,6 +364,10 @@ ${businessData}`;
       }
       input.push(...items);
       for (const c of calls) {
+        if (++toolCalls > 30) {
+          input.push({ type: "function_call_output", call_id: c.call_id, output: JSON.stringify({ ok: false, error: "Tool call limit (30) reached for this message; not executed" }) });
+          continue;
+        }
         let args: any = {};
         let result: any;
         try {
