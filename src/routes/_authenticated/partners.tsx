@@ -242,6 +242,71 @@ function PartnersPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="investments">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
+              <CardTitle className="font-display text-lg">{t("investments")}</CardTitle>
+              <Button size="sm" onClick={() => setInv({ row: null })}>
+                <Plus className="size-4" /> {t("addInvestment")}
+              </Button>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <Table className="min-w-[700px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("investor")}</TableHead>
+                    <TableHead>{t("date")}</TableHead>
+                    <TableHead>{t("notes")}</TableHead>
+                    <TableHead className="text-end">{t("amount")}</TableHead>
+                    <TableHead className="text-end">{t("inBaseCurrency")}</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {investments.map((x: any) => (
+                    <TableRow key={x.id}>
+                      <TableCell className="font-medium">{partners.find((p) => p.id === x.partner_id)?.name ?? "—"}</TableCell>
+                      <TableCell>{formatDate(x.txn_date)}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-muted-foreground" dir="auto">{x.notes ?? "—"}</TableCell>
+                      <TableCell className="text-end tabular-nums">{fmtMoney(x.amount, x.currency ?? baseCur)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{fmtMoney(x.base_amount ?? x.amount, baseCur)}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-1">
+                          {x.receipt_path ? (
+                            <Button variant="ghost" size="icon" className="size-7" aria-label={t("viewReceipt")} onClick={() => openReceipt(x.receipt_path)}>
+                              <Paperclip className="size-4" />
+                            </Button>
+                          ) : null}
+                          <Button variant="ghost" size="icon" className="size-7" aria-label={t("edit")} onClick={() => setInv({ row: x })}>
+                            <Pencil className="size-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="size-7" aria-label={t("delete")} onClick={() => setToDelete({ kind: "txn", id: x.id })}>
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {!investments.length && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">{t("noInvestments")}</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                {partners.map((p) => {
+                  const total = investments
+                    .filter((x: any) => x.partner_id === p.id)
+                    .reduce((s: number, x: any) => s + Number(x.base_amount ?? x.amount ?? 0), 0);
+                  return <Stat key={p.id} label={p.name} value={fmtMoney(total, baseCur)} />;
+                })}
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">{t("investmentsExplain")}</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="ledger">
           <Card>
             <CardContent className="overflow-x-auto pt-6">
