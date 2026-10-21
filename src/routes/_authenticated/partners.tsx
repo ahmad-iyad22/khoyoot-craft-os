@@ -124,6 +124,13 @@ function PartnersPage() {
     () => computeLedger(partners, allTxns, (expensesQ.data ?? []) as any[], month),
     [partners, allTxns, expensesQ.data, month],
   );
+  const investments = useMemo(
+    () =>
+      allTxns
+        .filter((x: any) => x.txn_type === "contribution" && inMonth(x.txn_date, month))
+        .sort((a: any, b: any) => (a.txn_date < b.txn_date ? 1 : -1)),
+    [allTxns, month],
+  );
 
   if (!roles.isLoading && !roles.isOwner) return <AccessDenied message={t("partnersOwnerOnly")} />;
 
