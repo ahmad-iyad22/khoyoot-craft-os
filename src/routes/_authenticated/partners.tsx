@@ -48,6 +48,7 @@ function PartnersPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [editPartner, setEditPartner] = useState<any | null>(null);
   const [txn, setTxn] = useState<{ partner: any; row: any | null } | null>(null);
+  const [inv, setInv] = useState<{ row: any | null } | null>(null);
   const [toDelete, setToDelete] = useState<{ kind: "partner" | "txn"; id: string } | null>(null);
 
   const partnersQ = useQuery({
@@ -123,6 +124,13 @@ function PartnersPage() {
     () => computeLedger(partners, allTxns, (expensesQ.data ?? []) as any[], month),
     [partners, allTxns, expensesQ.data, month],
   );
+  const investments = useMemo(
+    () =>
+      allTxns
+        .filter((x: any) => x.txn_type === "contribution" && inMonth(x.txn_date, month))
+        .sort((a: any, b: any) => (a.txn_date < b.txn_date ? 1 : -1)),
+    [allTxns, month],
+  );
 
   if (!roles.isLoading && !roles.isOwner) return <AccessDenied message={t("partnersOwnerOnly")} />;
 
@@ -156,6 +164,7 @@ function PartnersPage() {
       <Tabs defaultValue="cards">
         <TabsList>
           <TabsTrigger value="cards">{t("partners")}</TabsTrigger>
+          <TabsTrigger value="investments">{t("investments")}</TabsTrigger>
           <TabsTrigger value="ledger">{t("partnerLedger")}</TabsTrigger>
         </TabsList>
 
@@ -231,6 +240,71 @@ function PartnersPage() {
             })}
             {!partners.length && <TatreezEmptyState title={t("noPartners")} />}
           </div>
+        </TabsContent>
+
+        <TabsContent value="investments">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
+              <CardTitle className="font-display text-lg">{t("investments")}</CardTitle>
+              <Button size="sm" onClick={() => setInv({ row: null })}>
+                <Plus className="size-4" /> {t("addInvestment")}
+              </Button>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <Table className="min-w-[700px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("investor")}</TableHead>
+                    <TableHead>{t("date")}</TableHead>
+                    <TableHead>{t("notes")}</TableHead>
+                    <TableHead className="text-end">{t("amount")}</TableHead>
+                    <TableHead className="text-end">{t("inBaseCurrency")}</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {investments.map((x: any) => (
+                    <TableRow key={x.id}>
+                      <TableCell className="font-medium">{partners.find((p) => p.id === x.partner_id)?.name ?? "—"}</TableCell>
+                      <TableCell>{formatDate(x.txn_date)}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-muted-foreground" dir="auto">{x.notes ?? "—"}</TableCell>
+                      <TableCell className="text-end tabular-nums">{fmtMoney(x.amount, x.currency ?? baseCur)}</TableCell>
+                      <TableCell className="text-end tabular-nums">{fmtMoney(x.base_amount ?? x.amount, baseCur)}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-1">
+                          {x.receipt_path ? (
+                            <Button variant="ghost" size="icon" className="size-7" aria-label={t("viewReceipt")} onClick={() => openReceipt(x.receipt_path)}>
+                              <Paperclip className="size-4" />
+                            </Button>
+                          ) : null}
+                          <Button variant="ghost" size="icon" className="size-7" aria-label={t("edit")} onClick={() => setInv({ row: x })}>
+                            <Pencil className="size-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="size-7" aria-label={t("delete")} onClick={() => setToDelete({ kind: "txn", id: x.id })}>
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {!investments.length && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">{t("noInvestments")}</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                {partners.map((p) => {
+                  const total = investments
+                    .filter((x: any) => x.partner_id === p.id)
+                    .reduce((s: number, x: any) => s + Number(x.base_amount ?? x.amount ?? 0), 0);
+                  return <Stat key={p.id} label={p.name} value={fmtMoney(total, baseCur)} />;
+                })}
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">{t("investmentsExplain")}</p>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="ledger">
@@ -366,6 +440,65 @@ function PartnersPage() {
                 <Textarea id="t-notes" name="notes" defaultValue={txn.row?.notes ?? ""} placeholder={t("txnNoteHint")} dir="auto" />
               </div>
               <ReceiptUpload idPrefix="t" defaultPath={txn.row?.receipt_path} />
+              <DialogFooter>
+                <Button type="submit" disabled={saveTxn.isPending}>{t("save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!inv} onOpenChange={(o) => !o && setInv(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{inv?.row ? t("editInvestment") : t("addInvestment")}</DialogTitle>
+          </DialogHeader>
+          {inv && (
+            <form
+              key={inv.row?.id ?? "new"}
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                const m = readMoney(f);
+                if (m.amount <= 0) {
+                  toast.error(t("amountPositive"));
+                  return;
+                }
+                saveTxn.mutate({
+                  ...(inv.row ? { id: inv.row.id } : {}),
+                  payload: {
+                    partner_id: String(f.get("partner_id")),
+                    txn_type: "contribution",
+                    txn_date: String(f.get("txn_date")),
+                    notes: String(f.get("notes") || "").trim() || null,
+                    receipt_path: String(f.get("receipt_path") || "") || null,
+                    ...m,
+                  },
+                });
+                setInv(null);
+              }}
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="i-partner">{t("investor")}</Label>
+                  <select id="i-partner" name="partner_id" defaultValue={inv.row?.partner_id ?? partners[0]?.id} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                    {partners.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="i-date">{t("date")}</Label>
+                  <Input id="i-date" name="txn_date" type="date" defaultValue={inv.row?.txn_date ?? today()} required />
+                </div>
+              </div>
+              <MoneyFields idPrefix="i" defaultAmount={inv.row?.amount} defaultCurrency={inv.row?.currency} defaultFx={inv.row?.fx_rate_to_base} />
+              <div className="space-y-2">
+                <Label htmlFor="i-notes">{t("notes")}</Label>
+                <Textarea id="i-notes" name="notes" defaultValue={inv.row?.notes ?? ""} dir="auto" />
+              </div>
+              <ReceiptUpload idPrefix="i" defaultPath={inv.row?.receipt_path} />
               <DialogFooter>
                 <Button type="submit" disabled={saveTxn.isPending}>{t("save")}</Button>
               </DialogFooter>
