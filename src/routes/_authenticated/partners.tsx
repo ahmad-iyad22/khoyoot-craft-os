@@ -164,6 +164,7 @@ function PartnersPage() {
       <Tabs defaultValue="cards">
         <TabsList>
           <TabsTrigger value="cards">{t("partners")}</TabsTrigger>
+          <TabsTrigger value="investments">{t("investments")}</TabsTrigger>
           <TabsTrigger value="ledger">{t("partnerLedger")}</TabsTrigger>
         </TabsList>
 
