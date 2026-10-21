@@ -448,6 +448,65 @@ function PartnersPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!inv} onOpenChange={(o) => !o && setInv(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{inv?.row ? t("editInvestment") : t("addInvestment")}</DialogTitle>
+          </DialogHeader>
+          {inv && (
+            <form
+              key={inv.row?.id ?? "new"}
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                const m = readMoney(f);
+                if (m.amount <= 0) {
+                  toast.error(t("amountPositive"));
+                  return;
+                }
+                saveTxn.mutate({
+                  ...(inv.row ? { id: inv.row.id } : {}),
+                  payload: {
+                    partner_id: String(f.get("partner_id")),
+                    txn_type: "contribution",
+                    txn_date: String(f.get("txn_date")),
+                    notes: String(f.get("notes") || "").trim() || null,
+                    receipt_path: String(f.get("receipt_path") || "") || null,
+                    ...m,
+                  },
+                });
+                setInv(null);
+              }}
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="i-partner">{t("investor")}</Label>
+                  <select id="i-partner" name="partner_id" defaultValue={inv.row?.partner_id ?? partners[0]?.id} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                    {partners.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="i-date">{t("date")}</Label>
+                  <Input id="i-date" name="txn_date" type="date" defaultValue={inv.row?.txn_date ?? today()} required />
+                </div>
+              </div>
+              <MoneyFields idPrefix="i" defaultAmount={inv.row?.amount} defaultCurrency={inv.row?.currency} defaultFx={inv.row?.fx_rate_to_base} />
+              <div className="space-y-2">
+                <Label htmlFor="i-notes">{t("notes")}</Label>
+                <Textarea id="i-notes" name="notes" defaultValue={inv.row?.notes ?? ""} dir="auto" />
+              </div>
+              <ReceiptUpload idPrefix="i" defaultPath={inv.row?.receipt_path} />
+              <DialogFooter>
+                <Button type="submit" disabled={saveTxn.isPending}>{t("save")}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <ConfirmDelete
         open={!!toDelete}
         onOpenChange={(v) => !v && setToDelete(null)}
