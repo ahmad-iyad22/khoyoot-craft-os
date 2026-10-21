@@ -48,6 +48,7 @@ function PartnersPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [editPartner, setEditPartner] = useState<any | null>(null);
   const [txn, setTxn] = useState<{ partner: any; row: any | null } | null>(null);
+  const [inv, setInv] = useState<{ row: any | null } | null>(null);
   const [toDelete, setToDelete] = useState<{ kind: "partner" | "txn"; id: string } | null>(null);
 
   const partnersQ = useQuery({
