@@ -337,7 +337,13 @@ function InventoryPage() {
                         <div className="flex items-center gap-3">
                           <ProductThumbnail url={p.image_url} name={p.name} />
                           <div>
-                            <div className="font-medium">{p.name}</div>
+                            <Link
+                              to="/products/$productId"
+                              params={{ productId: p.id }}
+                              className="font-medium hover:text-primary hover:underline"
+                            >
+                              {p.name}
+                            </Link>
                             {p.name_ar && (
                               <div className="text-xs text-muted-foreground" dir="rtl">
                                 {p.name_ar}
