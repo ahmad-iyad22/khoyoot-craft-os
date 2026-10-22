@@ -52,7 +52,9 @@ function MarketingPage() {
   const [editingPost, setEditingPost] = useState<any>(null);
   const [editingCampaign, setEditingCampaign] = useState<any>(null);
   const [costCampaign, setCostCampaign] = useState<any>(null);
-  const [deleting, setDeleting] = useState<{ table: "content_calendar" | "campaigns" | "expenses"; id: string } | null>(null);
+  const [deleting, setDeleting] = useState<{ table: "content_calendar" | "campaigns" | "expenses" | "platform_analytics"; id: string } | null>(null);
+  const [snapOpen, setSnapOpen] = useState(false);
+  const [editingSnap, setEditingSnap] = useState<any>(null);
   const qc = useQueryClient();
   const [postOpen, setPostOpen] = useState(false);
   const [campaignOpen, setCampaignOpen] = useState(false);
@@ -111,6 +113,18 @@ function MarketingPage() {
     if (error) throw error;
     return data ?? [];
   } });
+  const analyticsQ = useQuery({ queryKey: ["platform-analytics"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase.from("platform_analytics").select("*").order("snapshot_date", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  } });
+  const saveSnap = useMutation({ mutationFn: async (payload: Record<string, unknown>) => {
+    const { error } = editingSnap
+      ? await supabase.from("platform_analytics").update(payload as never).eq("id", editingSnap.id)
+      : await supabase.from("platform_analytics").insert(payload as never);
+    if (error) throw error;
+  }, onSuccess: () => { toast.success(t("saved")); setSnapOpen(false); setEditingSnap(null); void qc.invalidateQueries({ queryKey: ["platform-analytics"] }); },
+    onError: (e: Error) => toast.error(e.message) });
   const refreshCosts = () => {
     for (const key of ["marketing-costs", "shared-expenses", "expenses", "partner-transactions", "partner-ledger", "month-statement", "audit-log"]) void qc.invalidateQueries({ queryKey: [key] });
   };
@@ -119,10 +133,10 @@ function MarketingPage() {
     if (error) throw error;
   }, onSuccess: () => { toast.success(t("saved")); setCostCampaign(null); refreshCosts(); },
     onError: (e: Error) => toast.error(e.message.includes("SPLIT_NOT_100") ? t("splitMust100") : e.message) });
-  const remove = useMutation({ mutationFn: async (v: { table: "content_calendar" | "campaigns" | "expenses"; id: string }) => {
+  const remove = useMutation({ mutationFn: async (v: { table: "content_calendar" | "campaigns" | "expenses" | "platform_analytics"; id: string }) => {
     const { error } = await supabase.from(v.table).delete().eq("id", v.id);
     if (error) throw error;
-  }, onSuccess: () => { toast.success(t("deleted")); setDeleting(null); void qc.invalidateQueries({ queryKey: ["content"] }); void qc.invalidateQueries({ queryKey: ["campaigns"] }); refreshCosts(); }, onError: (e: Error) => toast.error(e.message) });
+  }, onSuccess: () => { toast.success(t("deleted")); setDeleting(null); void qc.invalidateQueries({ queryKey: ["content"] }); void qc.invalidateQueries({ queryKey: ["campaigns"] }); void qc.invalidateQueries({ queryKey: ["platform-analytics"] }); refreshCosts(); }, onError: (e: Error) => toast.error(e.message) });
   const partnerName = (id: string | null) => tt((partnersQ.data ?? []).find((p) => p.id === id)?.name ?? "—");
 
   const addPost = useMutation({
@@ -176,6 +190,7 @@ function MarketingPage() {
         <TabsList>
           <TabsTrigger value="content">{tt("Content calendar")}</TabsTrigger>
           <TabsTrigger value="campaigns">{tt("Campaigns")}</TabsTrigger>
+          <TabsTrigger value="analytics">{tt("Platform Analytics")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="mt-4">
@@ -304,7 +319,96 @@ function MarketingPage() {
             })}
           </div>}
         </TabsContent>
+
+        <TabsContent value="analytics" className="mt-4">
+          <AnalyticsTab
+            rows={(analyticsQ.data ?? []) as any[]}
+            error={analyticsQ.error}
+            base={base}
+            channels={channels}
+            onAdd={() => { setEditingSnap(null); setSnapOpen(true); }}
+            onEdit={(s) => { setEditingSnap(s); setSnapOpen(true); }}
+            onDelete={(id) => setDeleting({ table: "platform_analytics", id })}
+          />
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={snapOpen} onOpenChange={setSnapOpen}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingSnap ? t("pa_editSnapshot") : t("pa_addSnapshot")}</DialogTitle>
+          </DialogHeader>
+          <form
+            key={editingSnap?.id ?? "new-snap"}
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              saveSnap.mutate({
+                platform: String(f.get("platform")),
+                snapshot_date: String(f.get("snapshot_date")),
+                views: Number(f.get("views") || 0),
+                product_views: Number(f.get("product_views") || 0),
+                orders: Number(f.get("orders") || 0),
+                revenue: Number(f.get("revenue") || 0),
+                ad_spend: Number(f.get("ad_spend") || 0),
+                notes: String(f.get("notes") || "") || null,
+              });
+            }}
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="a-platform">{tt("Platform")}</Label>
+                <select
+                  id="a-platform"
+                  defaultValue={editingSnap?.platform ?? channels[0]}
+                  name="platform"
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {channels.map((p) => (
+                    <option key={p} value={p}>{tt(p)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-date">{t("pa_weekOf")}</Label>
+                <Input id="a-date" name="snapshot_date" type="date" defaultValue={editingSnap?.snapshot_date ?? today} required />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="a-views">{tt("Views")}</Label>
+                <Input id="a-views" name="views" type="number" min={0} defaultValue={editingSnap?.views ?? 0} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-pviews">{t("pa_productViews")}</Label>
+                <Input id="a-pviews" name="product_views" type="number" min={0} defaultValue={editingSnap?.product_views ?? 0} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-orders">{tt("Orders")}</Label>
+                <Input id="a-orders" name="orders" type="number" min={0} defaultValue={editingSnap?.orders ?? 0} required />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="a-revenue">{tt("Revenue")} ({base})</Label>
+                <Input id="a-revenue" name="revenue" type="number" min={0} step="0.01" defaultValue={editingSnap?.revenue ?? 0} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-adspend">{t("pa_adSpend")} ({base})</Label>
+                <Input id="a-adspend" name="ad_spend" type="number" min={0} step="0.01" defaultValue={editingSnap?.ad_spend ?? 0} required />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="a-notes">{tt("Notes")}</Label>
+              <Textarea id="a-notes" name="notes" defaultValue={editingSnap?.notes ?? ""} />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={saveSnap.isPending}>{tt("Save")}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={postOpen} onOpenChange={setPostOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto">
@@ -529,4 +633,171 @@ function CampaignCostForm({ partners, pending, onSave }: { partners: { id: strin
     <ReceiptUpload idPrefix="mc" />
     <DialogFooter><Button type="submit" disabled={pending || !partners.length}>{t("save")}</Button></DialogFooter>
   </form>;
+}
+
+function AnalyticsTab({
+  rows,
+  error,
+  base,
+  channels,
+  onAdd,
+  onEdit,
+  onDelete,
+}: {
+  rows: any[];
+  error: Error | null;
+  base: string;
+  channels: string[];
+  onAdd: () => void;
+  onEdit: (s: any) => void;
+  onDelete: (id: string) => void;
+}) {
+  const { t } = useI18n();
+
+  const byPlatform = channels
+    .map((platform) => {
+      const pr = rows.filter((r) => r.platform === platform);
+      if (!pr.length) return null;
+      const views = pr.reduce((s, r) => s + Number(r.views), 0);
+      const orders = pr.reduce((s, r) => s + Number(r.orders), 0);
+      const revenue = pr.reduce((s, r) => s + Number(r.revenue), 0);
+      const adSpend = pr.reduce((s, r) => s + Number(r.ad_spend), 0);
+      const roas = adSpend > 0 ? revenue / adSpend : null;
+      return { platform, views, orders, revenue, adSpend, roas };
+    })
+    .filter((x): x is NonNullable<typeof x> => Boolean(x));
+
+  const totals = rows.reduce(
+    (acc, r) => ({
+      views: acc.views + Number(r.views),
+      orders: acc.orders + Number(r.orders),
+      revenue: acc.revenue + Number(r.revenue),
+      adSpend: acc.adSpend + Number(r.ad_spend),
+    }),
+    { views: 0, orders: 0, revenue: 0, adSpend: 0 },
+  );
+
+  const best = byPlatform
+    .filter((p) => p.roas !== null)
+    .sort((a, b) => (b.roas ?? 0) - (a.roas ?? 0))[0];
+
+  return (
+    <div className="space-y-6">
+      {error && <p className="text-sm text-destructive">{error.message}</p>}
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">{t("pa_hint")}</p>
+        <Button onClick={onAdd}>
+          <Plus className="size-4" /> {t("pa_addSnapshot")}
+        </Button>
+      </div>
+
+      {byPlatform.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {byPlatform.map((p) => (
+            <Card key={p.platform} className={best?.platform === p.platform ? "border-primary" : undefined}>
+              <CardContent className="space-y-2 pt-5">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{tt(p.platform)}</span>
+                  {best?.platform === p.platform && <Badge>{t("pa_bestValue")}</Badge>}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <div className="text-xs text-muted-foreground">{tt("Views")}</div>
+                    <div className="tabular-nums">{p.views.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">{tt("Orders")}</div>
+                    <div className="tabular-nums">{p.orders.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">{tt("Revenue")}</div>
+                    <div className="tabular-nums">{fmtMoney(p.revenue, base)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">{t("pa_adSpend")}</div>
+                    <div className="tabular-nums">{fmtMoney(p.adSpend, base)}</div>
+                  </div>
+                </div>
+                <div className="border-t pt-2 text-sm">
+                  <span className="text-muted-foreground">{t("pa_roas")}: </span>
+                  <span className="font-medium">{p.roas === null ? "—" : `${p.roas.toFixed(2)}×`}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {rows.length > 0 && (
+        <Card>
+          <CardContent className="pt-5">
+            <div className="mb-2 text-xs uppercase text-muted-foreground">{t("pa_totals")}</div>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              <span>{tt("Views")}: <strong className="tabular-nums">{totals.views.toLocaleString()}</strong></span>
+              <span>{tt("Orders")}: <strong className="tabular-nums">{totals.orders.toLocaleString()}</strong></span>
+              <span>{tt("Revenue")}: <strong className="tabular-nums">{fmtMoney(totals.revenue, base)}</strong></span>
+              <span>{t("pa_adSpend")}: <strong className="tabular-nums">{fmtMoney(totals.adSpend, base)}</strong></span>
+              <span>
+                {t("pa_roas")}:{" "}
+                <strong className="tabular-nums">
+                  {totals.adSpend > 0 ? `${(totals.revenue / totals.adSpend).toFixed(2)}×` : "—"}
+                </strong>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("pa_weekOf")}</TableHead>
+                <TableHead>{tt("Platform")}</TableHead>
+                <TableHead className="text-end">{tt("Views")}</TableHead>
+                <TableHead className="text-end">{tt("Orders")}</TableHead>
+                <TableHead className="text-end">{tt("Revenue")}</TableHead>
+                <TableHead className="text-end">{t("pa_adSpend")}</TableHead>
+                <TableHead className="text-end">{t("pa_roas")}</TableHead>
+                <TableHead>{t("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell>{formatDate(r.snapshot_date)}</TableCell>
+                  <TableCell>{tt(r.platform)}</TableCell>
+                  <TableCell className="text-end tabular-nums">{Number(r.views).toLocaleString()}</TableCell>
+                  <TableCell className="text-end tabular-nums">{r.orders}</TableCell>
+                  <TableCell className="text-end tabular-nums">{fmtMoney(r.revenue, base)}</TableCell>
+                  <TableCell className="text-end tabular-nums">{fmtMoney(r.ad_spend, base)}</TableCell>
+                  <TableCell className="text-end tabular-nums">
+                    {Number(r.ad_spend) > 0 ? `${(Number(r.revenue) / Number(r.ad_spend)).toFixed(2)}×` : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" aria-label={t("edit")} onClick={() => onEdit(r)}>
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" aria-label={t("delete")} onClick={() => onDelete(r.id)}>
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                    {t("pa_noData")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

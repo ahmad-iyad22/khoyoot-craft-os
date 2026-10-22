@@ -136,7 +136,7 @@ function ProductDetailPage() {
     },
   });
 
-  if (!roles.isOwner && !roles.isOps) {
+  if (!roles.isOwner && !roles.isOperations) {
     return <AccessDenied message={tt("Inventory is available to the Owner and the Operations partner.")} />;
   }
 
