@@ -1,0 +1,2 @@
+ALTER TABLE public.app_settings ADD COLUMN list_options jsonb NOT NULL DEFAULT '{}'::jsonb;
+COMMENT ON COLUMN public.app_settings.list_options IS 'Editable dropdown option lists keyed by list name (task_statuses, bank_kinds, bank_txn_types, partner_txn_types, content_statuses, campaign_statuses). Values are arrays of option codes.';
