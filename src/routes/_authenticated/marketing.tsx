@@ -190,6 +190,7 @@ function MarketingPage() {
         <TabsList>
           <TabsTrigger value="content">{tt("Content calendar")}</TabsTrigger>
           <TabsTrigger value="campaigns">{tt("Campaigns")}</TabsTrigger>
+          <TabsTrigger value="analytics">{tt("Platform Analytics")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="mt-4">
