@@ -50,6 +50,7 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   Views: { en: "Views", ar: "المشاهدات" },
   "No linked posts yet.": { en: "No linked posts yet.", ar: "لا منشورات مرتبطة بعد." },
   "cost →": { en: "cost →", ar: "التكلفة ←" },
+  "Platform Analytics": { en: "Platform Analytics", ar: "تحليلات المنصات" },
   role_owner: { en: "Owner / Finance", ar: "المالك / المالية" },
   role_operations: { en: "Inventory / Operations", ar: "المخزون / العمليات" },
   role_marketing: { en: "Marketing", ar: "التسويق" },
