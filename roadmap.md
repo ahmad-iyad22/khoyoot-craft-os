@@ -7,5 +7,5 @@
 - [ ] AI Manager page built (read-only chat advisor, EN/AR) — needs on-screen verification with approved sign-in.
 - [x] Batch 4: orders FIFO allocation, platform fees, per-partner profit, returns, write-offs (needs on-screen check)
 - [x] Batch 5: month-end statement, settlement, bank & cash, dashboard cards (needs on-screen check)
-- [ ] Product detail page (costs, margin, sales, batches, serials, movements, posts) — in progress
-- [ ] Platform Analytics screen: weekly views/orders/revenue/ad spend per platform, totals, best value platform (table exists)
+- [x] Product detail page (costs, margin, sales, batches, serials, movements, posts) — build OK, needs on-screen check
+- [x] Platform Analytics tab in Marketing: weekly snapshots, totals, best-value platform — build OK, needs on-screen check
