@@ -634,3 +634,170 @@ function CampaignCostForm({ partners, pending, onSave }: { partners: { id: strin
     <DialogFooter><Button type="submit" disabled={pending || !partners.length}>{t("save")}</Button></DialogFooter>
   </form>;
 }
+
+function AnalyticsTab({
+  rows,
+  error,
+  base,
+  channels,
+  onAdd,
+  onEdit,
+  onDelete,
+}: {
+  rows: any[];
+  error: Error | null;
+  base: string;
+  channels: string[];
+  onAdd: () => void;
+  onEdit: (s: any) => void;
+  onDelete: (id: string) => void;
+}) {
+  const { t } = useI18n();
+
+  const byPlatform = channels
+    .map((platform) => {
+      const pr = rows.filter((r) => r.platform === platform);
+      if (!pr.length) return null;
+      const views = pr.reduce((s, r) => s + Number(r.views), 0);
+      const orders = pr.reduce((s, r) => s + Number(r.orders), 0);
+      const revenue = pr.reduce((s, r) => s + Number(r.revenue), 0);
+      const adSpend = pr.reduce((s, r) => s + Number(r.ad_spend), 0);
+      const roas = adSpend > 0 ? revenue / adSpend : null;
+      return { platform, views, orders, revenue, adSpend, roas };
+    })
+    .filter((x): x is NonNullable<typeof x> => Boolean(x));
+
+  const totals = rows.reduce(
+    (acc, r) => ({
+      views: acc.views + Number(r.views),
+      orders: acc.orders + Number(r.orders),
+      revenue: acc.revenue + Number(r.revenue),
+      adSpend: acc.adSpend + Number(r.ad_spend),
+    }),
+    { views: 0, orders: 0, revenue: 0, adSpend: 0 },
+  );
+
+  const best = byPlatform
+    .filter((p) => p.roas !== null)
+    .sort((a, b) => (b.roas ?? 0) - (a.roas ?? 0))[0];
+
+  return (
+    <div className="space-y-6">
+      {error && <p className="text-sm text-destructive">{error.message}</p>}
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">{t("pa_hint")}</p>
+        <Button onClick={onAdd}>
+          <Plus className="size-4" /> {t("pa_addSnapshot")}
+        </Button>
+      </div>
+
+      {byPlatform.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {byPlatform.map((p) => (
+            <Card key={p.platform} className={best?.platform === p.platform ? "border-primary" : undefined}>
+              <CardContent className="space-y-2 pt-5">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{tt(p.platform)}</span>
+                  {best?.platform === p.platform && <Badge>{t("pa_bestValue")}</Badge>}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <div className="text-xs text-muted-foreground">{tt("Views")}</div>
+                    <div className="tabular-nums">{p.views.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">{tt("Orders")}</div>
+                    <div className="tabular-nums">{p.orders.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">{tt("Revenue")}</div>
+                    <div className="tabular-nums">{fmtMoney(p.revenue, base)}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">{t("pa_adSpend")}</div>
+                    <div className="tabular-nums">{fmtMoney(p.adSpend, base)}</div>
+                  </div>
+                </div>
+                <div className="border-t pt-2 text-sm">
+                  <span className="text-muted-foreground">{t("pa_roas")}: </span>
+                  <span className="font-medium">{p.roas === null ? "—" : `${p.roas.toFixed(2)}×`}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {rows.length > 0 && (
+        <Card>
+          <CardContent className="pt-5">
+            <div className="mb-2 text-xs uppercase text-muted-foreground">{t("pa_totals")}</div>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              <span>{tt("Views")}: <strong className="tabular-nums">{totals.views.toLocaleString()}</strong></span>
+              <span>{tt("Orders")}: <strong className="tabular-nums">{totals.orders.toLocaleString()}</strong></span>
+              <span>{tt("Revenue")}: <strong className="tabular-nums">{fmtMoney(totals.revenue, base)}</strong></span>
+              <span>{t("pa_adSpend")}: <strong className="tabular-nums">{fmtMoney(totals.adSpend, base)}</strong></span>
+              <span>
+                {t("pa_roas")}:{" "}
+                <strong className="tabular-nums">
+                  {totals.adSpend > 0 ? `${(totals.revenue / totals.adSpend).toFixed(2)}×` : "—"}
+                </strong>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("pa_weekOf")}</TableHead>
+                <TableHead>{tt("Platform")}</TableHead>
+                <TableHead className="text-end">{tt("Views")}</TableHead>
+                <TableHead className="text-end">{tt("Orders")}</TableHead>
+                <TableHead className="text-end">{tt("Revenue")}</TableHead>
+                <TableHead className="text-end">{t("pa_adSpend")}</TableHead>
+                <TableHead className="text-end">{t("pa_roas")}</TableHead>
+                <TableHead>{t("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell>{formatDate(r.snapshot_date)}</TableCell>
+                  <TableCell>{tt(r.platform)}</TableCell>
+                  <TableCell className="text-end tabular-nums">{Number(r.views).toLocaleString()}</TableCell>
+                  <TableCell className="text-end tabular-nums">{r.orders}</TableCell>
+                  <TableCell className="text-end tabular-nums">{fmtMoney(r.revenue, base)}</TableCell>
+                  <TableCell className="text-end tabular-nums">{fmtMoney(r.ad_spend, base)}</TableCell>
+                  <TableCell className="text-end tabular-nums">
+                    {Number(r.ad_spend) > 0 ? `${(Number(r.revenue) / Number(r.ad_spend)).toFixed(2)}×` : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" aria-label={t("edit")} onClick={() => onEdit(r)}>
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" aria-label={t("delete")} onClick={() => onDelete(r.id)}>
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                    {t("pa_noData")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
