@@ -92,6 +92,13 @@
       "when": 1792328206495,
       "tag": "0012_audit_marketing_changes",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792635325093,
+      "tag": "0013_app_settings_list_options",
+      "breakpoints": true
     }
   ]
 }
