@@ -319,7 +319,96 @@ function MarketingPage() {
             })}
           </div>}
         </TabsContent>
+
+        <TabsContent value="analytics" className="mt-4">
+          <AnalyticsTab
+            rows={(analyticsQ.data ?? []) as any[]}
+            error={analyticsQ.error}
+            base={base}
+            channels={channels}
+            onAdd={() => { setEditingSnap(null); setSnapOpen(true); }}
+            onEdit={(s) => { setEditingSnap(s); setSnapOpen(true); }}
+            onDelete={(id) => setDeleting({ table: "platform_analytics", id })}
+          />
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={snapOpen} onOpenChange={setSnapOpen}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingSnap ? t("pa_editSnapshot") : t("pa_addSnapshot")}</DialogTitle>
+          </DialogHeader>
+          <form
+            key={editingSnap?.id ?? "new-snap"}
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              saveSnap.mutate({
+                platform: String(f.get("platform")),
+                snapshot_date: String(f.get("snapshot_date")),
+                views: Number(f.get("views") || 0),
+                product_views: Number(f.get("product_views") || 0),
+                orders: Number(f.get("orders") || 0),
+                revenue: Number(f.get("revenue") || 0),
+                ad_spend: Number(f.get("ad_spend") || 0),
+                notes: String(f.get("notes") || "") || null,
+              });
+            }}
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="a-platform">{tt("Platform")}</Label>
+                <select
+                  id="a-platform"
+                  defaultValue={editingSnap?.platform ?? channels[0]}
+                  name="platform"
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {channels.map((p) => (
+                    <option key={p} value={p}>{tt(p)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-date">{t("pa_weekOf")}</Label>
+                <Input id="a-date" name="snapshot_date" type="date" defaultValue={editingSnap?.snapshot_date ?? today} required />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="a-views">{tt("Views")}</Label>
+                <Input id="a-views" name="views" type="number" min={0} defaultValue={editingSnap?.views ?? 0} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-pviews">{t("pa_productViews")}</Label>
+                <Input id="a-pviews" name="product_views" type="number" min={0} defaultValue={editingSnap?.product_views ?? 0} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-orders">{tt("Orders")}</Label>
+                <Input id="a-orders" name="orders" type="number" min={0} defaultValue={editingSnap?.orders ?? 0} required />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="a-revenue">{tt("Revenue")} ({base})</Label>
+                <Input id="a-revenue" name="revenue" type="number" min={0} step="0.01" defaultValue={editingSnap?.revenue ?? 0} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="a-adspend">{t("pa_adSpend")} ({base})</Label>
+                <Input id="a-adspend" name="ad_spend" type="number" min={0} step="0.01" defaultValue={editingSnap?.ad_spend ?? 0} required />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="a-notes">{tt("Notes")}</Label>
+              <Textarea id="a-notes" name="notes" defaultValue={editingSnap?.notes ?? ""} />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={saveSnap.isPending}>{tt("Save")}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={postOpen} onOpenChange={setPostOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto">
