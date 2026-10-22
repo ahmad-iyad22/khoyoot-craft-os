@@ -46,7 +46,6 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   "No movements yet.": { en: "No movements yet.", ar: "لا حركات بعد." },
   "Write-offs & losses": { en: "Write-offs & losses", ar: "الشطب والخسائر" },
   Loss: { en: "Loss", ar: "الخسارة" },
-  Title: { en: "Title", ar: "العنوان" },
   Views: { en: "Views", ar: "المشاهدات" },
   "No linked posts yet.": { en: "No linked posts yet.", ar: "لا منشورات مرتبطة بعد." },
   "cost →": { en: "cost →", ar: "التكلفة ←" },
