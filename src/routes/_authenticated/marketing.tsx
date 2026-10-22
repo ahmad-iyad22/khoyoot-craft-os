@@ -52,7 +52,9 @@ function MarketingPage() {
   const [editingPost, setEditingPost] = useState<any>(null);
   const [editingCampaign, setEditingCampaign] = useState<any>(null);
   const [costCampaign, setCostCampaign] = useState<any>(null);
-  const [deleting, setDeleting] = useState<{ table: "content_calendar" | "campaigns" | "expenses"; id: string } | null>(null);
+  const [deleting, setDeleting] = useState<{ table: "content_calendar" | "campaigns" | "expenses" | "platform_analytics"; id: string } | null>(null);
+  const [snapOpen, setSnapOpen] = useState(false);
+  const [editingSnap, setEditingSnap] = useState<any>(null);
   const qc = useQueryClient();
   const [postOpen, setPostOpen] = useState(false);
   const [campaignOpen, setCampaignOpen] = useState(false);
