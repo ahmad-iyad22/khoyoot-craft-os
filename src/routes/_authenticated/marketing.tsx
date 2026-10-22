@@ -133,10 +133,10 @@ function MarketingPage() {
     if (error) throw error;
   }, onSuccess: () => { toast.success(t("saved")); setCostCampaign(null); refreshCosts(); },
     onError: (e: Error) => toast.error(e.message.includes("SPLIT_NOT_100") ? t("splitMust100") : e.message) });
-  const remove = useMutation({ mutationFn: async (v: { table: "content_calendar" | "campaigns" | "expenses"; id: string }) => {
+  const remove = useMutation({ mutationFn: async (v: { table: "content_calendar" | "campaigns" | "expenses" | "platform_analytics"; id: string }) => {
     const { error } = await supabase.from(v.table).delete().eq("id", v.id);
     if (error) throw error;
-  }, onSuccess: () => { toast.success(t("deleted")); setDeleting(null); void qc.invalidateQueries({ queryKey: ["content"] }); void qc.invalidateQueries({ queryKey: ["campaigns"] }); refreshCosts(); }, onError: (e: Error) => toast.error(e.message) });
+  }, onSuccess: () => { toast.success(t("deleted")); setDeleting(null); void qc.invalidateQueries({ queryKey: ["content"] }); void qc.invalidateQueries({ queryKey: ["campaigns"] }); void qc.invalidateQueries({ queryKey: ["platform-analytics"] }); refreshCosts(); }, onError: (e: Error) => toast.error(e.message) });
   const partnerName = (id: string | null) => tt((partnersQ.data ?? []).find((p) => p.id === id)?.name ?? "—");
 
   const addPost = useMutation({
