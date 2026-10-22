@@ -113,6 +113,18 @@ function MarketingPage() {
     if (error) throw error;
     return data ?? [];
   } });
+  const analyticsQ = useQuery({ queryKey: ["platform-analytics"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase.from("platform_analytics").select("*").order("snapshot_date", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  } });
+  const saveSnap = useMutation({ mutationFn: async (payload: Record<string, unknown>) => {
+    const { error } = editingSnap
+      ? await supabase.from("platform_analytics").update(payload as never).eq("id", editingSnap.id)
+      : await supabase.from("platform_analytics").insert(payload as never);
+    if (error) throw error;
+  }, onSuccess: () => { toast.success(t("saved")); setSnapOpen(false); setEditingSnap(null); void qc.invalidateQueries({ queryKey: ["platform-analytics"] }); },
+    onError: (e: Error) => toast.error(e.message) });
   const refreshCosts = () => {
     for (const key of ["marketing-costs", "shared-expenses", "expenses", "partner-transactions", "partner-ledger", "month-statement", "audit-log"]) void qc.invalidateQueries({ queryKey: [key] });
   };
