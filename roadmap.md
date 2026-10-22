@@ -9,3 +9,4 @@
 - [x] Batch 5: month-end statement, settlement, bank & cash, dashboard cards (needs on-screen check)
 - [x] Product detail page (costs, margin, sales, batches, serials, movements, posts) — build OK, needs on-screen check
 - [x] Platform Analytics tab in Marketing: weekly snapshots, totals, best-value platform — build OK, needs on-screen check
+- [x] Bank statement upload — SKIPPED by owner: GXBank only gives PDFs; AI Manager screenshot entry replaces it
