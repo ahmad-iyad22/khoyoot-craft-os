@@ -13,3 +13,4 @@
 - [x] Per-platform pricing (option B): order form shows live net-after-fees per platform per unit — build OK
 - [ ] Flexible dropdowns: Settings editor for task/bank/partner/post option lists (DB column added; UI + wiring unfinished — paused when credits ran out)
 - [x] Republish so the live site gets the latest build — publish requested 2026-10-23
+- [x] E-invoice yearly sales warning (Dashboard, Owner-set limit)

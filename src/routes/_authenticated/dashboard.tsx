@@ -191,6 +191,7 @@ function Dashboard() {
       />
 
       {roles.isOwner && <MonthEndCards />}
+      {roles.isOwner && <EInvoiceWarning />}
 
       {lowStock.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-warning/40 bg-warning/15 px-4 py-3 text-sm">
