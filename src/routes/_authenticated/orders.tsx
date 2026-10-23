@@ -465,12 +465,20 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
   const platformsQ = useQuery({
     queryKey: ["platform-fees-list"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("platform_fees").select("platform").order("platform");
+      const { data, error } = await supabase.from("platform_fees").select("*").order("platform");
       if (error) throw error;
-      return (data ?? []).map((x) => x.platform as string);
+      return (data ?? []) as any[];
     },
   });
-  const platforms = Array.from(new Set([...(platformsQ.data ?? []), "Manual", ...(order?.platform ? [order.platform] : [])]));
+  const feeRates = platformsQ.data ?? [];
+  const platforms = Array.from(new Set([...feeRates.map((x) => x.platform as string), "Manual", ...(order?.platform ? [order.platform] : [])]));
+  // Mirrors the database compute_platform_fee formula: (amount x (commission% [0 while waived] + transaction%) / 100 + fixed) x (1 + sst%).
+  const feeFor = (pf: any, amount: number) => {
+    if (amount <= 0) return 0;
+    const waived = pf.waiver_until && date <= pf.waiver_until;
+    const comm = waived ? 0 : num(pf.commission_percent);
+    return r2((amount * (comm + num(pf.transaction_fee_percent)) / 100 + num(pf.fixed_fee)) * (1 + num(pf.sst_percent) / 100));
+  };
   const inOrder = useMemo(() => {
     const m = new Map<string, number>();
     if (order && order.status !== "cancelled") for (const i of order.order_items) m.set(i.product_id, (m.get(i.product_id) ?? 0) + num(i.quantity));
