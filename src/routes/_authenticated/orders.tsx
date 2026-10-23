@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -674,7 +674,7 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
                                 {tt(pf.platform)} {money(net)}
                               </span>
                             );
-                          }).reduce<React.ReactNode[]>((acc, el, i) => (i === 0 ? [el] : [...acc, " · ", el]), [])}
+                          }).reduce<ReactNode[]>((acc, el, i) => (i === 0 ? [el] : [...acc, " · ", el]), [])}
                         </p>
                       )}
                       <Input value={line.serials} placeholder={t("ord_serialsManual")} dir="ltr" className="h-8 text-xs"
