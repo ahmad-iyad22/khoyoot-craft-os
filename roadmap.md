@@ -10,3 +10,5 @@
 - [x] Product detail page (costs, margin, sales, batches, serials, movements, posts) — build OK, needs on-screen check
 - [x] Platform Analytics tab in Marketing: weekly snapshots, totals, best-value platform — build OK, needs on-screen check
 - [x] Bank statement upload — SKIPPED by owner: GXBank only gives PDFs; AI Manager screenshot entry replaces it
+- [x] Per-platform pricing (option B): order form shows live net-after-fees per platform per unit — build OK
+- [ ] Flexible dropdowns: Settings editor for task/bank/partner/post option lists (DB column added; UI + wiring unfinished — paused when credits ran out)

@@ -60,6 +60,7 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   pa_bestValue: { en: "Best value", ar: "أفضل قيمة" },
   pa_totals: { en: "Totals (all platforms)", ar: "المجاميع (كل المنصات)" },
   pa_noData: { en: "No analytics yet — add your first weekly snapshot.", ar: "لا توجد تحليلات بعد — أضف أول أرقام أسبوعية." },
+  ord_netPerPlatform: { en: "Net after fees per unit", ar: "الصافي بعد الرسوم للقطعة" },
   role_owner: { en: "Owner / Finance", ar: "المالك / المالية" },
   role_operations: { en: "Inventory / Operations", ar: "المخزون / العمليات" },
   role_marketing: { en: "Marketing", ar: "التسويق" },

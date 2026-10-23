@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -465,12 +465,20 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
   const platformsQ = useQuery({
     queryKey: ["platform-fees-list"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("platform_fees").select("platform").order("platform");
+      const { data, error } = await supabase.from("platform_fees").select("*").order("platform");
       if (error) throw error;
-      return (data ?? []).map((x) => x.platform as string);
+      return (data ?? []) as any[];
     },
   });
-  const platforms = Array.from(new Set([...(platformsQ.data ?? []), "Manual", ...(order?.platform ? [order.platform] : [])]));
+  const feeRates = platformsQ.data ?? [];
+  const platforms = Array.from(new Set([...feeRates.map((x) => x.platform as string), "Manual", ...(order?.platform ? [order.platform] : [])]));
+  // Mirrors the database compute_platform_fee formula: (amount x (commission% [0 while waived] + transaction%) / 100 + fixed) x (1 + sst%).
+  const feeFor = (pf: any, amount: number) => {
+    if (amount <= 0) return 0;
+    const waived = pf.waiver_until && date <= pf.waiver_until;
+    const comm = waived ? 0 : num(pf.commission_percent);
+    return r2((amount * (comm + num(pf.transaction_fee_percent)) / 100 + num(pf.fixed_fee)) * (1 + num(pf.sst_percent) / 100));
+  };
   const inOrder = useMemo(() => {
     const m = new Map<string, number>();
     if (order && order.status !== "cancelled") for (const i of order.order_items) m.set(i.product_id, (m.get(i.product_id) ?? 0) + num(i.quantity));
@@ -656,6 +664,19 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
                       <p className={"text-xs " + (over ? "text-destructive" : "text-muted-foreground")}>
                         {t("available")}: {availOf(p.id)} · {t("ord_packaging")} {money(num(p.packaging_cost_per_unit) * line.quantity)}
                       </p>
+                      {line.sale_price > 0 && feeRates.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {t("ord_netPerPlatform")}:{" "}
+                          {feeRates.map((pf) => {
+                            const net = r2(line.sale_price - feeFor(pf, line.sale_price));
+                            return (
+                              <span key={pf.platform} className={pf.platform === platform ? "font-semibold text-foreground" : undefined}>
+                                {tt(pf.platform)} {money(net)}
+                              </span>
+                            );
+                          }).reduce<ReactNode[]>((acc, el, i) => (i === 0 ? [el] : [...acc, " · ", el]), [])}
+                        </p>
+                      )}
                       <Input value={line.serials} placeholder={t("ord_serialsManual")} dir="ltr" className="h-8 text-xs"
                         onChange={(e) => setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, serials: e.target.value } : l)))} />
                       {allocQs[idx]?.error && <p className="text-xs text-destructive">{errText(allocQs[idx]!.error as Error, t)}</p>}
