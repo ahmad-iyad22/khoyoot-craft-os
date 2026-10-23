@@ -664,6 +664,19 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
                       <p className={"text-xs " + (over ? "text-destructive" : "text-muted-foreground")}>
                         {t("available")}: {availOf(p.id)} · {t("ord_packaging")} {money(num(p.packaging_cost_per_unit) * line.quantity)}
                       </p>
+                      {line.sale_price > 0 && feeRates.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {t("ord_netPerPlatform")}:{" "}
+                          {feeRates.map((pf) => {
+                            const net = r2(line.sale_price - feeFor(pf, line.sale_price));
+                            return (
+                              <span key={pf.platform} className={pf.platform === platform ? "font-semibold text-foreground" : undefined}>
+                                {tt(pf.platform)} {money(net)}
+                              </span>
+                            );
+                          }).reduce<React.ReactNode[]>((acc, el, i) => (i === 0 ? [el] : [...acc, " · ", el]), [])}
+                        </p>
+                      )}
                       <Input value={line.serials} placeholder={t("ord_serialsManual")} dir="ltr" className="h-8 text-xs"
                         onChange={(e) => setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, serials: e.target.value } : l)))} />
                       {allocQs[idx]?.error && <p className="text-xs text-destructive">{errText(allocQs[idx]!.error as Error, t)}</p>}
