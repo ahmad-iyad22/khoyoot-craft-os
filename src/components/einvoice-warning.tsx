@@ -37,8 +37,8 @@ export function EInvoiceWarning() {
     },
   });
 
-  const threshold = Number(setQ.data?.einvoice_threshold ?? 0);
-  const warnPct = Number(setQ.data?.einvoice_warn_pct ?? 80);
+  const threshold = Number(setQ.data?.["einvoice_threshold"] ?? 0);
+  const warnPct = Number(setQ.data?.["einvoice_warn_pct"] ?? 80);
   const [edit, setEdit] = useState(false);
   const [tv, setTv] = useState("");
   const [wv, setWv] = useState("");
