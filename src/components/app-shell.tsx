@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { NotificationBell } from "@/components/notification-bell";
 
 type NavItem = {
   to: string;
@@ -149,6 +150,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
       <div className="space-y-3 border-t border-sidebar-border pt-4">
         <LanguageToggle />
         <ThemeToggle />
+        <NotificationBell />
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{user?.email}</p>
           {primaryRole && (

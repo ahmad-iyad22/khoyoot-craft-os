@@ -14,4 +14,4 @@
 - [ ] Flexible dropdowns: Settings editor for task/bank/partner/post option lists (DB column added; UI + wiring unfinished — paused when credits ran out)
 - [x] Republish so the live site gets the latest build — publish requested 2026-10-23
 - [x] E-invoice yearly sales warning (Dashboard, Owner-set limit)
-- [ ] Notification bell (low stock, margin, shipment arrived, doc expiry, month to close; mark read)
+- [x] Notification bell (low stock, margin, shipment arrived, doc expiry, month to close; mark read)
