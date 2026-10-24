@@ -23,6 +23,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate, titleCase } from "@/lib/format";
+import { ConfirmDelete } from "@/components/confirm-delete";
+import { Pencil, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({
@@ -43,6 +45,8 @@ function TasksPage() {
   const { data: user } = useUser();
   const [open, setOpen] = useState(false);
   const [assignee, setAssignee] = useState("all");
+  const [editing, setEditing] = useState<any>(null);
+  const [del, setDel] = useState<string | null>(null);
 
   const peopleQ = useQuery({
     queryKey: ["profiles"],
@@ -67,14 +71,26 @@ function TasksPage() {
 
   const create = useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
-      const { error } = await supabase.from("tasks").insert({ ...payload, created_by: user?.id } as never);
+      const { error } = editing
+        ? await supabase.from("tasks").update(payload as never).eq("id", editing.id)
+        : await supabase.from("tasks").insert({ ...payload, created_by: user?.id } as never);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(tt("Task created"));
+      toast.success(editing ? tt("Saved") : tt("Task created"));
       setOpen(false);
+      setEditing(null);
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("tasks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { setDel(null); qc.invalidateQueries({ queryKey: ["tasks"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -97,15 +113,16 @@ function TasksPage() {
         title={tt("Tasks")}
         description={tt("Who is doing what, and by when.")}
         action={
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
             <DialogTrigger asChild>
-              <Button>{tt("New task")}</Button>
+              <Button onClick={() => setEditing(null)}>{tt("New task")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{tt("New task")}</DialogTitle>
+                <DialogTitle>{editing ? tt("Edit") : tt("New task")}</DialogTitle>
               </DialogHeader>
               <form
+                key={editing?.id ?? "new"}
                 className="space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -117,17 +134,17 @@ function TasksPage() {
                     assignee_id: a || null,
                     due_date: String(f.get("due_date") || "") || null,
                     priority: String(f.get("priority")),
-                    status: "todo",
+                    ...(editing ? {} : { status: "todo" }),
                   });
                 }}
               >
                 <div className="space-y-2">
                   <Label htmlFor="t-title">{tt("Title")}</Label>
-                  <Input id="t-title" name="title" required />
+                  <Input id="t-title" name="title" required defaultValue={editing?.title ?? ""} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="t-desc">{tt("Description")}</Label>
-                  <Textarea id="t-desc" name="description" />
+                  <Textarea id="t-desc" name="description" defaultValue={editing?.description ?? ""} />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
@@ -135,6 +152,7 @@ function TasksPage() {
                     <select
                       id="t-assignee"
                       name="assignee_id"
+                      defaultValue={editing?.assignee_id ?? ""}
                       className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                     >
                       <option value="">{tt("Unassigned")}</option>
@@ -150,7 +168,7 @@ function TasksPage() {
                     <select
                       id="t-priority"
                       name="priority"
-                      defaultValue="normal"
+                      defaultValue={editing?.priority ?? "normal"}
                       className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                     >
                       <option value="low">{tt("Low")}</option>
@@ -161,7 +179,7 @@ function TasksPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="t-due">{tt("Due date")}</Label>
-                  <Input id="t-due" name="due_date" type="date" />
+                  <Input id="t-due" name="due_date" type="date" defaultValue={editing?.due_date ?? ""} />
                 </div>
                 <DialogFooter>
                   <Button type="submit" disabled={create.isPending}>{tt("Save")}</Button>
@@ -198,6 +216,8 @@ function TasksPage() {
                 <TableHead>{tt("Due")}</TableHead>
                 <TableHead>{tt("Priority")}</TableHead>
                 <TableHead>{tt("Status")}</TableHead>
+                <TableHead />
+
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -209,11 +229,11 @@ function TasksPage() {
                       <p className="text-xs text-muted-foreground rtl-content">{t.description}</p>
                     )}
                   </TableCell>
-                  <TableCell>{t.profiles?.full_name || t.profiles?.email || "Unassigned"}</TableCell>
+                  <TableCell>{t.profiles?.full_name || t.profiles?.email || tt("Unassigned")}</TableCell>
                   <TableCell>{formatDate(t.due_date)}</TableCell>
                   <TableCell>
                     <Badge variant={t.priority === "high" ? "destructive" : "secondary"}>
-                      {titleCase(t.priority)}
+                      {tt(titleCase(t.priority))}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -224,16 +244,24 @@ function TasksPage() {
                     >
                       {STATUSES.map((s) => (
                         <option key={s} value={s}>
-                          {titleCase(s)}
+                          {tt(titleCase(s))}
                         </option>
                       ))}
                     </select>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => { setEditing(t); setOpen(true); }}>
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDel(t.id)}>
+                      <Trash2 className="size-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
               {tasks.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     {tt("No tasks yet.")}
                   </TableCell>
                 </TableRow>
