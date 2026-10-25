@@ -153,7 +153,7 @@ function Dashboard() {
           title={t("salesPerformance")}
           description={tt("Which products and platforms sell \u2014 costs and financial records stay with the Owner.")}
         />
-        <div className="card-surface overflow-hidden">
+        <div className="card-surface overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/60 text-start text-xs uppercase text-muted-foreground">
               <tr>

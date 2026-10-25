@@ -239,7 +239,7 @@ function InventoryPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="space-y-2">
                     <Label>{tt("Quantity")}</Label>
                     <Input name="quantity" type="number" min={1} required defaultValue={1} />

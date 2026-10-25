@@ -227,7 +227,7 @@ function ProductDetailPage() {
       )}
 
       <Tabs defaultValue="overview">
-        <TabsList className="flex-wrap">
+        <TabsList className="h-auto flex-wrap">
           <TabsTrigger value="overview">{tt("Overview")}</TabsTrigger>
           <TabsTrigger value="sales">{tt("Sales")}</TabsTrigger>
           <TabsTrigger value="batches">{tt("Batches")}</TabsTrigger>
