@@ -733,7 +733,7 @@ function OrderForm({ order, partners, onClose }: { order: any | null; partners: 
             </label>
             {useOverride && (
               <>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   {partners.map((p) => (
                     <div key={p.id} className="space-y-1">
                       <Label className="text-xs">{p.name} %</Label>
