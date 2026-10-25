@@ -39,6 +39,10 @@ export function NotificationBell() {
       for (const r of s.data ?? [])
         out.push({ id: `ship-${r.id}`, text: L(`Shipment arrived: ${r.reference} — add to inventory`, `وصلت الشحنة: ${r.reference} — أضفها للمخزون`), to: "/shipments" });
       if (roles.isOwner) {
+        const soon = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+        const { data: docs } = await supabase.from("company_documents").select("id, title, expires_on").not("expires_on", "is", null).lte("expires_on", soon);
+        for (const r of docs ?? [])
+          out.push({ id: `doc-${r.id}-${r.expires_on}`, text: L(`Document expiring ${r.expires_on}: ${r.title}`, `مستند ينتهي ${r.expires_on}: ${r.title}`), to: "/documents" });
         const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1);
         const m = d.toISOString().slice(0, 8) + "01";
         const { data } = await supabase.from("month_closures").select("id").eq("month", m).maybeSingle();
