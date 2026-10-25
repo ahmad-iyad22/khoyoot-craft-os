@@ -270,6 +270,7 @@ function TasksPage() {
           </Table>
         </CardContent>
       </Card>
+      <ConfirmDelete open={!!del} onOpenChange={(v) => !v && setDel(null)} onConfirm={() => del && remove.mutate(del)} />
     </div>
   );
 }

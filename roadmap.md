@@ -15,3 +15,4 @@
 - [x] Republish so the live site gets the latest build — publish requested 2026-10-23
 - [x] E-invoice yearly sales warning (Dashboard, Owner-set limit)
 - [x] Notification bell (low stock, margin, shipment arrived, doc expiry, month to close; mark read)
+- [ ] Company documents page (category, optional expiry, private file via receipts storage)
