@@ -16,6 +16,7 @@ import { Route as AuthenticatedAiManagerRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
 import { Route as AuthenticatedBankRouteImport } from './routes/_authenticated/bank'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
 import { Route as AuthenticatedMarketingRouteImport } from './routes/_authenticated/marketing'
@@ -61,6 +62,11 @@ const AuthenticatedBankRoute = AuthenticatedBankRouteImport.update({
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/documents': typeof AuthenticatedDocumentsRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/marketing': typeof AuthenticatedMarketingRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/documents': typeof AuthenticatedDocumentsRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/marketing': typeof AuthenticatedMarketingRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
   '/_authenticated/bank': typeof AuthenticatedBankRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/marketing': typeof AuthenticatedMarketingRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/audit-log'
     | '/bank'
     | '/dashboard'
+    | '/documents'
     | '/finance'
     | '/inventory'
     | '/marketing'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/audit-log'
     | '/bank'
     | '/dashboard'
+    | '/documents'
     | '/finance'
     | '/inventory'
     | '/marketing'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/_authenticated/audit-log'
     | '/_authenticated/bank'
     | '/_authenticated/dashboard'
+    | '/_authenticated/documents'
     | '/_authenticated/finance'
     | '/_authenticated/inventory'
     | '/_authenticated/marketing'
@@ -307,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/documents': {
+      id: '/_authenticated/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/finance': {
@@ -401,6 +420,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
   AuthenticatedBankRoute: typeof AuthenticatedBankRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedMarketingRoute: typeof AuthenticatedMarketingRoute
@@ -420,6 +440,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
   AuthenticatedBankRoute: AuthenticatedBankRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedMarketingRoute: AuthenticatedMarketingRoute,

@@ -323,6 +323,8 @@ export type Database = {
           created_by: string | null
           doc_date: string | null
           doc_type: string
+          expires_on: string | null
+          file_path: string | null
           id: string
           notes: string | null
           title: string
@@ -333,16 +335,20 @@ export type Database = {
           created_by?: string | null
           doc_date?: string | null
           doc_type?: string
+          expires_on?: string | null
+          file_path?: string | null
           id?: string
           notes?: string | null
           title: string
-          url: string
+          url?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
           doc_date?: string | null
           doc_type?: string
+          expires_on?: string | null
+          file_path?: string | null
           id?: string
           notes?: string | null
           title?: string

@@ -13,7 +13,7 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Menu,
-  Languages, Ship, Receipt, Bot, CalendarCheck, Landmark, ScrollText } from "lucide-react";
+  Languages, Ship, Receipt, Bot, CalendarCheck, Landmark, ScrollText, FileText } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles, useUser } from "@/lib/auth";
@@ -46,6 +46,7 @@ const NAV: NavItem[] = [
   { to: "/marketing", labelKey: "marketing", icon: Megaphone, show: (r) => r.isMarketing },
   { to: "/ai-manager", labelKey: "aiManager", icon: Bot, show: (r) => r.isOwner || r.isOperations || r.isMarketing },
   { to: "/tasks", labelKey: "tasks", icon: CheckSquare, show: () => true },
+  { to: "/documents", labelKey: "documents", icon: FileText, show: (r) => r.isOwner },
   { to: "/audit-log", labelKey: "auditLog", icon: ScrollText, show: (r) => r.isOwner },
   { to: "/settings", labelKey: "settings", icon: SettingsIcon, show: () => true },
 ];
