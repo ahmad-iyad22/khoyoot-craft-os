@@ -26,6 +26,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate, money, monthRange, titleCase } from "@/lib/format";
+import { downloadCsv, printReport } from "@/lib/export";
 import { MoneyFields, categoryLabel, readMoney, useExpenseCategories } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
 
@@ -216,13 +217,31 @@ function FinancePage() {
     return <AccessDenied message={tt("Financial records are limited to the Owner / Finance role.")} />;
   }
 
+  const pnlRows: [string, number][] = [
+    [tt("Revenue (orders)"), pnl.revenue],
+    [tt("Other income"), pnl.manualIncome],
+    [tt("Product cost"), -pnl.productCost],
+    [tt("Shipping"), -pnl.shipping],
+    [tt("Platform fees"), -pnl.fees],
+    [tt("Ads"), -pnl.ads],
+    [tt("Other expenses"), -pnl.other],
+    [tt("Net profit"), pnl.net],
+  ];
+  const pnlTitle = `${tt("ex_pnlTitle")} ${from} → ${to}`;
+  const exportPnlCsv = () =>
+    downloadCsv(`pnl-${from}_${to}.csv`, [tt("ex_line"), tt("ex_amount")], pnlRows.map(([l, v]) => [l, v.toFixed(2)]));
+  const exportPnlPdf = () =>
+    printReport(pnlTitle, [{ heading: pnlTitle, headers: [tt("ex_line"), tt("ex_amount")], rows: pnlRows.map(([l, v]) => [l, money(v)]) }], lang);
+
   return (
     <div>
       <PageHeader
         title={tt("Finance")}
         description={tt("Income, expenses and profit & loss.")}
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={exportPnlCsv}>{tt("ex_csv")}</Button>
+            <Button variant="outline" onClick={exportPnlPdf}>{tt("ex_pdf")}</Button>
             <Dialog open={incomeOpen} onOpenChange={setIncomeOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">{tt("Add income")}</Button>

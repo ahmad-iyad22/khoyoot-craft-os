@@ -16,3 +16,4 @@
 - [x] E-invoice yearly sales warning (Dashboard, Owner-set limit)
 - [x] Notification bell (low stock, margin, shipment arrived, doc expiry, month to close; mark read)
 - [x] Company documents page (category, optional expiry, private file via receipts storage)
+- [x] Excel (CSV) + PDF exports: P&L, inventory, partner ledger, month-end statement — build OK, needs on-screen check

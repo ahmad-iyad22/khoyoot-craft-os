@@ -22,6 +22,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/lib/format";
 import { MoneyFields, fmtMoney, readMoney, useAppSettings } from "@/lib/money";
 import { computeLedger, inMonth, monthOptions } from "@/lib/ledger";
+import { downloadCsv, printReport } from "@/lib/export";
 
 export const Route = createFileRoute("/_authenticated/partners")({
   head: () => ({
@@ -137,15 +138,28 @@ function PartnersPage() {
   const monthLabel = (m: string) =>
     new Date(m + "-01T00:00:00").toLocaleDateString(lang === "ar" ? "ar" : "en-GB", { month: "long", year: "numeric" });
 
+  const lgHeaders = [t("ex_partner"), t("ex_contributions"), t("ex_withdrawals"), t("ex_paidOnBehalf"), t("ex_owedToThem"), t("ex_theyOwe"), t("ex_net")];
+  const lgRows = ledger.map((r) => {
+    const name = partners.find((p) => p.id === r.partnerId)?.name ?? "";
+    return [name, r.contributions.toFixed(2), r.withdrawals.toFixed(2), r.paidOnBehalf.toFixed(2), r.owedToThem.toFixed(2), r.theyOwe.toFixed(2), r.net.toFixed(2)];
+  });
+  const lgTitle = `${t("ex_ledgerTitle")}${month ? ` · ${monthLabel(month)}` : ` · ${t("allTime")}`}`;
+  const exportLgCsv = () => downloadCsv(`partner-ledger${month ? `-${month}` : ""}.csv`, lgHeaders, lgRows);
+  const exportLgPdf = () => printReport(lgTitle, [{ heading: lgTitle, headers: lgHeaders, rows: lgRows }], lang);
+
   return (
     <div>
       <PageHeader
         title={t("partners")}
         description={t("partnersSubtitle")}
         action={
-          <Button onClick={() => setEditPartner({})}>
-            <Plus className="size-4" /> {t("addPartner")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={exportLgCsv}>{t("ex_csv")}</Button>
+            <Button variant="outline" onClick={exportLgPdf}>{t("ex_pdf")}</Button>
+            <Button onClick={() => setEditPartner({})}>
+              <Plus className="size-4" /> {t("addPartner")}
+            </Button>
+          </div>
         }
       />
 
