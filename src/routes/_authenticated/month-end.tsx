@@ -66,6 +66,37 @@ function MonthEndPage() {
 
   if (!roles.isLoading && !roles.isOwner) return <AccessDenied message={tt("me_onlyOwner")} />;
 
+  const stHeaders = [t("ex_partner"), ...LINES.map(([, label]) => t(label)), t("me_final"), t("me_settled"), t("me_remaining")];
+  const stRows = (s?.partners ?? []).map((p) => [
+    p.name,
+    ...LINES.map(([k, , sign]) => `${sign < 0 && Number(p[k]) ? "-" : ""}${Number(p[k] ?? 0).toFixed(2)}`),
+    Number(p.final).toFixed(2),
+    Number(p.settled).toFixed(2),
+    Number(p.remaining).toFixed(2),
+  ]);
+  const stTitle = `${t("ex_statementTitle")} · ${month}`;
+  const exportStCsv = () => downloadCsv(`month-end-${month}.csv`, stHeaders, stRows);
+  const exportStPdf = () =>
+    printReport(
+      stTitle,
+      [
+        { heading: stTitle, headers: stHeaders, rows: stRows.map((r) => r.map(String)) },
+        {
+          heading: t("ex_cashCheck"),
+          headers: [t("ex_line"), t("ex_amount")],
+          rows: s
+            ? [
+                [t("me_cashAvailable"), money(s.cash.available)],
+                [t("me_payouts"), money(s.cash.payouts)],
+                [t("bk_pendingTotal"), money(s.cash.pending_payouts)],
+                [t("me_shortfall").replace("{amt}", ""), money(s.cash.shortfall)],
+              ]
+            : [],
+        },
+      ],
+      lang,
+    );
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -76,6 +107,12 @@ function MonthEndPage() {
             <select aria-label={t("me_month")} value={month} onChange={(e) => setMonth(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
               {monthOptions().map((m) => <option key={m} value={m}>{m}</option>)}
             </select>
+            {s && (
+              <>
+                <Button variant="outline" onClick={exportStCsv}>{t("ex_csv")}</Button>
+                <Button variant="outline" onClick={exportStPdf}>{t("ex_pdf")}</Button>
+              </>
+            )}
             {s && (s.closed ? (
               <Button variant="outline" onClick={() => toggle.mutate(false)} disabled={toggle.isPending}><Unlock className="size-4" /> {t("me_reopen")}</Button>
             ) : (
