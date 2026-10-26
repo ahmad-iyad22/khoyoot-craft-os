@@ -310,6 +310,7 @@ function InventoryPage() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         }
       />
 
