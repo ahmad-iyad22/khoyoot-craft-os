@@ -239,7 +239,9 @@ function FinancePage() {
         title={tt("Finance")}
         description={tt("Income, expenses and profit & loss.")}
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={exportPnlCsv}>{tt("ex_csv")}</Button>
+            <Button variant="outline" onClick={exportPnlPdf}>{tt("ex_pdf")}</Button>
             <Dialog open={incomeOpen} onOpenChange={setIncomeOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">{tt("Add income")}</Button>
