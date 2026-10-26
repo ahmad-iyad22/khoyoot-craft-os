@@ -22,6 +22,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/lib/format";
 import { MoneyFields, fmtMoney, readMoney, useAppSettings } from "@/lib/money";
 import { computeLedger, inMonth, monthOptions } from "@/lib/ledger";
+import { downloadCsv, printReport } from "@/lib/export";
 
 export const Route = createFileRoute("/_authenticated/partners")({
   head: () => ({

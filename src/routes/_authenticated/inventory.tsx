@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { downloadCsv, printReport } from "@/lib/export";
 import { PackagePlus, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRoles } from "@/lib/auth";

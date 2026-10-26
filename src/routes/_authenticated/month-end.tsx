@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatDate, money } from "@/lib/format";
+import { downloadCsv, printReport } from "@/lib/export";
 import { monthOptions } from "@/lib/ledger";
 import { currentMonth, useStatement, type PartnerStatement } from "@/lib/month-end";
 
@@ -45,7 +46,7 @@ const LINES: [keyof PartnerStatement, string, 1 | -1][] = [
 
 function MonthEndPage() {
   const roles = useRoles();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const qc = useQueryClient();
   const [month, setMonth] = useState(currentMonth());
   const [settleFor, setSettleFor] = useState<PartnerStatement | null>(null);
