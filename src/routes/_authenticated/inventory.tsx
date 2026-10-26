@@ -190,12 +190,29 @@ function InventoryPage() {
       (p.name_ar ?? "").includes(search),
   );
 
+  const invHeaders = [t("ex_product"), "SKU", t("ex_status"), t("ex_stock"), t("ex_avgCost"), t("ex_salePrice"), t("ex_stockValue")];
+  const invRows = filtered.map((p) => [
+    p.name,
+    p.sku,
+    t(`status_${p.status}`) !== `status_${p.status}` ? t(`status_${p.status}`) : p.status,
+    p.stock_qty,
+    Number(p.avg_cost ?? 0).toFixed(2),
+    Number(p.sale_price ?? 0).toFixed(2),
+    (Number(p.avg_cost ?? 0) * Number(p.stock_qty ?? 0)).toFixed(2),
+  ]);
+  const exportInvCsv = () => downloadCsv("inventory.csv", invHeaders, invRows);
+  const exportInvPdf = () =>
+    printReport(t("ex_inventoryTitle"), [{ heading: t("ex_inventoryTitle"), headers: invHeaders, rows: invRows }], lang);
+
   return (
     <div>
       <PageHeader
         title={t("inventory")}
         description={t("inventorySubtitle")}
         action={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={exportInvCsv}>{t("ex_csv")}</Button>
+            <Button variant="outline" onClick={exportInvPdf}>{t("ex_pdf")}</Button>
           <Dialog open={receiveOpen} onOpenChange={setReceiveOpen}>
             <DialogTrigger asChild>
               <Button>
