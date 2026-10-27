@@ -8,6 +8,7 @@ import { useRoles } from "@/lib/auth";
 import { useI18n, tt } from "@/lib/i18n";
 import { AccessDenied, PageHeader } from "@/components/app-shell";
 import { ProductThumbnail } from "@/components/product-thumbnail";
+import { OrderImport } from "@/components/order-import";
 import { TatreezEmptyState } from "@/components/tatreez";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { Button } from "@/components/ui/button";
@@ -178,9 +179,12 @@ function OrdersPage() {
         title={t("orders")}
         description={t("ordersSubtitle")}
         action={
+          <div className="flex flex-wrap gap-2">
+          {roles.isOwner && <OrderImport />}
           <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
             <Plus className="size-4" /> {t("ord_newOrder")}
           </Button>
+          </div>
         }
       />
 

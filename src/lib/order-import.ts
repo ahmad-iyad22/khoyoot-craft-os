@@ -10,7 +10,7 @@ const aliases: Record<ImportField, string[]> = {
  sku: ['Seller SKU', 'Seller SKU ID', 'SKU', 'SKU Reference No.', 'Variation SKU', 'SKU Seller'],
  name: ['Product Name', 'Item Name', 'Product', 'Item'],
  quantity: ['Quantity', 'Qty', 'SKU Quantity', 'Order Item Quantity'],
- price: ['Deal Price', 'Unit Price', 'Paid Price', 'Sale Price', 'SKU Unit Original Price', 'Original Price'],
+ price: ['Deal Price', 'Unit Price', 'Paid Price', 'Sale Price'],
  status: ['Order Status', 'Status'],
  customer: ['Buyer Username', 'Buyer Name', 'Customer Name', 'Recipient', 'Recipient Name'],
 };
