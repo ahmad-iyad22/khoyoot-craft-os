@@ -1,5 +1,4 @@
-/// <reference types="bun" />
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'vitest';
 import { buildImportLines, detectColumns, groupImportLines, importDate, importStatus, matchProduct } from './order-import';
 const products=[{id:'p1',sku:'LEA-001',name:'Bag',stock_qty:3,image_url:null},{id:'p2',sku:'BAG-001',name:'Bag',stock_qty:4,image_url:null}];
 describe('marketplace imports',()=>{
