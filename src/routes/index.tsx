@@ -12,6 +12,8 @@ export const Route = createFileRoute("/")({
         content: "Sign in to the Khoyoot operating system: inventory, orders, finance and marketing.",
       },
       { property: "og:title", content: "Khoyoot — Business Operating System" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       {
         property: "og:description",
         content: "Sign in to the Khoyoot operating system: inventory, orders, finance and marketing.",
