@@ -2420,6 +2420,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_order: { Args: { _lines: Json; _order: Json }; Returns: Json }
       is_marketing: { Args: never; Returns: boolean }
       is_ops: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
