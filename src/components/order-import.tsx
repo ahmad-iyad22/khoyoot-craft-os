@@ -25,7 +25,7 @@ export function OrderImport() {
   try{
    if(file.size>10*1024*1024)throw new Error(t('imp_size'));
    let grid:unknown[][]=[];
-   if(/\.xlsx$/i.test(file.name)){const {readSheet}=await import('read-excel-file/browser');grid=await readSheet(file, {sheet: 1});}
+   if(/\.xlsx$/i.test(file.name)){const {readSheet}=await import('read-excel-file/browser');grid=await readSheet(file, 1);}
    else if(/\.csv$/i.test(file.name)){const {default:Papa}=await import('papaparse');const parsed=Papa.parse<string[]>(await file.text(),{skipEmptyLines:'greedy'});if(parsed.errors.length)throw new Error(t('imp_parse'));grid=parsed.data;}
    else throw new Error(t('imp_format'));
    const start=grid.findIndex(row=>!!detectColumns(row.map(v=>String(v??'').trim())).reference);

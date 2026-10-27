@@ -18,4 +18,5 @@
 - [x] Company documents page (category, optional expiry, private file via receipts storage)
 - [x] Excel (CSV) + PDF exports: P&L, inventory, partner ledger, month-end statement — build OK, needs on-screen check
 
-- [ ] Order import: CSV/XLSX upload, column and product matching, review, atomic creation, fees and duplicate safety, tests.
+- [x] Order import: CSV/XLSX upload, matching/review, atomic per-order creation, fee snapshots and duplicate safety; five parser tests pass.
+- [ ] Order import signed-in EN/AR and real marketplace-file checks — blocked: no matching account for managed preview sign-in; needs user sign-in.
