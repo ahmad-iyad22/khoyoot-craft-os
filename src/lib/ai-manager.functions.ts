@@ -368,29 +368,75 @@ async function runTool(sb: any, name: string, a: any): Promise<ToolResult> {
         _splits: splits,
       });
       if (error) throw new Error(error.message);
-      return `Added expense ${fmt(mm.amount, mm.currency)} (${a.category}) paid by ${payer?.name ?? "business"}, ${mode} split`;
+      return { summary: `Added expense ${fmt(mm.amount, mm.currency)} (${a.category}) paid by ${payer?.name ?? "business"}, ${mode} split` };
     }
     case "add_partner_transaction": {
       const mm = m(a);
       const p = await findPartner(sb, a.partner);
       const { error } = await sb.from("partner_transactions").insert({ partner_id: p.id, txn_type: a.type, txn_date: a.date, notes: a.notes || null, receipt_path: null, ...mm });
       if (error) throw new Error(error.message);
-      return `Added ${a.type} ${fmt(mm.amount, mm.currency)} for ${p.name} on ${a.date}`;
+      return { summary: `Added ${a.type} ${fmt(mm.amount, mm.currency)} for ${p.name} on ${a.date}` };
     }
     case "update_product": {
+      const { data: prod } = await sb.from("products").select("*").eq("sku", a.sku).maybeSingle();
+      if (!prod) throw new Error(`Product ${a.sku} not found`);
       const patch: Record<string, unknown> = {};
       for (const k of ["name", "sale_price", "weight_grams", "notes", "min_stock"]) if (a[k] !== undefined && a[k] !== null) patch[k] = a[k];
+      if (a.category) patch["category_id"] = (await findCategory(sb, a.category)).id;
       if (!Object.keys(patch).length) throw new Error("Nothing to change");
-      const { data, error } = await sb.from("products").update(patch).eq("sku", a.sku).select("sku");
+      const { error } = await sb.from("products").update(patch).eq("id", prod.id);
       if (error) throw new Error(error.message);
-      if (!data?.length) throw new Error(`Product ${a.sku} not found`);
-      return `Updated ${a.sku}: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`;
+      const old: Record<string, unknown> = {};
+      for (const k of Object.keys(patch)) old[k] = (prod as any)[k];
+      return { summary: `Updated ${a.sku}: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`, old };
+    }
+    case "create_product": {
+      const pname = String(a.name || "").trim();
+      if (!pname) throw new Error("Product name required");
+      const cat = await findCategory(sb, a.category);
+      if (!cat.prefix_code) throw new Error(`Category "${cat.name}" has no SKU prefix`);
+      const { data: sku, error: skuErr } = await sb.rpc("claim_next_sku", { _code: cat.prefix_code });
+      if (skuErr) throw new Error(skuErr.message);
+      const { error } = await sb.from("products").insert({
+        sku: String(sku),
+        name: pname,
+        category_id: cat.id,
+        sale_price: Math.max(0, Number(a.sale_price) || 0),
+        weight_grams: Math.max(0, Number(a.weight_grams) || 0),
+        notes: a.notes ? String(a.notes) : null,
+      });
+      if (error) throw new Error(error.message);
+      return { summary: `Created product "${pname}" with SKU ${sku} (category ${cat.name})` };
+    }
+    case "delete_product": {
+      const { data: prod } = await sb.from("products").select("*").eq("sku", a.sku).maybeSingle();
+      if (!prod) throw new Error(`Product ${a.sku} not found`);
+      const [oi, si, ib] = await Promise.all([
+        sb.from("order_items").select("id", { count: "exact", head: true }).eq("product_id", prod.id),
+        sb.from("shipment_items").select("id", { count: "exact", head: true }).eq("product_id", prod.id),
+        sb.from("inventory_batches").select("id", { count: "exact", head: true }).eq("product_id", prod.id),
+      ]);
+      const used = (oi.count ?? 0) + (si.count ?? 0) + (ib.count ?? 0);
+      if (used > 0) {
+        if (!prod.archived) {
+          const { error } = await sb.from("products").update({ archived: true }).eq("id", prod.id);
+          if (error) throw new Error(error.message);
+        }
+        return {
+          summary: `${a.sku} is used in ${used} order/shipment/batch record(s), so it was archived instead of deleted`,
+          old: { archived: prod.archived },
+        };
+      }
+      const { error } = await sb.from("products").delete().eq("id", prod.id);
+      if (error) throw new Error(error.message);
+      return { summary: `Deleted product ${a.sku} ("${prod.name}")`, old: prod as Record<string, unknown> };
     }
     case "archive_product": {
-      const { data, error } = await sb.from("products").update({ archived: !!a.archived }).eq("sku", a.sku).select("sku");
+      const { data: prod } = await sb.from("products").select("id, archived").eq("sku", a.sku).maybeSingle();
+      if (!prod) throw new Error(`Product ${a.sku} not found`);
+      const { error } = await sb.from("products").update({ archived: !!a.archived }).eq("id", prod.id);
       if (error) throw new Error(error.message);
-      if (!data?.length) throw new Error(`Product ${a.sku} not found`);
-      return `${a.archived ? "Archived" : "Restored"} ${a.sku}`;
+      return { summary: `${a.archived ? "Archived" : "Restored"} ${a.sku}`, old: { archived: prod.archived } };
     }
     case "set_platform_fee": {
       const patch: Record<string, unknown> = {};
