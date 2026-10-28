@@ -443,10 +443,13 @@ async function runTool(sb: any, name: string, a: any): Promise<ToolResult> {
       for (const k of ["commission_percent", "transaction_fee_percent", "fixed_fee", "sst_percent"]) if (typeof a[k] === "number") patch[k] = a[k];
       if (a.waiver_until !== undefined) patch["waiver_until"] = a.waiver_until || null;
       if (!Object.keys(patch).length) throw new Error("Nothing to change");
-      const { data, error } = await sb.from("platform_fees").update(patch).ilike("platform", a.platform).select("platform");
+      const { data: oldRow } = await sb.from("platform_fees").select("*").ilike("platform", a.platform).maybeSingle();
+      if (!oldRow) throw new Error(`Platform ${a.platform} not found`);
+      const { error } = await sb.from("platform_fees").update(patch).eq("id", oldRow.id);
       if (error) throw new Error(error.message);
-      if (!data?.length) throw new Error(`Platform ${a.platform} not found`);
-      return `Updated ${data[0].platform} fees: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`;
+      const old: Record<string, unknown> = {};
+      for (const k of Object.keys(patch)) old[k] = (oldRow as any)[k];
+      return { summary: `Updated ${oldRow.platform} fees: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`, old };
     }
     case "add_bank_transaction": {
       const mm = m(a);
@@ -455,21 +458,25 @@ async function runTool(sb: any, name: string, a: any): Promise<ToolResult> {
       let q = sb.from("bank_transactions").select("id").eq("account_id", acc.id).eq("txn_date", a.date).eq("amount", mm.amount);
       q = note ? q.eq("note", note) : q.is("note", null);
       const { data: dup } = await q.limit(1);
-      if (dup?.length) return `SKIPPED duplicate: ${acc.name} ${a.date} ${fmt(mm.amount, mm.currency)}${note ? ` "${note}"` : ""}`;
+      if (dup?.length) return { summary: `SKIPPED duplicate: ${acc.name} ${a.date} ${fmt(mm.amount, mm.currency)}${note ? ` "${note}"` : ""}` };
       const { error } = await sb.from("bank_transactions").insert({ account_id: acc.id, to_account_id: null, txn_type: a.type, txn_date: a.date, note, receipt_path: null, ...mm });
       if (error) throw new Error(error.message);
-      return `Added ${a.type} ${fmt(mm.amount, mm.currency)} to ${acc.name} on ${a.date}${note ? ` "${note}"` : ""}`;
+      return { summary: `Added ${a.type} ${fmt(mm.amount, mm.currency)} to ${acc.name} on ${a.date}${note ? ` "${note}"` : ""}` };
     }
     case "record_balance_check": {
       const acc = await findAccount(sb, a.account);
       const actual = Number(a.actual_balance);
       if (!Number.isFinite(actual)) throw new Error("actual_balance must be a number");
+      const { data: prev } = await sb.from("bank_accounts").select("actual_balance, actual_checked_at").eq("id", acc.id).maybeSingle();
       const { error } = await sb.from("bank_accounts").update({ actual_balance: actual, actual_checked_at: a.date }).eq("id", acc.id);
       if (error) throw new Error(error.message);
       const { data: bal } = await sb.from("bank_account_balances").select("balance_native").eq("id", acc.id).maybeSingle();
       const sys = Number(bal?.balance_native ?? 0);
       const diff = Math.round((actual - sys) * 100) / 100;
-      return `Balance check ${acc.name} on ${a.date}: actual ${fmt(actual, acc.currency)}, system ${fmt(sys, acc.currency)}, difference ${fmt(diff, acc.currency)}`;
+      return {
+        summary: `Balance check ${acc.name} on ${a.date}: actual ${fmt(actual, acc.currency)}, system ${fmt(sys, acc.currency)}, difference ${fmt(diff, acc.currency)}`,
+        old: { actual_balance: prev?.actual_balance ?? null, actual_checked_at: prev?.actual_checked_at ?? null },
+      };
     }
   }
   throw new Error(`Unknown tool ${name}`);
