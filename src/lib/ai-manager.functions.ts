@@ -275,8 +275,73 @@ function m(a: any) {
 }
 const fmt = (n: number, c: string) => `${n.toFixed(2)} ${c}`;
 
-async function runTool(sb: any, name: string, a: any): Promise<string> {
+type ToolResult = { summary: string; old?: Record<string, unknown>; silent?: boolean };
+
+const clean = (s: unknown) => String(s ?? "").replace(/[,%()]/g, " ").trim();
+
+async function findCategory(sb: any, name: string) {
+  const { data } = await sb.from("categories").select("id, name, name_ar, prefix_code");
+  const n = String(name).toLowerCase().trim();
+  const exact = (data ?? []).filter(
+    (c: any) => c.name.toLowerCase() === n || (c.name_ar && String(c.name_ar).trim() === String(name).trim()),
+  );
+  const hits = exact.length ? exact : (data ?? []).filter((c: any) => c.name.toLowerCase().includes(n));
+  if (hits.length !== 1) throw new Error(`Category "${name}" not found or ambiguous`);
+  return hits[0] as { id: string; name: string; prefix_code: string | null };
+}
+
+async function runTool(sb: any, name: string, a: any): Promise<ToolResult> {
   switch (name) {
+    case "find_products": {
+      const q = clean(a.query);
+      if (!q) throw new Error("query required");
+      const { data, error } = await sb
+        .from("products")
+        .select("id, sku, name, sale_price, stock_qty, status, archived, weight_grams, categories(name)")
+        .or(`name.ilike.%${q}%,sku.ilike.%${q}%`)
+        .limit(20);
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
+    case "find_orders": {
+      let q = sb
+        .from("orders")
+        .select("id, order_number, order_date, platform, customer_name, status, platform_fee, shipping_cost")
+        .order("order_date", { ascending: false })
+        .limit(20);
+      if (a.date) q = q.eq("order_date", a.date);
+      if (a.platform) q = q.ilike("platform", `%${clean(a.platform)}%`);
+      if (a.customer) q = q.ilike("customer_name", `%${clean(a.customer)}%`);
+      if (a.reference) q = q.ilike("order_number", `%${clean(a.reference)}%`);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
+    case "find_expenses": {
+      let q = sb
+        .from("expenses")
+        .select("id, entry_date, category, description, amount, currency, base_amount, is_shared")
+        .order("entry_date", { ascending: false })
+        .limit(20);
+      if (a.date) q = q.eq("entry_date", a.date);
+      if (a.category) q = q.ilike("category", `%${clean(a.category)}%`);
+      if (a.description) q = q.ilike("description", `%${clean(a.description)}%`);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
+    case "find_shipments": {
+      let q = sb
+        .from("shipments")
+        .select("id, reference, status, total_shipping_cost, customs_cost, currency, created_at, received_at")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (a.reference) q = q.ilike("reference", `%${clean(a.reference)}%`);
+      if (a.stage) q = q.ilike("status", `%${clean(a.stage)}%`);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
     case "add_shared_expense": {
       const mm = m(a);
       const { data: cat } = await sb.from("expense_categories").select("code").eq("code", a.category).maybeSingle();
