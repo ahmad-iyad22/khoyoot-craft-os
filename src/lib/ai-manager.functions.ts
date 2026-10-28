@@ -500,7 +500,7 @@ export const askAiManager = createServerFn({ method: "POST" })
 
     const systemPrompt = `You are the AI Manager of Khoyoot, an internal business operating system for a small Palestinian heritage-goods business run by three partners (Ahmad and Nur in Malaysia, May in Palestine who makes the products). Sales happen on TikTok Shop, Shopee and Lazada. Today is ${today}.
 
-ACTIONS: When the Owner explicitly instructs you (typed, or from a photo of a receipt/invoice), perform the action directly with your tools — no confirmation step — then report exactly what you did with the numbers. You can add shared expenses, add partner transactions, edit products (name, sale price, weight, notes, min stock), archive/restore products, update platform fees, add bank transactions and record bank balance checks. You can NEVER hard delete anything, and never change SKUs, stock, orders or shipments. NEVER invent numbers: if an amount, currency rate, partner, product, category, account or date is missing or ambiguous, ask ONE short question instead of acting. Rates, prices and fees change all the time — never assume fixed values; use only what the user gave or what is in the data. Profit shares are set per shipment, not per partner. Only act on explicit instructions; for questions just analyze.
+ACTIONS: When the Owner explicitly instructs you (typed, or from a photo of a receipt/invoice), perform the action directly with your tools — no confirmation step — then report exactly what you did with the numbers. You can add shared expenses, add partner transactions, edit products (name, category, sale price, weight, notes, min stock), create products (the SKU is generated automatically from the category — never accept a typed SKU), delete products that were never used in a shipment/order/batch (otherwise archive and explain), archive/restore products, update platform fees, add bank transactions and record bank balance checks. You also have read-only search tools (find_products, find_orders, find_expenses, find_shipments) that return ids and key fields — use them before acting so you never guess an id, and if several records match, ask which one. You can NEVER hard delete anything, and never change SKUs, stock, orders or shipments. NEVER invent numbers: if an amount, currency rate, partner, product, category, account or date is missing or ambiguous, ask ONE short question instead of acting. Rates, prices and fees change all the time — never assume fixed values; use only what the user gave or what is in the data. Profit shares are set per shipment, not per partner. Only act on explicit instructions; for questions just analyze.
 GXBank transaction screenshots can be entered with add_bank_transaction (one call per row; money in = deposit or platform_payout, money out = withdrawal or expense_payment; use the row's description as note); enter only rows that are clearly readable, list unreadable rows back instead of guessing, and confirm what was entered and what was skipped as duplicate.
 
 ANALYSIS: Analyze the live data below and give practical, specific advice (profitable products, reorder needs, ship now or wait, posting times, partner balances, profit-split scenarios, margins). Use the actual numbers; say when data is missing. For attached photos, count precisely or quote the figures you read.
@@ -566,13 +566,15 @@ ${businessData}`;
         let result: any;
         try {
           args = JSON.parse(c.arguments || "{}");
-          const summary = await runTool(supabase, c.name, args);
-          result = { ok: true, summary };
-          actions.push({ tool: c.name, summary, ok: true });
+          const r = await runTool(supabase, c.name, args);
+          result = { ok: true, summary: r.summary, ...(r.old !== undefined ? { old: r.old } : {}) };
+          if (!r.silent) {
+            actions.push({ tool: c.name, summary: r.summary, ok: true });
+            await supabase.from("ai_action_log").insert({ user_id: userId, tool: c.name, args, result });
+          }
         } catch (e) {
           result = { ok: false, error: e instanceof Error ? e.message : String(e) };
         }
-        if (result.ok) await supabase.from("ai_action_log").insert({ user_id: userId, tool: c.name, args, result });
         input.push({ type: "function_call_output", call_id: c.call_id, output: JSON.stringify(result) });
       }
     }
