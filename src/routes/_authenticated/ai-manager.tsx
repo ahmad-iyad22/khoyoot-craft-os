@@ -99,6 +99,7 @@ function AiManagerPage() {
         <h1 className="text-2xl font-bold">{t("aiManager")}</h1>
         <p className="text-sm text-muted-foreground">{t("aiManagerSubtitle")}</p>
         <p className="mt-1 text-xs text-muted-foreground">{t("aiCanActNote")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t("aiSearchNote")}</p>
       </div>
 
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto rounded-md border p-4 min-h-[40vh]">

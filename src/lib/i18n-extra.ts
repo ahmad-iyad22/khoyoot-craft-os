@@ -392,6 +392,7 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   aiAttachPhoto: { en: "Attach a photo", ar: "إرفاق صورة" },
   aiActionsDone: { en: "Actions performed", ar: "الإجراءات المنفذة" },
   aiCanActNote: { en: "The AI can add expenses and partner entries, edit products and fees, and archive products. Every change appears in the Audit Log. Send a screenshot of your GXBank transactions and I will enter them.", ar: "يمكن للذكاء الاصطناعي إضافة المصاريف وقيود الشركاء، وتعديل المنتجات والرسوم، وأرشفة المنتجات. كل تغيير يظهر في سجل التدقيق. أرسل لقطة شاشة لمعاملاتك في GXBank وسأقوم بإدخالها." },
+  aiSearchNote: { en: "It can also search products, orders, expenses and shipments, create products (SKU is automatic), and delete unused products.", ar: "يمكنه أيضًا البحث في المنتجات والطلبات والمصاريف والشحنات، وإنشاء المنتجات (رمز SKU تلقائي)، وحذف المنتجات غير المستخدمة." },
   al_byAi: { en: "by AI", ar: "بواسطة الذكاء الاصطناعي" },
   aiRemovePhoto: { en: "Remove photo", ar: "إزالة الصورة" },
   aiErrPhotoOnly: { en: "Please attach an image file", ar: "الرجاء إرفاق ملف صورة" },
