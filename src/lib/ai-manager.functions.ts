@@ -65,6 +65,55 @@ const money = {
 const TOOLS = [
   {
     type: "function",
+    name: "find_products",
+    description: "Search products by name or SKU. Returns ids and key fields so you never guess an id. Read-only.",
+    parameters: {
+      type: "object",
+      properties: { query: { type: "string", description: "name or SKU fragment" } },
+      required: ["query"],
+    },
+  },
+  {
+    type: "function",
+    name: "find_orders",
+    description: "Search orders by date, platform, customer name or order reference. Read-only.",
+    parameters: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "YYYY-MM-DD" },
+        platform: { type: "string" },
+        customer: { type: "string" },
+        reference: { type: "string", description: "order number / reference" },
+      },
+    },
+  },
+  {
+    type: "function",
+    name: "find_expenses",
+    description: "Search expenses by date, category or description. Read-only.",
+    parameters: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "YYYY-MM-DD" },
+        category: { type: "string" },
+        description: { type: "string" },
+      },
+    },
+  },
+  {
+    type: "function",
+    name: "find_shipments",
+    description: "Search shipments by reference or stage/status. Read-only.",
+    parameters: {
+      type: "object",
+      properties: {
+        reference: { type: "string" },
+        stage: { type: "string", description: "e.g. preparing, in_transit, customs, arrived_in_malaysia" },
+      },
+    },
+  },
+  {
+    type: "function",
     name: "add_shared_expense",
     description: "Record a shared business expense split between partners.",
     parameters: {
@@ -109,11 +158,38 @@ const TOOLS = [
       properties: {
         sku: { type: "string" },
         name: { type: "string" },
+        category: { type: "string", description: "category name (existing categories only)" },
         sale_price: { type: "number" },
         weight_grams: { type: "number" },
         notes: { type: "string" },
         min_stock: { type: "integer" },
       },
+      required: ["sku"],
+    },
+  },
+  {
+    type: "function",
+    name: "create_product",
+    description: "Create a product. The SKU is generated automatically from the category prefix; never accept a typed SKU.",
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        category: { type: "string", description: "category name (existing categories only)" },
+        sale_price: { type: "number" },
+        weight_grams: { type: "number" },
+        notes: { type: "string" },
+      },
+      required: ["name", "category"],
+    },
+  },
+  {
+    type: "function",
+    name: "delete_product",
+    description: "Delete a product by SKU, only if it was never used in a shipment, order or batch. Otherwise it is archived instead and you explain why.",
+    parameters: {
+      type: "object",
+      properties: { sku: { type: "string" } },
       required: ["sku"],
     },
   },
@@ -199,8 +275,73 @@ function m(a: any) {
 }
 const fmt = (n: number, c: string) => `${n.toFixed(2)} ${c}`;
 
-async function runTool(sb: any, name: string, a: any): Promise<string> {
+type ToolResult = { summary: string; old?: Record<string, unknown>; silent?: boolean };
+
+const clean = (s: unknown) => String(s ?? "").replace(/[,%()]/g, " ").trim();
+
+async function findCategory(sb: any, name: string) {
+  const { data } = await sb.from("categories").select("id, name, name_ar, prefix_code");
+  const n = String(name).toLowerCase().trim();
+  const exact = (data ?? []).filter(
+    (c: any) => c.name.toLowerCase() === n || (c.name_ar && String(c.name_ar).trim() === String(name).trim()),
+  );
+  const hits = exact.length ? exact : (data ?? []).filter((c: any) => c.name.toLowerCase().includes(n));
+  if (hits.length !== 1) throw new Error(`Category "${name}" not found or ambiguous`);
+  return hits[0] as { id: string; name: string; prefix_code: string | null };
+}
+
+async function runTool(sb: any, name: string, a: any): Promise<ToolResult> {
   switch (name) {
+    case "find_products": {
+      const q = clean(a.query);
+      if (!q) throw new Error("query required");
+      const { data, error } = await sb
+        .from("products")
+        .select("id, sku, name, sale_price, stock_qty, status, archived, weight_grams, categories(name)")
+        .or(`name.ilike.%${q}%,sku.ilike.%${q}%`)
+        .limit(20);
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
+    case "find_orders": {
+      let q = sb
+        .from("orders")
+        .select("id, order_number, order_date, platform, customer_name, status, platform_fee, shipping_cost")
+        .order("order_date", { ascending: false })
+        .limit(20);
+      if (a.date) q = q.eq("order_date", a.date);
+      if (a.platform) q = q.ilike("platform", `%${clean(a.platform)}%`);
+      if (a.customer) q = q.ilike("customer_name", `%${clean(a.customer)}%`);
+      if (a.reference) q = q.ilike("order_number", `%${clean(a.reference)}%`);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
+    case "find_expenses": {
+      let q = sb
+        .from("expenses")
+        .select("id, entry_date, category, description, amount, currency, base_amount, is_shared")
+        .order("entry_date", { ascending: false })
+        .limit(20);
+      if (a.date) q = q.eq("entry_date", a.date);
+      if (a.category) q = q.ilike("category", `%${clean(a.category)}%`);
+      if (a.description) q = q.ilike("description", `%${clean(a.description)}%`);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
+    case "find_shipments": {
+      let q = sb
+        .from("shipments")
+        .select("id, reference, status, total_shipping_cost, customs_cost, currency, created_at, received_at")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (a.reference) q = q.ilike("reference", `%${clean(a.reference)}%`);
+      if (a.stage) q = q.ilike("status", `%${clean(a.stage)}%`);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      return { summary: JSON.stringify(data ?? []), silent: true };
+    }
     case "add_shared_expense": {
       const mm = m(a);
       const { data: cat } = await sb.from("expense_categories").select("code").eq("code", a.category).maybeSingle();
@@ -227,39 +368,88 @@ async function runTool(sb: any, name: string, a: any): Promise<string> {
         _splits: splits,
       });
       if (error) throw new Error(error.message);
-      return `Added expense ${fmt(mm.amount, mm.currency)} (${a.category}) paid by ${payer?.name ?? "business"}, ${mode} split`;
+      return { summary: `Added expense ${fmt(mm.amount, mm.currency)} (${a.category}) paid by ${payer?.name ?? "business"}, ${mode} split` };
     }
     case "add_partner_transaction": {
       const mm = m(a);
       const p = await findPartner(sb, a.partner);
       const { error } = await sb.from("partner_transactions").insert({ partner_id: p.id, txn_type: a.type, txn_date: a.date, notes: a.notes || null, receipt_path: null, ...mm });
       if (error) throw new Error(error.message);
-      return `Added ${a.type} ${fmt(mm.amount, mm.currency)} for ${p.name} on ${a.date}`;
+      return { summary: `Added ${a.type} ${fmt(mm.amount, mm.currency)} for ${p.name} on ${a.date}` };
     }
     case "update_product": {
+      const { data: prod } = await sb.from("products").select("*").eq("sku", a.sku).maybeSingle();
+      if (!prod) throw new Error(`Product ${a.sku} not found`);
       const patch: Record<string, unknown> = {};
       for (const k of ["name", "sale_price", "weight_grams", "notes", "min_stock"]) if (a[k] !== undefined && a[k] !== null) patch[k] = a[k];
+      if (a.category) patch["category_id"] = (await findCategory(sb, a.category)).id;
       if (!Object.keys(patch).length) throw new Error("Nothing to change");
-      const { data, error } = await sb.from("products").update(patch).eq("sku", a.sku).select("sku");
+      const { error } = await sb.from("products").update(patch).eq("id", prod.id);
       if (error) throw new Error(error.message);
-      if (!data?.length) throw new Error(`Product ${a.sku} not found`);
-      return `Updated ${a.sku}: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`;
+      const old: Record<string, unknown> = {};
+      for (const k of Object.keys(patch)) old[k] = (prod as any)[k];
+      return { summary: `Updated ${a.sku}: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`, old };
+    }
+    case "create_product": {
+      const pname = String(a.name || "").trim();
+      if (!pname) throw new Error("Product name required");
+      const cat = await findCategory(sb, a.category);
+      if (!cat.prefix_code) throw new Error(`Category "${cat.name}" has no SKU prefix`);
+      const { data: sku, error: skuErr } = await sb.rpc("claim_next_sku", { _code: cat.prefix_code });
+      if (skuErr) throw new Error(skuErr.message);
+      const { error } = await sb.from("products").insert({
+        sku: String(sku),
+        name: pname,
+        category_id: cat.id,
+        sale_price: Math.max(0, Number(a.sale_price) || 0),
+        weight_grams: Math.max(0, Number(a.weight_grams) || 0),
+        notes: a.notes ? String(a.notes) : null,
+      });
+      if (error) throw new Error(error.message);
+      return { summary: `Created product "${pname}" with SKU ${sku} (category ${cat.name})` };
+    }
+    case "delete_product": {
+      const { data: prod } = await sb.from("products").select("*").eq("sku", a.sku).maybeSingle();
+      if (!prod) throw new Error(`Product ${a.sku} not found`);
+      const [oi, si, ib] = await Promise.all([
+        sb.from("order_items").select("id", { count: "exact", head: true }).eq("product_id", prod.id),
+        sb.from("shipment_items").select("id", { count: "exact", head: true }).eq("product_id", prod.id),
+        sb.from("inventory_batches").select("id", { count: "exact", head: true }).eq("product_id", prod.id),
+      ]);
+      const used = (oi.count ?? 0) + (si.count ?? 0) + (ib.count ?? 0);
+      if (used > 0) {
+        if (!prod.archived) {
+          const { error } = await sb.from("products").update({ archived: true }).eq("id", prod.id);
+          if (error) throw new Error(error.message);
+        }
+        return {
+          summary: `${a.sku} is used in ${used} order/shipment/batch record(s), so it was archived instead of deleted`,
+          old: { archived: prod.archived },
+        };
+      }
+      const { error } = await sb.from("products").delete().eq("id", prod.id);
+      if (error) throw new Error(error.message);
+      return { summary: `Deleted product ${a.sku} ("${prod.name}")`, old: prod as Record<string, unknown> };
     }
     case "archive_product": {
-      const { data, error } = await sb.from("products").update({ archived: !!a.archived }).eq("sku", a.sku).select("sku");
+      const { data: prod } = await sb.from("products").select("id, archived").eq("sku", a.sku).maybeSingle();
+      if (!prod) throw new Error(`Product ${a.sku} not found`);
+      const { error } = await sb.from("products").update({ archived: !!a.archived }).eq("id", prod.id);
       if (error) throw new Error(error.message);
-      if (!data?.length) throw new Error(`Product ${a.sku} not found`);
-      return `${a.archived ? "Archived" : "Restored"} ${a.sku}`;
+      return { summary: `${a.archived ? "Archived" : "Restored"} ${a.sku}`, old: { archived: prod.archived } };
     }
     case "set_platform_fee": {
       const patch: Record<string, unknown> = {};
       for (const k of ["commission_percent", "transaction_fee_percent", "fixed_fee", "sst_percent"]) if (typeof a[k] === "number") patch[k] = a[k];
       if (a.waiver_until !== undefined) patch["waiver_until"] = a.waiver_until || null;
       if (!Object.keys(patch).length) throw new Error("Nothing to change");
-      const { data, error } = await sb.from("platform_fees").update(patch).ilike("platform", a.platform).select("platform");
+      const { data: oldRow } = await sb.from("platform_fees").select("*").ilike("platform", a.platform).maybeSingle();
+      if (!oldRow) throw new Error(`Platform ${a.platform} not found`);
+      const { error } = await sb.from("platform_fees").update(patch).eq("id", oldRow.id);
       if (error) throw new Error(error.message);
-      if (!data?.length) throw new Error(`Platform ${a.platform} not found`);
-      return `Updated ${data[0].platform} fees: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`;
+      const old: Record<string, unknown> = {};
+      for (const k of Object.keys(patch)) old[k] = (oldRow as any)[k];
+      return { summary: `Updated ${oldRow.platform} fees: ${Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(", ")}`, old };
     }
     case "add_bank_transaction": {
       const mm = m(a);
@@ -268,21 +458,25 @@ async function runTool(sb: any, name: string, a: any): Promise<string> {
       let q = sb.from("bank_transactions").select("id").eq("account_id", acc.id).eq("txn_date", a.date).eq("amount", mm.amount);
       q = note ? q.eq("note", note) : q.is("note", null);
       const { data: dup } = await q.limit(1);
-      if (dup?.length) return `SKIPPED duplicate: ${acc.name} ${a.date} ${fmt(mm.amount, mm.currency)}${note ? ` "${note}"` : ""}`;
+      if (dup?.length) return { summary: `SKIPPED duplicate: ${acc.name} ${a.date} ${fmt(mm.amount, mm.currency)}${note ? ` "${note}"` : ""}` };
       const { error } = await sb.from("bank_transactions").insert({ account_id: acc.id, to_account_id: null, txn_type: a.type, txn_date: a.date, note, receipt_path: null, ...mm });
       if (error) throw new Error(error.message);
-      return `Added ${a.type} ${fmt(mm.amount, mm.currency)} to ${acc.name} on ${a.date}${note ? ` "${note}"` : ""}`;
+      return { summary: `Added ${a.type} ${fmt(mm.amount, mm.currency)} to ${acc.name} on ${a.date}${note ? ` "${note}"` : ""}` };
     }
     case "record_balance_check": {
       const acc = await findAccount(sb, a.account);
       const actual = Number(a.actual_balance);
       if (!Number.isFinite(actual)) throw new Error("actual_balance must be a number");
+      const { data: prev } = await sb.from("bank_accounts").select("actual_balance, actual_checked_at").eq("id", acc.id).maybeSingle();
       const { error } = await sb.from("bank_accounts").update({ actual_balance: actual, actual_checked_at: a.date }).eq("id", acc.id);
       if (error) throw new Error(error.message);
       const { data: bal } = await sb.from("bank_account_balances").select("balance_native").eq("id", acc.id).maybeSingle();
       const sys = Number(bal?.balance_native ?? 0);
       const diff = Math.round((actual - sys) * 100) / 100;
-      return `Balance check ${acc.name} on ${a.date}: actual ${fmt(actual, acc.currency)}, system ${fmt(sys, acc.currency)}, difference ${fmt(diff, acc.currency)}`;
+      return {
+        summary: `Balance check ${acc.name} on ${a.date}: actual ${fmt(actual, acc.currency)}, system ${fmt(sys, acc.currency)}, difference ${fmt(diff, acc.currency)}`,
+        old: { actual_balance: prev?.actual_balance ?? null, actual_checked_at: prev?.actual_checked_at ?? null },
+      };
     }
   }
   throw new Error(`Unknown tool ${name}`);
@@ -306,7 +500,7 @@ export const askAiManager = createServerFn({ method: "POST" })
 
     const systemPrompt = `You are the AI Manager of Khoyoot, an internal business operating system for a small Palestinian heritage-goods business run by three partners (Ahmad and Nur in Malaysia, May in Palestine who makes the products). Sales happen on TikTok Shop, Shopee and Lazada. Today is ${today}.
 
-ACTIONS: When the Owner explicitly instructs you (typed, or from a photo of a receipt/invoice), perform the action directly with your tools — no confirmation step — then report exactly what you did with the numbers. You can add shared expenses, add partner transactions, edit products (name, sale price, weight, notes, min stock), archive/restore products, update platform fees, add bank transactions and record bank balance checks. You can NEVER hard delete anything, and never change SKUs, stock, orders or shipments. NEVER invent numbers: if an amount, currency rate, partner, product, category, account or date is missing or ambiguous, ask ONE short question instead of acting. Rates, prices and fees change all the time — never assume fixed values; use only what the user gave or what is in the data. Profit shares are set per shipment, not per partner. Only act on explicit instructions; for questions just analyze.
+ACTIONS: When the Owner explicitly instructs you (typed, or from a photo of a receipt/invoice), perform the action directly with your tools — no confirmation step — then report exactly what you did with the numbers. You can add shared expenses, add partner transactions, edit products (name, category, sale price, weight, notes, min stock), create products (the SKU is generated automatically from the category — never accept a typed SKU), delete products that were never used in a shipment/order/batch (otherwise archive and explain), archive/restore products, update platform fees, add bank transactions and record bank balance checks. You also have read-only search tools (find_products, find_orders, find_expenses, find_shipments) that return ids and key fields — use them before acting so you never guess an id, and if several records match, ask which one. You can NEVER hard delete anything, and never change SKUs, stock, orders or shipments. NEVER invent numbers: if an amount, currency rate, partner, product, category, account or date is missing or ambiguous, ask ONE short question instead of acting. Rates, prices and fees change all the time — never assume fixed values; use only what the user gave or what is in the data. Profit shares are set per shipment, not per partner. Only act on explicit instructions; for questions just analyze.
 GXBank transaction screenshots can be entered with add_bank_transaction (one call per row; money in = deposit or platform_payout, money out = withdrawal or expense_payment; use the row's description as note); enter only rows that are clearly readable, list unreadable rows back instead of guessing, and confirm what was entered and what was skipped as duplicate.
 
 ANALYSIS: Analyze the live data below and give practical, specific advice (profitable products, reorder needs, ship now or wait, posting times, partner balances, profit-split scenarios, margins). Use the actual numbers; say when data is missing. For attached photos, count precisely or quote the figures you read.
@@ -372,13 +566,15 @@ ${businessData}`;
         let result: any;
         try {
           args = JSON.parse(c.arguments || "{}");
-          const summary = await runTool(supabase, c.name, args);
-          result = { ok: true, summary };
-          actions.push({ tool: c.name, summary, ok: true });
+          const r = await runTool(supabase, c.name, args);
+          result = { ok: true, summary: r.summary, ...(r.old !== undefined ? { old: r.old } : {}) };
+          if (!r.silent) {
+            actions.push({ tool: c.name, summary: r.summary, ok: true });
+            await supabase.from("ai_action_log").insert({ user_id: userId, tool: c.name, args, result });
+          }
         } catch (e) {
           result = { ok: false, error: e instanceof Error ? e.message : String(e) };
         }
-        if (result.ok) await supabase.from("ai_action_log").insert({ user_id: userId, tool: c.name, args, result });
         input.push({ type: "function_call_output", call_id: c.call_id, output: JSON.stringify(result) });
       }
     }
