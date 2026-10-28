@@ -65,6 +65,55 @@ const money = {
 const TOOLS = [
   {
     type: "function",
+    name: "find_products",
+    description: "Search products by name or SKU. Returns ids and key fields so you never guess an id. Read-only.",
+    parameters: {
+      type: "object",
+      properties: { query: { type: "string", description: "name or SKU fragment" } },
+      required: ["query"],
+    },
+  },
+  {
+    type: "function",
+    name: "find_orders",
+    description: "Search orders by date, platform, customer name or order reference. Read-only.",
+    parameters: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "YYYY-MM-DD" },
+        platform: { type: "string" },
+        customer: { type: "string" },
+        reference: { type: "string", description: "order number / reference" },
+      },
+    },
+  },
+  {
+    type: "function",
+    name: "find_expenses",
+    description: "Search expenses by date, category or description. Read-only.",
+    parameters: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "YYYY-MM-DD" },
+        category: { type: "string" },
+        description: { type: "string" },
+      },
+    },
+  },
+  {
+    type: "function",
+    name: "find_shipments",
+    description: "Search shipments by reference or stage/status. Read-only.",
+    parameters: {
+      type: "object",
+      properties: {
+        reference: { type: "string" },
+        stage: { type: "string", description: "e.g. preparing, in_transit, customs, arrived_in_malaysia" },
+      },
+    },
+  },
+  {
+    type: "function",
     name: "add_shared_expense",
     description: "Record a shared business expense split between partners.",
     parameters: {
@@ -109,11 +158,38 @@ const TOOLS = [
       properties: {
         sku: { type: "string" },
         name: { type: "string" },
+        category: { type: "string", description: "category name (existing categories only)" },
         sale_price: { type: "number" },
         weight_grams: { type: "number" },
         notes: { type: "string" },
         min_stock: { type: "integer" },
       },
+      required: ["sku"],
+    },
+  },
+  {
+    type: "function",
+    name: "create_product",
+    description: "Create a product. The SKU is generated automatically from the category prefix; never accept a typed SKU.",
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        category: { type: "string", description: "category name (existing categories only)" },
+        sale_price: { type: "number" },
+        weight_grams: { type: "number" },
+        notes: { type: "string" },
+      },
+      required: ["name", "category"],
+    },
+  },
+  {
+    type: "function",
+    name: "delete_product",
+    description: "Delete a product by SKU, only if it was never used in a shipment, order or batch. Otherwise it is archived instead and you explain why.",
+    parameters: {
+      type: "object",
+      properties: { sku: { type: "string" } },
       required: ["sku"],
     },
   },
