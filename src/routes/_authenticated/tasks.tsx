@@ -40,24 +40,6 @@ export const Route = createFileRoute("/_authenticated/tasks")({
 
 const STATUSES = ["todo", "in_progress", "done"] as const;
 
-const SECTIONS = [
-  { key: "todo", labelKey: "taskPending", dot: "bg-muted-foreground" },
-  { key: "in_progress", labelKey: "taskInProgress", dot: "bg-info" },
-  { key: "done", labelKey: "taskCompleted", dot: "bg-success" },
-] as const;
-
-const PRIORITY_TONE: Record<string, string> = {
-  high: "border-destructive/40 bg-destructive/15 text-destructive",
-  normal: "border-warning/40 bg-warning/20 text-warning-foreground",
-  low: "bg-muted text-muted-foreground",
-};
-
-const STATUS_TONE: Record<string, string> = {
-  todo: "bg-muted text-muted-foreground",
-  in_progress: "border-info/40 bg-info/20 text-foreground",
-  done: "border-success/40 bg-success/20 text-foreground",
-};
-
 function TasksPage() {
   const qc = useQueryClient();
   const { data: user } = useUser();
@@ -122,7 +104,7 @@ function TasksPage() {
   });
 
   const tasks = (tasksQ.data ?? []).filter(
-    (t: any) => assignee === "all" || t.assignee_id === assignee,
+    (t: any) => !t.is_marketing && (assignee === "all" || t.assignee_id === assignee),
   );
 
   return (
