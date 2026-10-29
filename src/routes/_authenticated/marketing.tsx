@@ -464,7 +464,91 @@ function MarketingPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="mtasks" className="mt-4">
+          <div className="mb-4">
+            <Button onClick={() => { setEditingMtask(null); setMtaskOpen(true); }}>{t("mk_newTask")}</Button>
+          </div>
+          <TaskSections
+            tasks={(mtasksQ.data ?? []) as any[]}
+            onEdit={(task) => { setEditingMtask(task); setMtaskOpen(true); }}
+            onDelete={(id) => setDelMtask(id)}
+            onSetStatus={(id, status) => setMtaskStatus.mutate({ id, status })}
+          />
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={mtaskOpen} onOpenChange={(v) => { setMtaskOpen(v); if (!v) setEditingMtask(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingMtask ? t("edit") : t("mk_newTask")}</DialogTitle>
+          </DialogHeader>
+          <form
+            key={editingMtask?.id ?? "new-mtask"}
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              const a = String(f.get("assignee_id") || "");
+              saveMtask.mutate({
+                title: String(f.get("title")),
+                description: String(f.get("description") || "") || null,
+                assignee_id: a || null,
+                due_date: String(f.get("due_date") || "") || null,
+                priority: String(f.get("priority")),
+              });
+            }}
+          >
+            <div className="space-y-2">
+              <Label htmlFor="m-title">{tt("Title")}</Label>
+              <Input id="m-title" name="title" required defaultValue={editingMtask?.title ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="m-desc">{tt("Description")}</Label>
+              <Textarea id="m-desc" name="description" defaultValue={editingMtask?.description ?? ""} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="m-assignee">{tt("Assignee")}</Label>
+                <select
+                  id="m-assignee"
+                  name="assignee_id"
+                  defaultValue={editingMtask?.assignee_id ?? ""}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">{tt("Unassigned")}</option>
+                  {(mpeopleQ.data ?? []).map((p: any) => (
+                    <option key={p.id} value={p.id}>
+                      {p.full_name || p.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="m-priority">{tt("Priority")}</Label>
+                <select
+                  id="m-priority"
+                  name="priority"
+                  defaultValue={editingMtask?.priority ?? "normal"}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="low">{tt("Low")}</option>
+                  <option value="normal">{tt("Normal")}</option>
+                  <option value="high">{tt("High")}</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="m-due">{tt("Due date")}</Label>
+              <Input id="m-due" name="due_date" type="date" defaultValue={editingMtask?.due_date ?? ""} />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={saveMtask.isPending}>{tt("Save")}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <ConfirmDelete open={!!delMtask} onOpenChange={(v) => !v && setDelMtask(null)} onConfirm={() => delMtask && delMtaskM.mutate(delMtask)} />
 
       <Dialog open={snapOpen} onOpenChange={setSnapOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto">
