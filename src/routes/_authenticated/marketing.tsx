@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Check, ExternalLink, Pencil, Trash2, Plus } from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { ReceiptUpload, openReceipt } from "@/components/receipt-upload";
 import { MoneyFields, readMoney, fmtMoney, useAppSettings } from "@/lib/money";
@@ -118,6 +118,18 @@ function MarketingPage() {
     if (error) throw error;
     return data ?? [];
   } });
+  const socialQ = useQuery({ queryKey: ["social-links"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase.from("app_settings").select("list_options").eq("id", true).maybeSingle();
+    if (error) throw error;
+    return (((data?.list_options as any)?.social_links) ?? []) as { platform: string; url: string }[];
+  } });
+  const saveSocial = useMutation({ mutationFn: async (links: { platform: string; url: string }[]) => {
+    const { data: cur, error: e1 } = await supabase.from("app_settings").select("list_options").eq("id", true).maybeSingle();
+    if (e1) throw e1;
+    const { error } = await supabase.from("app_settings").update({ list_options: { ...((cur?.list_options as any) ?? {}), social_links: links }, updated_at: new Date().toISOString() } as never).eq("id", true);
+    if (error) throw error;
+  }, onSuccess: () => { toast.success(t("saved")); void qc.invalidateQueries({ queryKey: ["social-links"] }); },
+    onError: (e: Error) => toast.error(e.message) });
   const saveSnap = useMutation({ mutationFn: async (payload: Record<string, unknown>) => {
     const { error } = editingSnap
       ? await supabase.from("platform_analytics").update(payload as never).eq("id", editingSnap.id)
@@ -191,6 +203,7 @@ function MarketingPage() {
           <TabsTrigger value="content">{tt("Content calendar")}</TabsTrigger>
           <TabsTrigger value="campaigns">{tt("Campaigns")}</TabsTrigger>
           <TabsTrigger value="analytics">{tt("Platform Analytics")}</TabsTrigger>
+          <TabsTrigger value="accounts">{t("mk_accounts")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="mt-4">
@@ -232,6 +245,9 @@ function MarketingPage() {
                         </select>
                       </TableCell>
                       <TableCell><div className="flex gap-1">
+                        {c.status !== "posted" && (
+                          <Button size="icon" variant="ghost" aria-label={t("mk_markPosted")} title={t("mk_markPosted")} onClick={() => updatePost.mutate({ id: c.id, status: "posted" })}><Check className="size-4" /></Button>
+                        )}
                         <Button size="icon" variant="ghost" aria-label={t("edit")} onClick={() => { setEditingPost(c); setPostOpen(true); }}><Pencil className="size-4" /></Button>
                         <Button size="icon" variant="ghost" aria-label={t("delete")} onClick={() => setDeleting({ table: "content_calendar", id: c.id })}><Trash2 className="size-4" /></Button>
                       </div></TableCell>
