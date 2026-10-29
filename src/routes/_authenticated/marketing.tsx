@@ -24,6 +24,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/lib/format";
 import { Check, ExternalLink, Pencil, Trash2, Plus } from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
+import { TaskSections } from "@/components/task-sections";
+import { useUser } from "@/lib/auth";
 import { ReceiptUpload, openReceipt } from "@/components/receipt-upload";
 import { MoneyFields, readMoney, fmtMoney, useAppSettings } from "@/lib/money";
 

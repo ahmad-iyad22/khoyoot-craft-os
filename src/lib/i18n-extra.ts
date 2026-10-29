@@ -402,6 +402,8 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   mk_addAccount: { en: "Add account", ar: "إضافة حساب" },
   mk_accountUrl: { en: "Link (URL)", ar: "الرابط" },
   mk_noAccounts: { en: "No accounts yet — add your Instagram, TikTok or other pages.", ar: "لا توجد حسابات بعد — أضف إنستغرام أو تيك توك أو صفحاتك الأخرى." },
+  mk_tasks: { en: "Marketing tasks", ar: "مهام التسويق" },
+  mk_newTask: { en: "New marketing task", ar: "مهمة تسويقية جديدة" },
   al_byAi: { en: "by AI", ar: "بواسطة الذكاء الاصطناعي" },
   aiRemovePhoto: { en: "Remove photo", ar: "إزالة الصورة" },
   aiErrPhotoOnly: { en: "Please attach an image file", ar: "الرجاء إرفاق ملف صورة" },
