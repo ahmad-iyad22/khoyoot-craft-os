@@ -347,6 +347,85 @@ function MarketingPage() {
             onDelete={(id) => setDeleting({ table: "platform_analytics", id })}
           />
         </TabsContent>
+
+        <TabsContent value="accounts" className="mt-4">
+          <Card>
+            <CardContent className="space-y-4 pt-6">
+              <form
+                className="flex flex-wrap items-end gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const f = new FormData(form);
+                  const platform = String(f.get("platform") || "").trim();
+                  const url = String(f.get("url") || "").trim();
+                  if (!platform || !url) return;
+                  saveSocial.mutate([...(socialQ.data ?? []), { platform, url }]);
+                  form.reset();
+                }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="s-platform">{tt("Platform")}</Label>
+                  <Input id="s-platform" name="platform" required placeholder="Instagram" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-url">{t("mk_accountUrl")}</Label>
+                  <Input id="s-url" name="url" type="url" required placeholder="https://instagram.com/..." className="min-w-64" dir="ltr" />
+                </div>
+                <Button type="submit" disabled={saveSocial.isPending}>{t("mk_addAccount")}</Button>
+              </form>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{tt("Platform")}</TableHead>
+                    <TableHead>{t("mk_accountUrl")}</TableHead>
+                    <TableHead className="w-24" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(socialQ.data ?? []).map((s, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Input
+                          defaultValue={s.platform}
+                          onBlur={(e) => {
+                            const v = e.target.value.trim();
+                            if (v && v !== s.platform) saveSocial.mutate((socialQ.data ?? []).map((x, j) => (j === i ? { ...x, platform: v } : x)));
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            dir="ltr"
+                            defaultValue={s.url}
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v && v !== s.url) saveSocial.mutate((socialQ.data ?? []).map((x, j) => (j === i ? { ...x, url: v } : x)));
+                            }}
+                          />
+                          <Button size="icon" variant="ghost" aria-label={t("mk_accountUrl")} onClick={() => window.open(s.url, "_blank", "noopener")}>
+                            <ExternalLink className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="icon" variant="ghost" aria-label={t("delete")} onClick={() => saveSocial.mutate((socialQ.data ?? []).filter((_, j) => j !== i))}>
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(socialQ.data ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground">{t("mk_noAccounts")}</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       <Dialog open={snapOpen} onOpenChange={setSnapOpen}>
