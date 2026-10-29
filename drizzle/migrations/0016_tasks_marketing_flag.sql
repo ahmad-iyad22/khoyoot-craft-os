@@ -1,0 +1,1 @@
+ALTER TABLE public.tasks ADD COLUMN is_marketing boolean NOT NULL DEFAULT false;

@@ -20,3 +20,6 @@
 
 - [x] Order import: CSV/XLSX upload, matching/review, atomic per-order creation, fee snapshots and duplicate safety; five parser tests pass.
 - [ ] Order import signed-in EN/AR and real marketplace-file checks — blocked: no matching account for managed preview sign-in; needs user sign-in.
+- [ ] Tasks: sections (Pending / In Progress / Completed), done tasks auto-move, colored status/priority badges.
+- [ ] Marketing: quick "mark as posted" on content posts; company social accounts (Instagram etc.) editable list.
+- [ ] Marketing: own task list inside Marketing section (Pending/In Progress/Completed, edit/assign/deadline), separate from general tasks.

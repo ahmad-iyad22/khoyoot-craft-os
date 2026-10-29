@@ -22,8 +22,10 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Check, ExternalLink, Pencil, Trash2, Plus } from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
+import { TaskSections } from "@/components/task-sections";
+import { useUser } from "@/lib/auth";
 import { ReceiptUpload, openReceipt } from "@/components/receipt-upload";
 import { MoneyFields, readMoney, fmtMoney, useAppSettings } from "@/lib/money";
 
@@ -58,6 +60,10 @@ function MarketingPage() {
   const qc = useQueryClient();
   const [postOpen, setPostOpen] = useState(false);
   const [campaignOpen, setCampaignOpen] = useState(false);
+  const { data: user } = useUser();
+  const [mtaskOpen, setMtaskOpen] = useState(false);
+  const [editingMtask, setEditingMtask] = useState<any>(null);
+  const [delMtask, setDelMtask] = useState<string | null>(null);
 
   const productsQ = useQuery({
     queryKey: ["products-basic"],
@@ -118,6 +124,49 @@ function MarketingPage() {
     if (error) throw error;
     return data ?? [];
   } });
+  const socialQ = useQuery({ queryKey: ["social-links"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase.from("app_settings").select("list_options").eq("id", true).maybeSingle();
+    if (error) throw error;
+    return (((data?.list_options as any)?.social_links) ?? []) as { platform: string; url: string }[];
+  } });
+  const mpeopleQ = useQuery({ queryKey: ["profiles"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase.from("profiles").select("id, full_name, email").order("email");
+    if (error) throw error;
+    return data ?? [];
+  } });
+  const mtasksQ = useQuery({ queryKey: ["marketing-tasks"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*, profiles:assignee_id(full_name, email)")
+      .eq("is_marketing", true)
+      .order("due_date", { ascending: true, nullsFirst: false });
+    if (error) throw error;
+    return data ?? [];
+  } });
+  const saveMtask = useMutation({ mutationFn: async (payload: Record<string, unknown>) => {
+    const { error } = editingMtask
+      ? await supabase.from("tasks").update(payload as never).eq("id", editingMtask.id)
+      : await supabase.from("tasks").insert({ ...payload, is_marketing: true, status: "todo", created_by: user?.id } as never);
+    if (error) throw error;
+  }, onSuccess: () => { toast.success(t("saved")); setMtaskOpen(false); setEditingMtask(null); void qc.invalidateQueries({ queryKey: ["marketing-tasks"] }); },
+    onError: (e: Error) => toast.error(e.message) });
+  const delMtaskM = useMutation({ mutationFn: async (id: string) => {
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) throw error;
+  }, onSuccess: () => { setDelMtask(null); void qc.invalidateQueries({ queryKey: ["marketing-tasks"] }); },
+    onError: (e: Error) => toast.error(e.message) });
+  const setMtaskStatus = useMutation({ mutationFn: async (v: { id: string; status: string }) => {
+    const { error } = await supabase.from("tasks").update({ status: v.status }).eq("id", v.id);
+    if (error) throw error;
+  }, onSuccess: () => void qc.invalidateQueries({ queryKey: ["marketing-tasks"] }),
+    onError: (e: Error) => toast.error(e.message) });
+  const saveSocial = useMutation({ mutationFn: async (links: { platform: string; url: string }[]) => {
+    const { data: cur, error: e1 } = await supabase.from("app_settings").select("list_options").eq("id", true).maybeSingle();
+    if (e1) throw e1;
+    const { error } = await supabase.from("app_settings").update({ list_options: { ...((cur?.list_options as any) ?? {}), social_links: links }, updated_at: new Date().toISOString() } as never).eq("id", true);
+    if (error) throw error;
+  }, onSuccess: () => { toast.success(t("saved")); void qc.invalidateQueries({ queryKey: ["social-links"] }); },
+    onError: (e: Error) => toast.error(e.message) });
   const saveSnap = useMutation({ mutationFn: async (payload: Record<string, unknown>) => {
     const { error } = editingSnap
       ? await supabase.from("platform_analytics").update(payload as never).eq("id", editingSnap.id)
@@ -191,6 +240,8 @@ function MarketingPage() {
           <TabsTrigger value="content">{tt("Content calendar")}</TabsTrigger>
           <TabsTrigger value="campaigns">{tt("Campaigns")}</TabsTrigger>
           <TabsTrigger value="analytics">{tt("Platform Analytics")}</TabsTrigger>
+          <TabsTrigger value="accounts">{t("mk_accounts")}</TabsTrigger>
+          <TabsTrigger value="mtasks">{t("mk_tasks")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="mt-4">
@@ -232,6 +283,9 @@ function MarketingPage() {
                         </select>
                       </TableCell>
                       <TableCell><div className="flex gap-1">
+                        {c.status !== "posted" && (
+                          <Button size="icon" variant="ghost" aria-label={t("mk_markPosted")} title={t("mk_markPosted")} onClick={() => updatePost.mutate({ id: c.id, status: "posted" })}><Check className="size-4" /></Button>
+                        )}
                         <Button size="icon" variant="ghost" aria-label={t("edit")} onClick={() => { setEditingPost(c); setPostOpen(true); }}><Pencil className="size-4" /></Button>
                         <Button size="icon" variant="ghost" aria-label={t("delete")} onClick={() => setDeleting({ table: "content_calendar", id: c.id })}><Trash2 className="size-4" /></Button>
                       </div></TableCell>
@@ -331,7 +385,170 @@ function MarketingPage() {
             onDelete={(id) => setDeleting({ table: "platform_analytics", id })}
           />
         </TabsContent>
+
+        <TabsContent value="accounts" className="mt-4">
+          <Card>
+            <CardContent className="space-y-4 pt-6">
+              <form
+                className="flex flex-wrap items-end gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const f = new FormData(form);
+                  const platform = String(f.get("platform") || "").trim();
+                  const url = String(f.get("url") || "").trim();
+                  if (!platform || !url) return;
+                  saveSocial.mutate([...(socialQ.data ?? []), { platform, url }]);
+                  form.reset();
+                }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="s-platform">{tt("Platform")}</Label>
+                  <Input id="s-platform" name="platform" required placeholder="Instagram" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-url">{t("mk_accountUrl")}</Label>
+                  <Input id="s-url" name="url" type="url" required placeholder="https://instagram.com/..." className="min-w-64" dir="ltr" />
+                </div>
+                <Button type="submit" disabled={saveSocial.isPending}>{t("mk_addAccount")}</Button>
+              </form>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{tt("Platform")}</TableHead>
+                    <TableHead>{t("mk_accountUrl")}</TableHead>
+                    <TableHead className="w-24" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(socialQ.data ?? []).map((s, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Input
+                          defaultValue={s.platform}
+                          onBlur={(e) => {
+                            const v = e.target.value.trim();
+                            if (v && v !== s.platform) saveSocial.mutate((socialQ.data ?? []).map((x, j) => (j === i ? { ...x, platform: v } : x)));
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            dir="ltr"
+                            defaultValue={s.url}
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v && v !== s.url) saveSocial.mutate((socialQ.data ?? []).map((x, j) => (j === i ? { ...x, url: v } : x)));
+                            }}
+                          />
+                          <Button size="icon" variant="ghost" aria-label={t("mk_accountUrl")} onClick={() => window.open(s.url, "_blank", "noopener")}>
+                            <ExternalLink className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="icon" variant="ghost" aria-label={t("delete")} onClick={() => saveSocial.mutate((socialQ.data ?? []).filter((_, j) => j !== i))}>
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(socialQ.data ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground">{t("mk_noAccounts")}</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="mtasks" className="mt-4">
+          <div className="mb-4">
+            <Button onClick={() => { setEditingMtask(null); setMtaskOpen(true); }}>{t("mk_newTask")}</Button>
+          </div>
+          <TaskSections
+            tasks={(mtasksQ.data ?? []) as any[]}
+            onEdit={(task) => { setEditingMtask(task); setMtaskOpen(true); }}
+            onDelete={(id) => setDelMtask(id)}
+            onSetStatus={(id, status) => setMtaskStatus.mutate({ id, status })}
+          />
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={mtaskOpen} onOpenChange={(v) => { setMtaskOpen(v); if (!v) setEditingMtask(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingMtask ? t("edit") : t("mk_newTask")}</DialogTitle>
+          </DialogHeader>
+          <form
+            key={editingMtask?.id ?? "new-mtask"}
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              const a = String(f.get("assignee_id") || "");
+              saveMtask.mutate({
+                title: String(f.get("title")),
+                description: String(f.get("description") || "") || null,
+                assignee_id: a || null,
+                due_date: String(f.get("due_date") || "") || null,
+                priority: String(f.get("priority")),
+              });
+            }}
+          >
+            <div className="space-y-2">
+              <Label htmlFor="m-title">{tt("Title")}</Label>
+              <Input id="m-title" name="title" required defaultValue={editingMtask?.title ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="m-desc">{tt("Description")}</Label>
+              <Textarea id="m-desc" name="description" defaultValue={editingMtask?.description ?? ""} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="m-assignee">{tt("Assignee")}</Label>
+                <select
+                  id="m-assignee"
+                  name="assignee_id"
+                  defaultValue={editingMtask?.assignee_id ?? ""}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">{tt("Unassigned")}</option>
+                  {(mpeopleQ.data ?? []).map((p: any) => (
+                    <option key={p.id} value={p.id}>
+                      {p.full_name || p.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="m-priority">{tt("Priority")}</Label>
+                <select
+                  id="m-priority"
+                  name="priority"
+                  defaultValue={editingMtask?.priority ?? "normal"}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="low">{tt("Low")}</option>
+                  <option value="normal">{tt("Normal")}</option>
+                  <option value="high">{tt("High")}</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="m-due">{tt("Due date")}</Label>
+              <Input id="m-due" name="due_date" type="date" defaultValue={editingMtask?.due_date ?? ""} />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={saveMtask.isPending}>{tt("Save")}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <ConfirmDelete open={!!delMtask} onOpenChange={(v) => !v && setDelMtask(null)} onConfirm={() => delMtask && delMtaskM.mutate(delMtask)} />
 
       <Dialog open={snapOpen} onOpenChange={setSnapOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto">

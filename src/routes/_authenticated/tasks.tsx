@@ -9,9 +9,7 @@ import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +19,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDate, titleCase } from "@/lib/format";
 import { ConfirmDelete } from "@/components/confirm-delete";
-import { Pencil, Trash2 } from "lucide-react";
+import { TaskSections } from "@/components/task-sections";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({
@@ -37,8 +33,6 @@ export const Route = createFileRoute("/_authenticated/tasks")({
   }),
   component: TasksPage,
 });
-
-const STATUSES = ["todo", "in_progress", "done"] as const;
 
 function TasksPage() {
   const qc = useQueryClient();
@@ -104,7 +98,7 @@ function TasksPage() {
   });
 
   const tasks = (tasksQ.data ?? []).filter(
-    (t: any) => assignee === "all" || t.assignee_id === assignee,
+    (t: any) => !t.is_marketing && (assignee === "all" || t.assignee_id === assignee),
   );
 
   return (
@@ -206,70 +200,12 @@ function TasksPage() {
         </Select>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{tt("Task")}</TableHead>
-                <TableHead>{tt("Assignee")}</TableHead>
-                <TableHead>{tt("Due")}</TableHead>
-                <TableHead>{tt("Priority")}</TableHead>
-                <TableHead>{tt("Status")}</TableHead>
-                <TableHead />
-
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tasks.map((t: any) => (
-                <TableRow key={t.id}>
-                  <TableCell>
-                    <p className="font-medium">{t.title}</p>
-                    {t.description && (
-                      <p className="text-xs text-muted-foreground rtl-content">{t.description}</p>
-                    )}
-                  </TableCell>
-                  <TableCell>{t.profiles?.full_name || t.profiles?.email || tt("Unassigned")}</TableCell>
-                  <TableCell>{formatDate(t.due_date)}</TableCell>
-                  <TableCell>
-                    <Badge variant={t.priority === "high" ? "destructive" : "secondary"}>
-                      {tt(titleCase(t.priority))}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <select
-                      value={t.status}
-                      onChange={(e) => setStatus.mutate({ id: t.id, status: e.target.value })}
-                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                    >
-                      {STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {tt(titleCase(s))}
-                        </option>
-                      ))}
-                    </select>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => { setEditing(t); setOpen(true); }}>
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDel(t.id)}>
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {tasks.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    {tt("No tasks yet.")}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <TaskSections
+        tasks={tasks}
+        onEdit={(task) => { setEditing(task); setOpen(true); }}
+        onDelete={(id) => setDel(id)}
+        onSetStatus={(id, status) => setStatus.mutate({ id, status })}
+      />
       <ConfirmDelete open={!!del} onOpenChange={(v) => !v && setDel(null)} onConfirm={() => del && remove.mutate(del)} />
     </div>
   );
