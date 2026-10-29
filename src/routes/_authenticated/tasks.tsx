@@ -9,9 +9,7 @@ import { PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +19,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDate, titleCase } from "@/lib/format";
 import { ConfirmDelete } from "@/components/confirm-delete";
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { TaskSections } from "@/components/task-sections";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({
@@ -37,8 +33,6 @@ export const Route = createFileRoute("/_authenticated/tasks")({
   }),
   component: TasksPage,
 });
-
-const STATUSES = ["todo", "in_progress", "done"] as const;
 
 function TasksPage() {
   const qc = useQueryClient();
