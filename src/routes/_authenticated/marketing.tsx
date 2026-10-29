@@ -60,6 +60,10 @@ function MarketingPage() {
   const qc = useQueryClient();
   const [postOpen, setPostOpen] = useState(false);
   const [campaignOpen, setCampaignOpen] = useState(false);
+  const { data: user } = useUser();
+  const [mtaskOpen, setMtaskOpen] = useState(false);
+  const [editingMtask, setEditingMtask] = useState<any>(null);
+  const [delMtask, setDelMtask] = useState<string | null>(null);
 
   const productsQ = useQuery({
     queryKey: ["products-basic"],
@@ -125,6 +129,37 @@ function MarketingPage() {
     if (error) throw error;
     return (((data?.list_options as any)?.social_links) ?? []) as { platform: string; url: string }[];
   } });
+  const mpeopleQ = useQuery({ queryKey: ["profiles"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase.from("profiles").select("id, full_name, email").order("email");
+    if (error) throw error;
+    return data ?? [];
+  } });
+  const mtasksQ = useQuery({ queryKey: ["marketing-tasks"], enabled: roles.isMarketing, queryFn: async () => {
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*, profiles:assignee_id(full_name, email)")
+      .eq("is_marketing", true)
+      .order("due_date", { ascending: true, nullsFirst: false });
+    if (error) throw error;
+    return data ?? [];
+  } });
+  const saveMtask = useMutation({ mutationFn: async (payload: Record<string, unknown>) => {
+    const { error } = editingMtask
+      ? await supabase.from("tasks").update(payload as never).eq("id", editingMtask.id)
+      : await supabase.from("tasks").insert({ ...payload, is_marketing: true, status: "todo", created_by: user?.id } as never);
+    if (error) throw error;
+  }, onSuccess: () => { toast.success(t("saved")); setMtaskOpen(false); setEditingMtask(null); void qc.invalidateQueries({ queryKey: ["marketing-tasks"] }); },
+    onError: (e: Error) => toast.error(e.message) });
+  const delMtaskM = useMutation({ mutationFn: async (id: string) => {
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) throw error;
+  }, onSuccess: () => { setDelMtask(null); void qc.invalidateQueries({ queryKey: ["marketing-tasks"] }); },
+    onError: (e: Error) => toast.error(e.message) });
+  const setMtaskStatus = useMutation({ mutationFn: async (v: { id: string; status: string }) => {
+    const { error } = await supabase.from("tasks").update({ status: v.status }).eq("id", v.id);
+    if (error) throw error;
+  }, onSuccess: () => void qc.invalidateQueries({ queryKey: ["marketing-tasks"] }),
+    onError: (e: Error) => toast.error(e.message) });
   const saveSocial = useMutation({ mutationFn: async (links: { platform: string; url: string }[]) => {
     const { data: cur, error: e1 } = await supabase.from("app_settings").select("list_options").eq("id", true).maybeSingle();
     if (e1) throw e1;
@@ -206,6 +241,7 @@ function MarketingPage() {
           <TabsTrigger value="campaigns">{tt("Campaigns")}</TabsTrigger>
           <TabsTrigger value="analytics">{tt("Platform Analytics")}</TabsTrigger>
           <TabsTrigger value="accounts">{t("mk_accounts")}</TabsTrigger>
+          <TabsTrigger value="mtasks">{t("mk_tasks")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="mt-4">
