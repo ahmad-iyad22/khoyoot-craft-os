@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { EInvoiceWarning } from "@/components/einvoice-warning";
+import { WorkOverview } from "@/components/work-overview";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import {
@@ -193,6 +194,7 @@ function Dashboard() {
 
       {roles.isOwner && <MonthEndCards />}
       {roles.isOwner && <EInvoiceWarning />}
+      <WorkOverview />
 
       {lowStock.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-warning/40 bg-warning/15 px-4 py-3 text-sm">
