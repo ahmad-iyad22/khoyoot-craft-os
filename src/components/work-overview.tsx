@@ -75,7 +75,7 @@ export function WorkOverview() {
   const camps = (campQ.data ?? []) as any[];
   const spent = new Map<string, number>();
   for (const e of (costsQ.data ?? []) as any[]) spent.set(e.campaign_id, (spent.get(e.campaign_id) ?? 0) + Number(e.base_amount ?? 0));
-  const ended = (c: any) => c.status === "completed" || (c.end_date && c.end_date < now);
+  const ended = (c: any) => c.status === "finished" || (c.end_date && c.end_date < now);
   const notStarted = camps.filter((c) => !ended(c) && (c.status === "planned" || (c.start_date && c.start_date > now)));
   const running = camps.filter((c) => !ended(c) && !notStarted.includes(c));
   const finished = camps.filter(ended);

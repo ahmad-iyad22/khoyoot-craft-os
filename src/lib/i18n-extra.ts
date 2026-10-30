@@ -489,7 +489,6 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   ord_onlyOps: { en: "Orders are available to Owners and Operations.", ar: "الطلبات متاحة للمالكين وفريق العمليات." },
   ord_Manual: { en: "Manual", ar: "يدوي" },
   wo_button: { en: "Write off", ar: "شطب" },
-  wo_title: { en: "Write off / sample / gift", ar: "شطب / عينة / هدية" },
   wo_hint: { en: "Records a loss at landed cost (oldest batch first) and reduces stock. The loss is shared by the batch profit split.", ar: "يسجل خسارة بالتكلفة الواصلة (من أقدم دفعة أولًا) ويخفض المخزون. تُقسم الخسارة حسب نسب ربح الدفعة." },
   wo_reason_damaged: { en: "Damaged", ar: "تالف" },
   wo_reason_lost: { en: "Lost", ar: "مفقود" },
