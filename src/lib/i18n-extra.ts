@@ -1,5 +1,6 @@
 // Extra dictionary entries (merged into DICT without overriding existing keys).
 export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
+  contacts: { en: "Contacts", ar: "جهات الاتصال" },
   wo_title: { en: "Write off / sample / gift", ar: "شطب / عينة / هدية" },
   wo_team: { en: "Team tasks", ar: "مهام الفريق" },
   wo_mktTasks: { en: "Marketing tasks", ar: "مهام التسويق" },
