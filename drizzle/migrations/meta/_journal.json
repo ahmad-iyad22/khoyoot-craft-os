@@ -120,6 +120,13 @@
       "when": 1793238707881,
       "tag": "0016_tasks_marketing_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793324709998,
+      "tag": "0017_contacts",
+      "breakpoints": true
     }
   ]
 }

@@ -356,6 +356,54 @@ export type Database = {
         }
         Relationships: []
       }
+      contacts: {
+        Row: {
+          address: string | null
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          instagram: string | null
+          kind: string
+          name: string
+          notes: string | null
+          other_social: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          kind?: string
+          name: string
+          notes?: string | null
+          other_social?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          kind?: string
+          name?: string
+          notes?: string | null
+          other_social?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       content_calendar: {
         Row: {
           attributed_orders: number
