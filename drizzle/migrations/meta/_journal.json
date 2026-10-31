@@ -127,6 +127,13 @@
       "when": 1793324709998,
       "tag": "0017_contacts",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793461275379,
+      "tag": "0018_category_budgets",
+      "breakpoints": true
     }
   ]
 }

@@ -317,6 +317,39 @@ export type Database = {
         }
         Relationships: []
       }
+      category_budgets: {
+        Row: {
+          amount: number
+          category_code: string
+          created_at: string
+          id: string
+          month: string | null
+          notes: string | null
+          updated_at: string
+          warn_at_percent: number
+        }
+        Insert: {
+          amount: number
+          category_code: string
+          created_at?: string
+          id?: string
+          month?: string | null
+          notes?: string | null
+          updated_at?: string
+          warn_at_percent?: number
+        }
+        Update: {
+          amount?: number
+          category_code?: string
+          created_at?: string
+          id?: string
+          month?: string | null
+          notes?: string | null
+          updated_at?: string
+          warn_at_percent?: number
+        }
+        Relationships: []
+      }
       company_documents: {
         Row: {
           created_at: string
@@ -2424,6 +2457,7 @@ export type Database = {
         Returns: undefined
       }
       allocate_shipment: { Args: { _shipment_id: string }; Returns: undefined }
+      category_budget_status: { Args: { _month: string }; Returns: Json }
       claim_next_sku: { Args: { _code: string }; Returns: string }
       close_month: { Args: { _month: string }; Returns: undefined }
       compute_platform_fee: {
