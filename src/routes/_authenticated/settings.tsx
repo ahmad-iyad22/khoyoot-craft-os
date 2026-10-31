@@ -1,3 +1,4 @@
+import { BudgetSettings } from "@/components/category-budgets";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -387,6 +388,7 @@ function SettingsPage() {
         <TabsContent value="fees" className="mt-4 space-y-6">
           <CurrencySettings canEdit={roles.isOwner} />
           <PlatformFeesSettings canEdit={roles.isOwner} />
+          {roles.isOwner && <BudgetSettings canEdit />}
         </TabsContent>
 
         <TabsContent value="team" className="mt-4">

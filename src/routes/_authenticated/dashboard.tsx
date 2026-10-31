@@ -1,3 +1,4 @@
+import { BudgetStatus } from "@/components/category-budgets";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { EInvoiceWarning } from "@/components/einvoice-warning";
 import { WorkOverview } from "@/components/work-overview";
@@ -194,6 +195,7 @@ function Dashboard() {
 
       {roles.isOwner && <MonthEndCards />}
       {roles.isOwner && <EInvoiceWarning />}
+      {roles.isOwner && <BudgetStatus />}
       <WorkOverview />
 
       {lowStock.length > 0 && (
