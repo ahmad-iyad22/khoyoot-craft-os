@@ -1,3 +1,4 @@
+import { BudgetStatus } from "@/components/category-budgets";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -132,6 +133,7 @@ function SharedExpensesPage() {
           </div>
         }
       />
+      <div className="mb-4"><BudgetStatus month={month} /></div>
 
       <div className="mb-4 space-y-2">
         <Label htmlFor="se-month">{t("month")}</Label>
