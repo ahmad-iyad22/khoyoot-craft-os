@@ -96,7 +96,7 @@ function ContactsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title={L("Contacts", "جهات الاتصال")} description={L("Companies, partners, suppliers and their details.", "الشركات والشركاء والموردون وبيانات التواصل.")}
-        actions={<Button onClick={() => openForm()}><Plus className="size-4" />{L("Add contact", "إضافة جهة")}</Button>} />
+        action={<Button onClick={() => openForm()}><Plus className="size-4" />{L("Add contact", "إضافة جهة")}</Button>} />
       <p className="text-sm text-muted-foreground">
         {L("Supplier prices and payments stay on the ", "أسعار ومدفوعات الموردين في صفحة ")}
         <Link to="/suppliers" className="text-primary hover:underline">{L("Suppliers", "الموردون")}</Link>
@@ -119,7 +119,7 @@ function ContactsPage() {
                     <div className="truncate font-display text-lg">{c.name}</div>
                     {c.contact_person && <div className="text-sm text-muted-foreground">{c.contact_person}</div>}
                   </div>
-                  <Badge variant="outline" className={KIND_TONE[c.kind] ?? KIND_TONE.other}>{LBL[c.kind] ?? c.kind}</Badge>
+                  <Badge variant="outline" className={KIND_TONE[c.kind] ?? KIND_TONE["other"]}>{LBL[c.kind] ?? c.kind}</Badge>
                 </div>
                 <div className="space-y-1 text-sm">
                   {c.phone && <a href={`tel:${c.phone}`} className="flex items-center gap-2 hover:text-primary"><Phone className="size-4" />{c.phone}</a>}
