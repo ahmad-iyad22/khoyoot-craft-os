@@ -1,5 +1,5 @@
 # Current updates
-- [ ] Batch 11: editable capital/reserve settings, marked contributions, snapshot-based repayment, connected totals, one rolled-back SQL test; no browser tests.
+- [x] Batch 11: editable capital/reserve settings, marked contributions, snapshot-based repayment, connected totals; one rolled-back helper SQL test and saved regression passed. Build OK; full month-close/reopen integration and signed-in screens untested, as browser tests were excluded.
 - [ ] Verify loading and bilingual content on Dashboard, Inventory, Orders, Finance and Settings.
 - [ ] Show product photos in Orders and Shipment lines.
 - [ ] Strengthen the Palestinian heritage design in light and dark themes.

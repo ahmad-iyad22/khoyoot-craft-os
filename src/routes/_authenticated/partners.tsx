@@ -214,7 +214,7 @@ function PartnersPage() {
                     <div className="space-y-2 border-b pb-3 text-sm">
                       {(() => {
                         const cp = capitalStatement.data?.partners.find((x) => x.partner_id === p.id);
-                        const contributed = (p.partner_transactions ?? []).filter((x: any) => x.txn_type === "contribution" && x.is_capital && x.txn_date < `${currentMonth()}-32`).reduce((sum: number, x: any) => sum + Number(x.base_amount ?? x.amount), 0);
+                        const contributed = Number(cp?.capital_contributed ?? (p.partner_transactions ?? []).filter((x: any) => x.txn_type === "contribution" && x.is_capital && String(x.txn_date).slice(0, 7) <= currentMonth()).reduce((sum: number, x: any) => sum + Number(x.base_amount ?? x.amount), 0));
                         const outstanding = Number(cp?.capital_outstanding ?? contributed);
                         return <><Stat label={t("cap_contributed")} value={fmtMoney(contributed, baseCur)} /><Stat label={t("cap_returned")} value={fmtMoney(Math.max(contributed - outstanding, 0), baseCur)} /><Stat label={t("cap_outstanding")} value={fmtMoney(outstanding, baseCur)} /><p className="text-xs text-muted-foreground">{t("cap_estimate")}</p></>;
                       })()}
