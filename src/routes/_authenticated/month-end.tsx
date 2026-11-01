@@ -35,6 +35,7 @@ export const Route = createFileRoute("/_authenticated/month-end")({
 
 const LINES: [keyof PartnerStatement, string, 1 | -1][] = [
   ["profit_share", "me_profitShare", 1],
+  ["capital_returned", "cap_returned", 1],
   ["loss_share", "me_lossShare", -1],
   ["item_cost_owed", "me_itemCost", 1],
   ["paid_on_behalf", "me_paidOnBehalf", 1],
@@ -61,7 +62,7 @@ function MonthEndPage() {
       return close;
     },
     onSuccess: (close) => { toast.success(tt(close ? "me_closed" : "me_reopened")); qc.invalidateQueries(); },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message.includes("CAPITAL_CLOSE_ORDER") ? t("cap_closeOrder") : e.message.includes("CAPITAL_REOPEN_ORDER") ? t("cap_reopenOrder") : e.message),
   });
 
   if (!roles.isLoading && !roles.isOwner) return <AccessDenied message={tt("me_onlyOwner")} />;
@@ -88,6 +89,7 @@ function MonthEndPage() {
             ? [
                 [t("me_cashAvailable"), money(s.cash.available)],
                 [t("me_payouts"), money(s.cash.payouts)],
+                [t("cap_reserve"), money(s.reserve_kept)],
                 [t("bk_pendingTotal"), money(s.cash.pending_payouts)],
                 [t("me_shortfall").replace("{amt}", ""), money(s.cash.shortfall)],
               ]
@@ -156,6 +158,7 @@ function MonthEndPage() {
               </div>
             ))}
           </div>
+          <div className="flex justify-between gap-3 border-y py-3 text-sm"><span>{t("cap_reserve")}</span><span className="font-medium">{money(s.reserve_kept)}</span></div>
           <div className="card-surface space-y-1 p-4 text-sm">
             <p className="font-medium">{t("me_cashCheck")}</p>
             <div className="flex justify-between"><span>{t("me_cashAvailable")}</span><span>{money(s.cash.available)}</span></div>

@@ -25,6 +25,9 @@ export function MonthEndCards() {
           {(st.data?.partners ?? []).map((p) => (
             <div key={p.partner_id} className="rounded-lg border p-3">
               <p className="font-medium">{p.name}</p>
+              <div className="flex justify-between gap-2 text-xs"><span>{t("me_profitShare")}</span><span>{money(p.profit_share)}</span></div>
+              <div className="flex justify-between gap-2 text-xs"><span>{t("cap_returned")}</span><span>{money(p.capital_returned)}</span></div>
+              <div className="flex justify-between gap-2 text-xs"><span>{t("me_final")}</span><span>{money(p.final)}</span></div>
               <p className={"font-display text-xl " + (Number(p.remaining) < 0 ? "text-destructive" : "text-primary")}>
                 {Number(p.remaining) < 0 ? t("me_paysIn") : t("me_takes")} {money(Math.abs(Number(p.remaining)))}
               </p>
@@ -32,6 +35,7 @@ export function MonthEndCards() {
           ))}
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{t("cap_reserve")}: {money(st.data?.reserve_kept)}</span>
           <span>{st.data?.closed ? t("me_closed") : t("me_live")}</span>
           <Link to="/month-end" className="font-medium text-primary underline">{t("me_seeDetails")}</Link>
         </div>

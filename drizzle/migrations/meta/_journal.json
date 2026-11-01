@@ -134,6 +134,13 @@
       "when": 1793461275379,
       "tag": "0018_category_budgets",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793529958502,
+      "tag": "0019_capital_reserve",
+      "breakpoints": true
     }
   ]
 }

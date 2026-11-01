@@ -5,13 +5,13 @@ import { useI18n } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export type AppSettings = { base_currency: string; currencies: string[] };
+export type AppSettings = { base_currency: string; currencies: string[]; capital_return_percent_of_profit?: number; reserve_percent?: number };
 
 export function useAppSettings() {
   return useQuery({
     queryKey: ["app-settings"],
     queryFn: async (): Promise<AppSettings> => {
-      const { data, error } = await supabase.from("app_settings").select("base_currency, currencies").maybeSingle();
+      const { data, error } = await supabase.from("app_settings").select("base_currency, currencies, capital_return_percent_of_profit, reserve_percent").maybeSingle();
       if (error) throw error;
       return data ?? { base_currency: "MYR", currencies: ["MYR"] };
     },
