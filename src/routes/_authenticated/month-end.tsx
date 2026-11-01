@@ -238,6 +238,7 @@ function DetailDialog({ month, p, onClose }: { month: string; p: PartnerStatemen
         {data && (
           <div className="space-y-4 text-sm">
             <section><p className="font-medium">{t("me_orders")}</p>
+              {data.lines.map((l) => <Row key={l.allocation_id} a={`${formatDate(l.order_date)} · ${l.batch_code ?? "—"} · ${ts(l.status)}`} b={`${money(l.profit)} → ${l.split_missing ? t("ord_splitMissing") : money((Number(l.profit) * pct(l.effective_split)) / 100)}${l.cost_owed_partner_id === p.partner_id ? ` + ${money(l.item_cost_owed)}` : ""}`} />)}
               {!data.lines.length && <p className="text-xs text-muted-foreground">{t("me_nothing")}</p>}
             </section>
             <section><p className="font-medium">{t("me_losses")}</p>

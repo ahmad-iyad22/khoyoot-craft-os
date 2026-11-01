@@ -23,6 +23,7 @@ import { formatDate } from "@/lib/format";
 import { MoneyFields, fmtMoney, readMoney, useAppSettings } from "@/lib/money";
 import { computeLedger, inMonth, monthOptions } from "@/lib/ledger";
 import { downloadCsv, printReport } from "@/lib/export";
+import { currentMonth, useStatement } from "@/lib/month-end";
 
 export const Route = createFileRoute("/_authenticated/partners")({
   head: () => ({
@@ -46,6 +47,7 @@ function PartnersPage() {
   const { t, lang } = useI18n();
   const qc = useQueryClient();
   const baseCur = useAppSettings().data?.base_currency ?? "MYR";
+  const capitalStatement = useStatement(currentMonth(), roles.isOwner);
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [editPartner, setEditPartner] = useState<any | null>(null);
   const [txn, setTxn] = useState<{ partner: any; row: any | null } | null>(null);
@@ -74,6 +76,7 @@ function PartnersPage() {
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["partners"] });
     qc.invalidateQueries({ queryKey: ["shared-expenses"] });
+    qc.invalidateQueries({ queryKey: ["month-statement"] });
   };
 
   const savePartner = useMutation({
@@ -208,6 +211,14 @@ function PartnersPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div className="space-y-2 border-b pb-3 text-sm">
+                      {(() => {
+                        const cp = capitalStatement.data?.partners.find((x) => x.partner_id === p.id);
+                        const contributed = (p.partner_transactions ?? []).filter((x: any) => x.txn_type === "contribution" && x.is_capital && x.txn_date < `${currentMonth()}-32`).reduce((sum: number, x: any) => sum + Number(x.base_amount ?? x.amount), 0);
+                        const outstanding = Number(cp?.capital_outstanding ?? contributed);
+                        return <><Stat label={t("cap_contributed")} value={fmtMoney(contributed, baseCur)} /><Stat label={t("cap_returned")} value={fmtMoney(Math.max(contributed - outstanding, 0), baseCur)} /><Stat label={t("cap_outstanding")} value={fmtMoney(outstanding, baseCur)} /><p className="text-xs text-muted-foreground">{t("cap_estimate")}</p></>;
+                      })()}
+                    </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <Stat label={t("contributions")} value={fmtMoney(row?.contributions, baseCur)} />
                       <Stat label={t("withdrawals")} value={fmtMoney(row?.withdrawals, baseCur)} />
@@ -426,6 +437,7 @@ function PartnersPage() {
                   payload: {
                     partner_id: txn.partner.id,
                     txn_type: String(f.get("txn_type")),
+                    is_capital: String(f.get("txn_type")) === "contribution" && f.get("is_capital") === "on",
                     txn_date: String(f.get("txn_date")),
                     notes: String(f.get("notes") || "").trim() || null,
                     receipt_path: String(f.get("receipt_path") || "") || null,
@@ -449,6 +461,7 @@ function PartnersPage() {
                 </div>
               </div>
               <MoneyFields idPrefix="t" defaultAmount={txn.row?.amount} defaultCurrency={txn.row?.currency} defaultFx={txn.row?.fx_rate_to_base} />
+              <Label className="flex items-center gap-2"><input name="is_capital" type="checkbox" defaultChecked={txn.row?.is_capital ?? false} />{t("cap_marker")}</Label>
               <div className="space-y-2">
                 <Label htmlFor="t-notes">{t("notes")}</Label>
                 <Textarea id="t-notes" name="notes" defaultValue={txn.row?.notes ?? ""} placeholder={t("txnNoteHint")} dir="auto" />
@@ -484,6 +497,7 @@ function PartnersPage() {
                   payload: {
                     partner_id: String(f.get("partner_id")),
                     txn_type: "contribution",
+                    is_capital: f.get("is_capital") === "on",
                     txn_date: String(f.get("txn_date")),
                     notes: String(f.get("notes") || "").trim() || null,
                     receipt_path: String(f.get("receipt_path") || "") || null,
@@ -508,6 +522,7 @@ function PartnersPage() {
                 </div>
               </div>
               <MoneyFields idPrefix="i" defaultAmount={inv.row?.amount} defaultCurrency={inv.row?.currency} defaultFx={inv.row?.fx_rate_to_base} />
+              <Label className="flex items-center gap-2"><input name="is_capital" type="checkbox" defaultChecked={inv.row?.is_capital ?? false} />{t("cap_marker")}</Label>
               <div className="space-y-2">
                 <Label htmlFor="i-notes">{t("notes")}</Label>
                 <Textarea id="i-notes" name="notes" defaultValue={inv.row?.notes ?? ""} dir="auto" />
