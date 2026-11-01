@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { PlatformFeesSettings, CurrencySettings } from "@/components/money-settings";
+import { PlatformFeesSettings, CurrencySettings, CapitalSettings } from "@/components/money-settings";
 import { ProductThumbnail } from "@/components/product-thumbnail";
 import { ImageUploadError, uploadProductImage } from "@/lib/product-images";
 import { ROLE_LABELS, useRoles, type AppRole } from "@/lib/auth";
@@ -35,6 +35,8 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { name: "description", content: "Product catalog, categories, platform fees and team roles." },
       { property: "og:title", content: "Settings — Khoyoot" },
       { property: "og:description", content: "Product catalog, categories, platform fees and team roles." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: SettingsPage,
@@ -387,6 +389,7 @@ function SettingsPage() {
 
         <TabsContent value="fees" className="mt-4 space-y-6">
           <CurrencySettings canEdit={roles.isOwner} />
+          {roles.isOwner && <CapitalSettings />}
           <PlatformFeesSettings canEdit={roles.isOwner} />
           {roles.isOwner && <BudgetSettings canEdit />}
         </TabsContent>

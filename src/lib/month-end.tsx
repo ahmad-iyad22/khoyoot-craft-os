@@ -5,10 +5,12 @@ export type PartnerStatement = {
   partner_id: string; name: string; profit_share: number; loss_share: number; item_cost_owed: number;
   paid_on_behalf: number; owed_to_them: number; they_owe: number; withdrawals: number; carry_in: number;
   final: number; settled: number; remaining: number;
+  capital_contributed?: number; capital_returned?: number; capital_outstanding?: number;
 };
 export type Statement = {
   month: string; closed: boolean; closed_at: string | null; previous_closed: boolean; unallocated_profit: number;
   partners: PartnerStatement[];
+  reserve_kept?: number; capital_return?: number; distribution_scale?: number;
   cash: { available: number; pending_payouts: number; payouts: number; shortfall: number };
 };
 

@@ -75,6 +75,31 @@ const FEE_FIELDS = [
   { key: "sst_percent", label: "sstPct", step: "0.001" },
 ] as const;
 
+export function CapitalSettings() {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const s = useAppSettings().data;
+  const save = useMutation({
+    mutationFn: async (f: FormData) => {
+      const capital_return_percent_of_profit = Number(f.get("capital"));
+      const reserve_percent = Number(f.get("reserve"));
+      if (![capital_return_percent_of_profit, reserve_percent].every((v) => Number.isFinite(v) && v >= 0 && v <= 100)) throw new Error(t("cap_invalid"));
+      const { error } = await supabase.from("app_settings").update({ capital_return_percent_of_profit, reserve_percent }).eq("id", true);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success(t("saved")); qc.invalidateQueries(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  if (!s) return null;
+  return <Card><CardHeader><CardTitle className="text-lg">{t("cap_settings")}</CardTitle></CardHeader><CardContent>
+    <form key={`${s.capital_return_percent_of_profit}-${s.reserve_percent}`} className="grid items-end gap-4 sm:grid-cols-[1fr_1fr_auto]" onSubmit={(e) => { e.preventDefault(); save.mutate(new FormData(e.currentTarget)); }}>
+      <div className="space-y-2"><Label htmlFor="cap-rate">{t("cap_rate")}</Label><Input id="cap-rate" name="capital" type="number" min="0" max="100" step="0.01" required defaultValue={s.capital_return_percent_of_profit ?? 100} /></div>
+      <div className="space-y-2"><Label htmlFor="cap-reserve">{t("cap_reserveRate")}</Label><Input id="cap-reserve" name="reserve" type="number" min="0" max="100" step="0.01" required defaultValue={s.reserve_percent ?? 0} /></div>
+      <Button type="submit" disabled={save.isPending}>{t("save")}</Button>
+    </form>
+  </CardContent></Card>;
+}
+
 export function PlatformFeesSettings({ canEdit }: { canEdit: boolean }) {
   const { t } = useI18n();
   const qc = useQueryClient();

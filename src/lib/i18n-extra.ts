@@ -1,5 +1,17 @@
 // Extra dictionary entries (merged into DICT without overriding existing keys).
 export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
+  cap_settings: { en: "Capital repayment & reserve", ar: "سداد رأس المال والاحتياطي" },
+  cap_rate: { en: "Profit used to repay capital (%)", ar: "نسبة الربح لسداد رأس المال (%)" },
+  cap_reserveRate: { en: "Reserve from remaining profit (%)", ar: "الاحتياطي من الربح المتبقي (%)" },
+  cap_marker: { en: "Capital contribution", ar: "مساهمة في رأس المال" },
+  cap_contributed: { en: "Capital contributed", ar: "رأس المال المساهم به" },
+  cap_returned: { en: "Capital returned", ar: "رأس المال المسترد" },
+  cap_outstanding: { en: "Capital outstanding", ar: "رأس المال المتبقي للسداد" },
+  cap_reserve: { en: "Reserve kept", ar: "الاحتياطي المحتفظ به" },
+  cap_estimate: { en: "Includes current month estimate", ar: "يشمل تقدير الشهر الحالي" },
+  cap_invalid: { en: "Percentages must be between 0 and 100.", ar: "يجب أن تكون النسب بين 0 و100." },
+  cap_closeOrder: { en: "Close earlier months before later months.", ar: "أغلق الأشهر الأقدم قبل الأشهر الأحدث." },
+  cap_reopenOrder: { en: "Reopen later months first to preserve capital balances.", ar: "أعد فتح الأشهر الأحدث أولاً للحفاظ على أرصدة رأس المال." },
   contacts: { en: "Contacts", ar: "جهات الاتصال" },
   wo_title: { en: "Write off / sample / gift", ar: "شطب / عينة / هدية" },
   wo_team: { en: "Team tasks", ar: "مهام الفريق" },
