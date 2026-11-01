@@ -44,26 +44,32 @@ export type Database = {
       app_settings: {
         Row: {
           base_currency: string
+          capital_return_percent_of_profit: number
           counting_statuses: string[]
           currencies: string[]
           id: boolean
           list_options: Json
+          reserve_percent: number
           updated_at: string
         }
         Insert: {
           base_currency?: string
+          capital_return_percent_of_profit?: number
           counting_statuses?: string[]
           currencies?: string[]
           id?: boolean
           list_options?: Json
+          reserve_percent?: number
           updated_at?: string
         }
         Update: {
           base_currency?: string
+          capital_return_percent_of_profit?: number
           counting_statuses?: string[]
           currencies?: string[]
           id?: boolean
           list_options?: Json
+          reserve_percent?: number
           updated_at?: string
         }
         Relationships: []
@@ -1186,6 +1192,7 @@ export type Database = {
           currency: string
           fx_rate_to_base: number
           id: string
+          is_capital: boolean
           notes: string | null
           partner_id: string
           profit_period_id: string | null
@@ -1204,6 +1211,7 @@ export type Database = {
           currency?: string
           fx_rate_to_base?: number
           id?: string
+          is_capital?: boolean
           notes?: string | null
           partner_id: string
           profit_period_id?: string | null
@@ -1222,6 +1230,7 @@ export type Database = {
           currency?: string
           fx_rate_to_base?: number
           id?: string
+          is_capital?: boolean
           notes?: string | null
           partner_id?: string
           profit_period_id?: string | null
@@ -2457,6 +2466,15 @@ export type Database = {
         Returns: undefined
       }
       allocate_shipment: { Args: { _shipment_id: string }; Returns: undefined }
+      capital_distribution: {
+        Args: {
+          _capital_pct: number
+          _caps: Json
+          _pool: number
+          _reserve_pct: number
+        }
+        Returns: Json
+      }
       category_budget_status: { Args: { _month: string }; Returns: Json }
       claim_next_sku: { Args: { _code: string }; Returns: string }
       close_month: { Args: { _month: string }; Returns: undefined }
