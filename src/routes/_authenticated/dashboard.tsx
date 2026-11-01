@@ -31,6 +31,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "description", content: "Revenue, profit, stock value and recent orders at a glance." },
       { property: "og:title", content: "Dashboard — Khoyoot" },
       { property: "og:description", content: "Revenue, profit, stock value and recent orders at a glance." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Dashboard,
