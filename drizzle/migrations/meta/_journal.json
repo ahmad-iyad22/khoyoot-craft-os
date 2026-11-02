@@ -141,6 +141,13 @@
       "when": 1793529958502,
       "tag": "0019_capital_reserve",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793604964234,
+      "tag": "0020_carry_open_month_balances",
+      "breakpoints": true
     }
   ]
 }
