@@ -1,5 +1,10 @@
 // Extra dictionary entries (merged into DICT without overriding existing keys).
 export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
+  cat_prefix: { en: "SKU prefix", ar: "بادئة رمز المنتج" },
+  cat_prefixMissing: { en: "This category has no SKU prefix. Save it in Categories first.", ar: "هذه الفئة بلا بادئة رمز. احفظها في الفئات أولاً." },
+  cat_prefixUsed: { en: "The prefix cannot change after products use it.", ar: "لا يمكن تغيير البادئة بعد استخدامها في المنتجات." },
+  cat_prefixTaken: { en: "This prefix is already reserved. Choose another.", ar: "هذه البادئة محجوزة بالفعل. اختر غيرها." },
+  cat_prefixInvalid: { en: "Use 2 to 4 uppercase letters for an override.", ar: "استخدم حرفين إلى أربعة أحرف لاتينية كبيرة للتعديل." },
   cap_settings: { en: "Capital repayment & reserve", ar: "سداد رأس المال والاحتياطي" },
   cap_rate: { en: "Profit used to repay capital (%)", ar: "نسبة الربح لسداد رأس المال (%)" },
   cap_reserveRate: { en: "Reserve from remaining profit (%)", ar: "الاحتياطي من الربح المتبقي (%)" },

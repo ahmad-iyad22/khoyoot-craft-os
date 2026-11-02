@@ -368,6 +368,14 @@ function SettingsPage() {
                           <span className="rtl-content">{c.name_ar ?? "—"}</span>
                         )}
                       </TableCell>
+                      <TableCell>
+                        <Input key={c.prefix_code} defaultValue={c.prefix_code ?? ""} className="w-24 uppercase" maxLength={4} disabled={!roles.isOwner || (productsQ.data ?? []).some((p) => p.category_id === c.id || p.sku.startsWith(`${c.prefix_code}-`))} title={t("cat_prefixUsed")} onBlur={(e) => {
+                          const value = e.target.value.trim().toUpperCase();
+                          if (value === c.prefix_code) return;
+                          if (!/^[A-Z]{2,4}$/.test(value)) { toast.error(t("cat_prefixInvalid")); e.target.value = c.prefix_code; return; }
+                          saveCategory.mutate({ id: c.id, patch: { prefix_code: value } });
+                        }} />
+                      </TableCell>
                       {roles.isOperations && (
                         <TableCell>
                           <Button
@@ -463,6 +471,7 @@ function SettingsPage() {
               let sku = editing ? String(f.get("sku")) : newSku;
               if (!editing && categoryId) {
                 const cat = (categoriesQ.data ?? []).find((c: any) => c.id === categoryId);
+                if (!cat?.prefix_code) { toast.error(t("cat_prefixMissing")); return; }
                 if (cat?.prefix_code) {
                   const { data, error } = await supabase.rpc("claim_next_sku", { _code: cat.prefix_code });
                   if (error) {

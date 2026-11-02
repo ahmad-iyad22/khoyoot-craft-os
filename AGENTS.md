@@ -12,4 +12,5 @@
 - Month-end numbers come only from the month_statement() DB function (closed months read the month_closures snapshot; settlements are partner_transactions with settles_month), so the dashboard and Month-end page never compute differently.
 - Capital repayment is recognized from month-closure snapshots, not mutable balance counters; close chronologically and reopen newest-first so later snapshots never double-repay capital.
 - Live month statements recursively carry unpaid earlier live balances from the earliest activity month; closed statements remain immutable and settlements reduce carry exactly once.
+- Category prefixes and counters are assigned atomically by the category trigger; retired codes remain reserved so product SKU numbers are never reused.
 - Marketplace files are parsed in browser event handlers and reviewed before creation; imports use the Owner-only import_order wrapper around create_order with a transaction-scoped platform/reference lock, so duplicate uploads cannot deduct stock twice and fee/allocation rules remain shared.
