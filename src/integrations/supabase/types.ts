@@ -74,6 +74,81 @@ export type Database = {
         }
         Relationships: []
       }
+      assets: {
+        Row: {
+          amount: number
+          base_amount: number
+          category: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          expense_id: string | null
+          expense_splits: Json
+          fx_rate_to_base: number
+          id: string
+          name: string
+          notes: string | null
+          paid_by_partner_id: string | null
+          purchase_date: string
+          receipt_path: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          base_amount?: number
+          category: string
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          expense_id?: string | null
+          expense_splits?: Json
+          fx_rate_to_base: number
+          id?: string
+          name: string
+          notes?: string | null
+          paid_by_partner_id?: string | null
+          purchase_date: string
+          receipt_path?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          base_amount?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expense_id?: string | null
+          expense_splits?: Json
+          fx_rate_to_base?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          paid_by_partner_id?: string | null
+          purchase_date?: string
+          receipt_path?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: true
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_paid_by_partner_id_fkey"
+            columns: ["paid_by_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
