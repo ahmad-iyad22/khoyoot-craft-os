@@ -56,6 +56,7 @@ function SettingsPage() {
     const cat = (categoriesQ.data ?? []).find((c: any) => c.id === categoryId);
     if (!cat?.prefix_code) {
       setNewSku("");
+      if (categoryId) toast.error(t("cat_prefixMissing"));
       return;
     }
     const { data } = await supabase.rpc("next_sku_preview", { _code: cat.prefix_code });
@@ -141,11 +142,12 @@ function SettingsPage() {
 
   const addCategory = useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
-      const { error } = await supabase.from("categories").insert(payload as never);
+      const { data, error } = await supabase.from("categories").insert(payload as never).select("prefix_code").single();
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
-      toast.success(tt("Category added"));
+    onSuccess: (data) => {
+      toast.success(`${tt("Category added")} · ${data.prefix_code}`);
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -160,7 +162,7 @@ function SettingsPage() {
       toast.success(tt("Category updated"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message.includes("CATEGORY_PREFIX_USED") ? t("cat_prefixUsed") : e.message.includes("CATEGORY_PREFIX_TAKEN") ? t("cat_prefixTaken") : e.message.includes("CATEGORY_PREFIX_INVALID") ? t("cat_prefixInvalid") : e.message),
   });
 
   const deleteCategory = useMutation({
@@ -330,6 +332,7 @@ function SettingsPage() {
                   <TableRow>
                     <TableHead>{t("name")}</TableHead>
                     <TableHead>{t("arabicName")}</TableHead>
+                    <TableHead>{t("cat_prefix")}</TableHead>
                     {roles.isOperations && <TableHead className="w-24" />}
                   </TableRow>
                 </TableHeader>
