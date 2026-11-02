@@ -519,7 +519,7 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   me_reopen: { en: "Reopen month", ar: "إعادة فتح الشهر" },
   me_closed: { en: "Month closed", ar: "تم إغلاق الشهر" },
   me_reopened: { en: "Month reopened", ar: "أُعيد فتح الشهر" },
-  me_prevNotClosed: { en: "Previous month is not closed, so nothing is carried over yet.", ar: "الشهر السابق غير مغلق، لذا لا يوجد رصيد مُرحّل بعد." },
+  me_prevNotClosed: { en: "Previous month is still open; carried balances are provisional until it is closed.", ar: "الشهر السابق لا يزال مفتوحاً؛ الأرصدة المرحّلة تقديرية حتى إغلاقه." },
   me_profitShare: { en: "Profit share", ar: "حصة الربح" },
   me_lossShare: { en: "Loss share", ar: "حصة الخسائر" },
   me_itemCost: { en: "Item cost owed", ar: "تكلفة القطع المستحقة" },
