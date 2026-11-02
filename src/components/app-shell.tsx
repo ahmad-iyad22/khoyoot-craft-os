@@ -41,6 +41,7 @@ const NAV: NavItem[] = [
   { to: "/shipments", labelKey: "shipments", icon: Ship, show: (r) => r.isOperations },
   { to: "/month-end", labelKey: "monthEnd", icon: CalendarCheck, show: (r) => r.isOwner },
   { to: "/bank", labelKey: "bankCash", icon: Landmark, show: (r) => r.isOwner },
+  { to: "/assets", labelKey: "assets", icon: Package, show: (r) => r.isOwner },
   { to: "/shared-expenses", labelKey: "sharedExpenses", icon: Receipt, show: (r) => r.isOwner },
   { to: "/suppliers", labelKey: "suppliers", icon: Truck, show: (r) => r.isOperations },
   { to: "/marketing", labelKey: "marketing", icon: Megaphone, show: (r) => r.isMarketing },

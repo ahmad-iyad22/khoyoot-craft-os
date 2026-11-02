@@ -1,5 +1,16 @@
 // Extra dictionary entries (merged into DICT without overriding existing keys).
 export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
+  assets: { en: "Assets", ar: "الأصول" },
+  asset_add: { en: "Add asset", ar: "إضافة أصل" },
+  asset_edit: { en: "Edit asset", ar: "تعديل الأصل" },
+  asset_empty: { en: "No assets yet", ar: "لا توجد أصول بعد" },
+  asset_activeValue: { en: "Active asset value", ar: "قيمة الأصول النشطة" },
+  asset_purchaseDate: { en: "Purchase date", ar: "تاريخ الشراء" },
+  asset_active: { en: "Active", ar: "نشط" },
+  asset_sold: { en: "Sold", ar: "مباع" },
+  asset_written_off: { en: "Written off", ar: "مشطوب" },
+  asset_linkedExpense: { en: "Linked equipment expense", ar: "مصروف معدات مرتبط" },
+  asset_deleteWarning: { en: "Delete this asset and its linked shared expense?", ar: "حذف هذا الأصل ومصروفه المشترك المرتبط؟" },
   cat_prefix: { en: "SKU prefix", ar: "بادئة رمز المنتج" },
   cat_prefixMissing: { en: "This category has no SKU prefix. Save it in Categories first.", ar: "هذه الفئة بلا بادئة رمز. احفظها في الفئات أولاً." },
   cat_prefixUsed: { en: "The prefix cannot change after products use it.", ar: "لا يمكن تغيير البادئة بعد استخدامها في المنتجات." },

@@ -14,3 +14,4 @@
 - Live month statements recursively carry unpaid earlier live balances from the earliest activity month; closed statements remain immutable and settlements reduce carry exactly once.
 - Category prefixes and counters are assigned atomically by the category trigger; retired codes remain reserved so product SKU numbers are never reused.
 - Marketplace files are parsed in browser event handlers and reviewed before creation; imports use the Owner-only import_order wrapper around create_order with a transaction-scoped platform/reference lock, so duplicate uploads cannot deduct stock twice and fee/allocation rules remain shared.
+- Asset writes use the assets synchronization trigger to create/update/remove linked expenses through save_shared_expense in the same transaction; this keeps partner settlements connected to asset changes.
