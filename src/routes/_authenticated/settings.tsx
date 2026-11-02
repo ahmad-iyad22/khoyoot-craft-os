@@ -56,6 +56,7 @@ function SettingsPage() {
     const cat = (categoriesQ.data ?? []).find((c: any) => c.id === categoryId);
     if (!cat?.prefix_code) {
       setNewSku("");
+      if (categoryId) toast.error(t("cat_prefixMissing"));
       return;
     }
     const { data } = await supabase.rpc("next_sku_preview", { _code: cat.prefix_code });
@@ -141,11 +142,12 @@ function SettingsPage() {
 
   const addCategory = useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
-      const { error } = await supabase.from("categories").insert(payload as never);
+      const { data, error } = await supabase.from("categories").insert(payload as never).select("prefix_code").single();
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
-      toast.success(tt("Category added"));
+    onSuccess: (data) => {
+      toast.success(`${tt("Category added")} · ${data.prefix_code}`);
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -160,7 +162,7 @@ function SettingsPage() {
       toast.success(tt("Category updated"));
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message.includes("CATEGORY_PREFIX_USED") ? t("cat_prefixUsed") : e.message.includes("CATEGORY_PREFIX_TAKEN") ? t("cat_prefixTaken") : e.message.includes("CATEGORY_PREFIX_INVALID") ? t("cat_prefixInvalid") : e.message),
   });
 
   const deleteCategory = useMutation({
@@ -330,6 +332,7 @@ function SettingsPage() {
                   <TableRow>
                     <TableHead>{t("name")}</TableHead>
                     <TableHead>{t("arabicName")}</TableHead>
+                    <TableHead>{t("cat_prefix")}</TableHead>
                     {roles.isOperations && <TableHead className="w-24" />}
                   </TableRow>
                 </TableHeader>
@@ -364,6 +367,14 @@ function SettingsPage() {
                         ) : (
                           <span className="rtl-content">{c.name_ar ?? "—"}</span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <Input key={c.prefix_code} defaultValue={c.prefix_code ?? ""} className="w-24 uppercase" maxLength={4} disabled={!roles.isOwner || (productsQ.data ?? []).some((p) => p.category_id === c.id || p.sku.startsWith(`${c.prefix_code}-`))} title={t("cat_prefixUsed")} onBlur={(e) => {
+                          const value = e.target.value.trim().toUpperCase();
+                          if (value === c.prefix_code) return;
+                          if (!/^[A-Z]{2,4}$/.test(value)) { toast.error(t("cat_prefixInvalid")); e.target.value = c.prefix_code; return; }
+                          saveCategory.mutate({ id: c.id, patch: { prefix_code: value } });
+                        }} />
                       </TableCell>
                       {roles.isOperations && (
                         <TableCell>
@@ -460,6 +471,7 @@ function SettingsPage() {
               let sku = editing ? String(f.get("sku")) : newSku;
               if (!editing && categoryId) {
                 const cat = (categoriesQ.data ?? []).find((c: any) => c.id === categoryId);
+                if (!cat?.prefix_code) { toast.error(t("cat_prefixMissing")); return; }
                 if (cat?.prefix_code) {
                   const { data, error } = await supabase.rpc("claim_next_sku", { _code: cat.prefix_code });
                   if (error) {

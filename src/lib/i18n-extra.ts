@@ -1,5 +1,10 @@
 // Extra dictionary entries (merged into DICT without overriding existing keys).
 export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
+  cat_prefix: { en: "SKU prefix", ar: "بادئة رمز المنتج" },
+  cat_prefixMissing: { en: "This category has no SKU prefix. Save it in Categories first.", ar: "هذه الفئة بلا بادئة رمز. احفظها في الفئات أولاً." },
+  cat_prefixUsed: { en: "The prefix cannot change after products use it.", ar: "لا يمكن تغيير البادئة بعد استخدامها في المنتجات." },
+  cat_prefixTaken: { en: "This prefix is already reserved. Choose another.", ar: "هذه البادئة محجوزة بالفعل. اختر غيرها." },
+  cat_prefixInvalid: { en: "Use 2 to 4 uppercase letters for an override.", ar: "استخدم حرفين إلى أربعة أحرف لاتينية كبيرة للتعديل." },
   cap_settings: { en: "Capital repayment & reserve", ar: "سداد رأس المال والاحتياطي" },
   cap_rate: { en: "Profit used to repay capital (%)", ar: "نسبة الربح لسداد رأس المال (%)" },
   cap_reserveRate: { en: "Reserve from remaining profit (%)", ar: "الاحتياطي من الربح المتبقي (%)" },
@@ -519,7 +524,7 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   me_reopen: { en: "Reopen month", ar: "إعادة فتح الشهر" },
   me_closed: { en: "Month closed", ar: "تم إغلاق الشهر" },
   me_reopened: { en: "Month reopened", ar: "أُعيد فتح الشهر" },
-  me_prevNotClosed: { en: "Previous month is not closed, so nothing is carried over yet.", ar: "الشهر السابق غير مغلق، لذا لا يوجد رصيد مُرحّل بعد." },
+  me_prevNotClosed: { en: "Previous month is still open; carried balances are provisional until it is closed.", ar: "الشهر السابق لا يزال مفتوحاً؛ الأرصدة المرحّلة تقديرية حتى إغلاقه." },
   me_profitShare: { en: "Profit share", ar: "حصة الربح" },
   me_lossShare: { en: "Loss share", ar: "حصة الخسائر" },
   me_itemCost: { en: "Item cost owed", ar: "تكلفة القطع المستحقة" },

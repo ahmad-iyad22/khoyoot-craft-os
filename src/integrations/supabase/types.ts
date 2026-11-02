@@ -2528,6 +2528,7 @@ export type Database = {
       is_ops: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
       month_statement: { Args: { _month: string }; Returns: Json }
+      month_statement_base: { Args: { _month: string }; Returns: Json }
       next_sku_preview: { Args: { _code: string }; Returns: string }
       partner_month_summary: { Args: { _month: string }; Returns: Json }
       preview_allocation: {

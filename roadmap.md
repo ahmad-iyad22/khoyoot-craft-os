@@ -1,4 +1,6 @@
 # Current updates
+- [x] Carry unpaid balances into following live months even when earlier months remain open; rolled-back October/November RPC checks passed. Signed-in screens unverified: preview identity has no matching account.
+- [x] SKU-1: automatic category prefixes, safe unused-prefix overrides, Medallions backfilled as MDL; one rolled-back SQL test passed (RIN-001, RIN-002, collision). No browser tests requested.
 - [x] Batch 11: editable capital/reserve settings, marked contributions, snapshot-based repayment, connected totals; one rolled-back helper SQL test and saved regression passed. Build OK; full month-close/reopen integration and signed-in screens untested, as browser tests were excluded.
 - [ ] Verify loading and bilingual content on Dashboard, Inventory, Orders, Finance and Settings.
 - [ ] Show product photos in Orders and Shipment lines.
