@@ -148,6 +148,13 @@
       "when": 1793604964234,
       "tag": "0020_carry_open_month_balances",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793605005022,
+      "tag": "0021_automatic_category_prefixes",
+      "breakpoints": true
     }
   ]
 }
