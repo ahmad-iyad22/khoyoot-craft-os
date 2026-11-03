@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDate, money, monthRange, titleCase } from "@/lib/format";
+import { formatDate, monthRange, titleCase } from "@/lib/format";
 import { downloadCsv, printReport } from "@/lib/export";
 import { MoneyFields, categoryLabel, readMoney, useExpenseCategories, useAppSettings, fmtMoney } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
@@ -49,6 +49,7 @@ const today = new Date().toISOString().slice(0, 10);
 
 function FinancePage() {
   const roles = useRoles();
+  const navigate = useNavigate();
   const { lang, t } = useI18n();
   const base = useAppSettings().data?.base_currency ?? "MYR";
   const money = (value: number | string | null | undefined) => fmtMoney(value, base);
@@ -59,7 +60,7 @@ function FinancePage() {
 
   const [month, setMonth] = useState(thisMonth.start.slice(0, 7));
   const from = `${month}-01`;
-  const to = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).toISOString().slice(0, 10);
+  const to = `${month}-${String(new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate()).padStart(2, "0")}`;
   const statement = useStatement(month, roles.isOwner);
   const [category, setCategory] = useState<string>("all");
   const [expenseOpen, setExpenseOpen] = useState(false);
@@ -399,7 +400,7 @@ function FinancePage() {
                       <TableCell className="text-end tabular-nums">{money(e.base_amount ?? e.amount)}{e.currency && e.currency !== base ? <span className="block text-xs text-muted-foreground">{e.currency} {Number(e.amount).toFixed(2)}</span> : null}</TableCell>
                       <TableCell className="text-end">
                         <div className="flex justify-end gap-1">
-                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => e.is_shared ? window.location.assign("/shared-expenses") : setEditExpense(e)}>
+                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => e.is_shared ? navigate({ to: "/shared-expenses" }) : setEditExpense(e)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDelTarget({ kind: "expenses", id: e.id })}>
