@@ -1,4 +1,5 @@
 # Current updates
+- [ ] Finance consistency: shared Dashboard totals and Month-end statements; verify calculations and screens.
 - [ ] Batch 12: Owner-only editable Assets and atomic linked expenses; one rolled-back SQL test, no browser tests.
 - [x] Carry unpaid balances into following live months even when earlier months remain open; rolled-back October/November RPC checks passed. Signed-in screens unverified: preview identity has no matching account.
 - [x] SKU-1: automatic category prefixes, safe unused-prefix overrides, Medallions backfilled as MDL; one rolled-back SQL test passed (RIN-001, RIN-002, collision). No browser tests requested.
