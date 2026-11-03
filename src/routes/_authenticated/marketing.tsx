@@ -57,6 +57,7 @@ function MarketingPage() {
   const [deleting, setDeleting] = useState<{ table: "content_calendar" | "campaigns" | "expenses" | "platform_analytics"; id: string } | null>(null);
   const [snapOpen, setSnapOpen] = useState(false);
   const [editingSnap, setEditingSnap] = useState<any>(null);
+  const [socialPlatform, setSocialPlatform] = useState("");
   const qc = useQueryClient();
   const [postOpen, setPostOpen] = useState(false);
   const [campaignOpen, setCampaignOpen] = useState(false);
