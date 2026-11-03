@@ -389,6 +389,19 @@ function MarketingPage() {
         <TabsContent value="accounts" className="mt-4">
           <Card>
             <CardContent className="space-y-4 pt-6">
+              <div className="flex flex-wrap items-center gap-2">
+                {["Instagram", "Facebook", "TikTok", "YouTube", "WhatsApp", "X"].map((p) => (
+                  <Button
+                    key={p}
+                    type="button"
+                    size="sm"
+                    variant={socialPlatform === p ? "default" : "outline"}
+                    onClick={() => setSocialPlatform(p)}
+                  >
+                    {p}
+                  </Button>
+                ))}
+              </div>
               <form
                 className="flex flex-wrap items-end gap-3"
                 onSubmit={(e) => {
@@ -400,11 +413,12 @@ function MarketingPage() {
                   if (!platform || !url) return;
                   saveSocial.mutate([...(socialQ.data ?? []), { platform, url }]);
                   form.reset();
+                  setSocialPlatform("");
                 }}
               >
                 <div className="space-y-2">
                   <Label htmlFor="s-platform">{tt("Platform")}</Label>
-                  <Input id="s-platform" name="platform" required placeholder="Instagram" />
+                  <Input id="s-platform" name="platform" required placeholder={tt("Instagram, Facebook, TikTok… or type any name")} value={socialPlatform} onChange={(e) => setSocialPlatform(e.target.value)} className="min-w-52" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="s-url">{t("mk_accountUrl")}</Label>
