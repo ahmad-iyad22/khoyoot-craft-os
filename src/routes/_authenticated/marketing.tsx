@@ -419,7 +419,7 @@ function MarketingPage() {
               >
                 <div className="space-y-2">
                   <Label htmlFor="s-platform">{tt("Platform")}</Label>
-                  <Input id="s-platform" name="platform" required placeholder={tt("Instagram, Facebook, TikTok… or type any name")} value={socialPlatform} onChange={(e) => setSocialPlatform(e.target.value)} className="min-w-52" />
+                  <Input id="s-platform" name="platform" required placeholder={t("mk_platformPlaceholder")} value={socialPlatform} onChange={(e) => setSocialPlatform(e.target.value)} className="min-w-52" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="s-url">{t("mk_accountUrl")}</Label>
