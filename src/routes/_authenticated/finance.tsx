@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { tt } from "@/lib/i18n";
@@ -25,10 +25,11 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDate, money, monthRange, titleCase } from "@/lib/format";
+import { formatDate, monthRange, titleCase } from "@/lib/format";
 import { downloadCsv, printReport } from "@/lib/export";
-import { MoneyFields, categoryLabel, readMoney, useExpenseCategories } from "@/lib/money";
+import { MoneyFields, categoryLabel, readMoney, useExpenseCategories, useAppSettings, fmtMoney } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
+import { useStatement } from "@/lib/month-end";
 
 export const Route = createFileRoute("/_authenticated/finance")({
   head: () => ({
@@ -37,6 +38,8 @@ export const Route = createFileRoute("/_authenticated/finance")({
       { name: "description", content: "Income, expenses and monthly profit & loss for Khoyoot." },
       { property: "og:title", content: "Finance — Khoyoot" },
       { property: "og:description", content: "Income, expenses and monthly profit & loss for Khoyoot." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: FinancePage,
@@ -46,14 +49,19 @@ const today = new Date().toISOString().slice(0, 10);
 
 function FinancePage() {
   const roles = useRoles();
-  const { lang } = useI18n();
+  const navigate = useNavigate();
+  const { lang, t } = useI18n();
+  const base = useAppSettings().data?.base_currency ?? "MYR";
+  const money = (value: number | string | null | undefined) => fmtMoney(value, base);
   const catsQ = useExpenseCategories();
   const cats = catsQ.data ?? [];
   const qc = useQueryClient();
   const thisMonth = monthRange(0);
 
-  const [from, setFrom] = useState(thisMonth.start);
-  const [to, setTo] = useState(thisMonth.end);
+  const [month, setMonth] = useState(thisMonth.start.slice(0, 7));
+  const from = `${month}-01`;
+  const to = `${month}-${String(new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate()).padStart(2, "0")}`;
+  const statement = useStatement(month, roles.isOwner);
   const [category, setCategory] = useState<string>("all");
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [incomeOpen, setIncomeOpen] = useState(false);
@@ -93,17 +101,12 @@ function FinancePage() {
     },
   });
 
-  const ordersQ = useQuery({
-    queryKey: ["finance-orders", from, to],
-    enabled,
+  const summaryQ = useQuery({
+    queryKey: ["dash-summary", month], enabled,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("id, order_date, status, shipping_cost, platform_fee, order_items(quantity, sale_price, unit_cost)")
-        .gte("order_date", from)
-        .lte("order_date", to);
+      const { data, error } = await supabase.rpc("dashboard_summary", { _month: from });
       if (error) throw error;
-      return data ?? [];
+      return data as unknown as { months: { month: string; revenue: number; order_profit: number; losses: number; net_profit: number; shared_costs: number; unallocated: number }[] };
     },
   });
 
@@ -172,42 +175,8 @@ function FinancePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const pnl = useMemo(() => {
-    const orders = ordersQ.data ?? [];
-    const live = orders.filter((o: any) => o.status !== "cancelled");
-    const revenue = live.reduce(
-      (s: number, o: any) =>
-        s + (o.order_items ?? []).reduce((t: number, i: any) => t + Number(i.sale_price) * i.quantity, 0),
-      0,
-    );
-    const productCost = live.reduce(
-      (s: number, o: any) =>
-        s + (o.order_items ?? []).reduce((t: number, i: any) => t + Number(i.unit_cost) * i.quantity, 0),
-      0,
-    );
-    const orderShipping = live.reduce((s: number, o: any) => s + Number(o.shipping_cost ?? 0), 0);
-    const orderFees = live.reduce((s: number, o: any) => s + Number(o.platform_fee ?? 0), 0);
-
-    const byCat = (c: string) =>
-      (expensesQ.data ?? [])
-        .filter((e: any) => e.category === c)
-        .reduce((s: number, e: any) => s + Number(e.base_amount ?? e.amount), 0);
-    const allExp = (expensesQ.data ?? []).reduce((s: number, e: any) => s + Number(e.base_amount ?? e.amount), 0);
-
-    const manualIncome = (incomeQ.data ?? [])
-      .filter((i: any) => i.source !== "sale")
-      .reduce((s: number, i: any) => s + Number(i.base_amount ?? i.amount), 0);
-
-    const shipExp = byCat("shipping") + byCat("international_shipping");
-    const feeExp = byCat("platform_fees");
-    const adsExp = byCat("ads") + byCat("advertising");
-    const shipping = orderShipping + shipExp;
-    const fees = orderFees + feeExp;
-    const ads = adsExp;
-    const other = allExp - shipExp - feeExp - adsExp;
-    const net = revenue + manualIncome - productCost - shipping - fees - ads - other;
-    return { revenue, manualIncome, productCost, shipping, fees, ads, other, net };
-  }, [ordersQ.data, expensesQ.data, incomeQ.data]);
+  const summary = summaryQ.data?.months.find(m => m.month === month);
+  const pnl = { revenue: Number(summary?.revenue ?? 0), orderProfit: Number(summary?.order_profit ?? 0), losses: Number(summary?.losses ?? 0), shared: Number(summary?.shared_costs ?? 0), unallocated: Number(summary?.unallocated ?? 0), net: Number(summary?.net_profit ?? 0) };
 
   const filteredExpenses = (expensesQ.data ?? []).filter(
     (e: any) => category === "all" || e.category === category,
@@ -219,13 +188,11 @@ function FinancePage() {
 
   const pnlRows: [string, number][] = [
     [tt("Revenue (orders)"), pnl.revenue],
-    [tt("Other income"), pnl.manualIncome],
-    [tt("Product cost"), -pnl.productCost],
-    [tt("Shipping"), -pnl.shipping],
-    [tt("Platform fees"), -pnl.fees],
-    [tt("Ads"), -pnl.ads],
-    [tt("Other expenses"), -pnl.other],
+    [t("fin_orderProfit"), pnl.orderProfit],
+    [t("fin_losses"), -pnl.losses],
+    [t("fin_unallocated"), pnl.unallocated],
     [tt("Net profit"), pnl.net],
+    [t("fin_sharedSeparate"), pnl.shared],
   ];
   const pnlTitle = `${tt("ex_pnlTitle")} ${from} → ${to}`;
   const exportPnlCsv = () =>
@@ -345,12 +312,8 @@ function FinancePage() {
       <Card className="mb-6">
         <CardContent className="flex flex-wrap items-end gap-4 pt-6">
           <div className="space-y-2">
-            <Label htmlFor="from">{tt("From")}</Label>
-            <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="to">{tt("To")}</Label>
-            <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <Label htmlFor="finance-month">{t("month")}</Label>
+            <Input id="finance-month" type="month" value={month} onChange={e => e.target.value && setMonth(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>{tt("Expense category")}</Label>
@@ -373,12 +336,15 @@ function FinancePage() {
 
       <Tabs defaultValue="pnl">
         <TabsList>
-          <TabsTrigger value="pnl">{tt("Profit &amp; Loss")}</TabsTrigger>
+          <TabsTrigger value="pnl">{tt("Profit & Loss")}</TabsTrigger>
           <TabsTrigger value="expenses">{tt("Expenses")}</TabsTrigger>
           <TabsTrigger value="income">{tt("Income")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pnl" className="mt-4">
+          {(summaryQ.error || statement.error) && <p role="alert" className="text-destructive">{summaryQ.error?.message ?? statement.error?.message}</p>}
+          {summaryQ.isLoading && <p>{t("loading")}</p>}
+
           <Card>
             <CardHeader>
               <CardTitle>
@@ -388,19 +354,8 @@ function FinancePage() {
             <CardContent>
               <Table>
                 <TableBody>
-                  {[
-                    [tt("Revenue (orders)"), pnl.revenue],
-                    [tt("Other income"), pnl.manualIncome],
-                    [tt("Product cost"), -pnl.productCost],
-                    [tt("Shipping"), -pnl.shipping],
-                    [tt("Platform fees"), -pnl.fees],
-                    [tt("Ads"), -pnl.ads],
-                    [tt("Other expenses"), -pnl.other],
-                  ].map(([label, value]) => (
-                    <TableRow key={label as string}>
-                      <TableCell>{label as string}</TableCell>
-                      <TableCell className="text-end tabular-nums">{money(value as number)}</TableCell>
-                    </TableRow>
+                  {pnlRows.filter(([label]) => label !== tt("Net profit")).map(([label, value]) => (
+                    <TableRow key={label}><TableCell>{label}</TableCell><TableCell className="text-end tabular-nums">{money(value)}</TableCell></TableRow>
                   ))}
                   <TableRow className="font-semibold">
                     <TableCell>{tt("Net profit")}</TableCell>
@@ -414,6 +369,11 @@ function FinancePage() {
               </Table>
             </CardContent>
           </Card>
+          <div className="mt-5">
+            <h2 className="mb-3 font-display text-xl">{t("me_finalThisMonth")}</h2>
+            <div className="grid gap-3 sm:grid-cols-3">{statement.data?.partners.map(p => <div key={p.partner_id} className="border-s-2 border-primary ps-3"><p className="font-medium">{p.name}</p><p>{t("me_final")}: {money(p.final)}</p><p className={p.remaining < 0 ? "text-destructive" : "text-primary"}>{p.remaining < 0 ? t("me_paysIn") : t("me_takes")} {money(Math.abs(p.remaining))}</p></div>)}</div>
+            <p className="mt-3 text-sm text-muted-foreground">{t("cap_returned")}: {money(statement.data?.capital_return)} · {t("cap_reserve")}: {money(statement.data?.reserve_kept)} · {statement.data?.closed ? t("me_closed") : t("me_live")}</p>
+          </div>
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
@@ -437,10 +397,10 @@ function FinancePage() {
                         <Badge variant="secondary">{categoryLabel(cats, e.category, lang)}</Badge>
                       </TableCell>
                       <TableCell className="rtl-content">{e.description ?? "—"}</TableCell>
-                      <TableCell className="text-end tabular-nums">{money(e.base_amount ?? e.amount)}{e.currency && e.currency !== "MYR" ? <span className="block text-xs text-muted-foreground">{e.currency} {Number(e.amount).toFixed(2)}</span> : null}</TableCell>
+                      <TableCell className="text-end tabular-nums">{money(e.base_amount ?? e.amount)}{e.currency && e.currency !== base ? <span className="block text-xs text-muted-foreground">{e.currency} {Number(e.amount).toFixed(2)}</span> : null}</TableCell>
                       <TableCell className="text-end">
                         <div className="flex justify-end gap-1">
-                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => setEditExpense(e)}>
+                          <Button size="icon" variant="ghost" aria-label={tt("Edit")} onClick={() => e.is_shared ? navigate({ to: "/shared-expenses" }) : setEditExpense(e)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button size="icon" variant="ghost" aria-label={tt("Delete")} onClick={() => setDelTarget({ kind: "expenses", id: e.id })}>

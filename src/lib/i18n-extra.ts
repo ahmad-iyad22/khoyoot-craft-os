@@ -1,5 +1,9 @@
 // Extra dictionary entries (merged into DICT without overriding existing keys).
 export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
+  fin_orderProfit: { en: "Order profit after all order costs", ar: "ربح الطلبات بعد جميع تكاليف الطلب" },
+  fin_losses: { en: "Stock losses", ar: "خسائر المخزون" },
+  fin_unallocated: { en: "Unallocated order profit", ar: "ربح الطلبات غير الموزع" },
+  fin_sharedSeparate: { en: "Shared expenses (settled separately)", ar: "المصروفات المشتركة (تسوى بشكل منفصل)" },
   assets: { en: "Assets", ar: "الأصول" },
   asset_add: { en: "Add asset", ar: "إضافة أصل" },
   asset_edit: { en: "Edit asset", ar: "تعديل الأصل" },

@@ -52,7 +52,7 @@ function AssetsPage() {
   const refresh = () => {
     for (const key of ["assets", "shared-expenses", "expenses", "expense-categories", "month-statement", "partner-ledger", "audit-log", "category-budget-status", "dashboard-summary"]) qc.invalidateQueries({ queryKey: [key] });
   };
-  const save = useMutation({ mutationFn: async (v: { id?: string; payload: Omit<Asset, "id" | "created_at" | "created_by" | "updated_at" | "expense_id"> }) => {
+  const save = useMutation({ mutationFn: async (v: { id?: string | undefined; payload: Omit<Asset, "id" | "created_at" | "created_by" | "updated_at" | "expense_id"> }) => {
     const { error } = v.id ? await supabase.from("assets").update(v.payload).eq("id", v.id) : await supabase.from("assets").insert(v.payload);
     if (error) throw error;
   }, onSuccess: () => { refresh(); setEditing(null); toast.success(t("saved")); }, onError: (e: Error) => toast.error(e.message.includes("SPLIT_NOT_100") ? t("splitMust100") : e.message) });
@@ -93,11 +93,11 @@ function AssetForm({ row, partners, pending, onSave }: { row: Asset | null; part
   }}>
     <div className="space-y-2"><Label htmlFor="asset-name">{t("name")}</Label><Input id="asset-name" name="name" required dir="auto" defaultValue={row?.name ?? ""} /></div>
     <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="asset-category">{t("category")}</Label><Input id="asset-category" name="category" required dir="auto" defaultValue={row?.category ?? ""} /></div><div className="space-y-2"><Label htmlFor="asset-date">{t("asset_purchaseDate")}</Label><Input id="asset-date" name="purchase_date" type="date" required defaultValue={row?.purchase_date ?? new Date().toISOString().slice(0, 10)} /></div></div>
-    <MoneyFields idPrefix="asset" defaultAmount={row?.amount} defaultCurrency={row?.currency} defaultFx={row?.fx_rate_to_base} />
+    <MoneyFields idPrefix="asset" defaultAmount={row?.amount ?? null} defaultCurrency={row?.currency ?? null} defaultFx={row?.fx_rate_to_base ?? null} />
     <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="asset-payer">{t("paidBy")}</Label><select id="asset-payer" className={selectClass} value={payer} onChange={e => setPayer(e.target.value)}><option value="">{t("businessAccount")}</option>{partners.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div><div className="space-y-2"><Label htmlFor="asset-status">{t("status")}</Label><select id="asset-status" name="status" className={selectClass} defaultValue={row?.status ?? "active"}>{["active", "sold", "written_off"].map(s => <option key={s} value={s}>{t(`asset_${s}`)}</option>)}</select></div></div>
     {payer && <fieldset className="space-y-2"><legend className="mb-2 text-sm font-medium">{t("split")}</legend>{splits.map(s => <div key={s.partner_id} className="grid grid-cols-[1fr_110px] items-center gap-3"><Label htmlFor={`asset-split-${s.partner_id}`}>{partners.find(p => p.id === s.partner_id)?.name ?? "—"} (%)</Label><Input id={`asset-split-${s.partner_id}`} type="number" min="0" max="100" step="any" value={s.percent} onChange={e => setSplits(v => v.map(x => x.partner_id === s.partner_id ? { ...x, percent: Number(e.target.value) } : x))} /></div>)}</fieldset>}
     <div className="space-y-2"><Label htmlFor="asset-notes">{t("notes")}</Label><Textarea id="asset-notes" name="notes" dir="auto" defaultValue={row?.notes ?? ""} /></div>
-    <ReceiptUpload idPrefix="asset" defaultPath={row?.receipt_path} />
+    <ReceiptUpload idPrefix="asset" defaultPath={row?.receipt_path ?? null} />
     <DialogFooter><Button type="submit" disabled={pending}>{t("save")}</Button></DialogFooter>
   </form>;
 }
