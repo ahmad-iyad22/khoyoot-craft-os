@@ -362,20 +362,22 @@ async function runTool(sb: any, name: string, a: any): Promise<ToolResult> {
         const each = Math.floor(10000 / list.length) / 100;
         splits = list.map((p, i) => ({ partner_id: p.id, percent: i === list.length - 1 ? Math.round((100 - each * (list.length - 1)) * 100) / 100 : each }));
       }
-      const { error } = await sb.rpc("save_shared_expense", {
+      const { data: newId, error } = await sb.rpc("save_shared_expense", {
         _id: null,
         _e: { entry_date: a.date, category: a.category, description: a.description, paid_by_business: business, paid_by_partner_id: payer?.id ?? null, split_mode: mode, campaign_id: null, shipment_id: null, receipt_path: null, ...mm },
         _splits: splits,
       });
       if (error) throw new Error(error.message);
-      return { summary: `Added expense ${fmt(mm.amount, mm.currency)} (${a.category}) paid by ${payer?.name ?? "business"}, ${mode} split` };
+      const pend = await pendingNote(sb, "expenses", newId as unknown as string);
+      return { summary: `Added expense ${fmt(mm.amount, mm.currency)} (${a.category}) paid by ${payer?.name ?? "business"}, ${mode} split${pend}` };
     }
     case "add_partner_transaction": {
       const mm = m(a);
       const p = await findPartner(sb, a.partner);
-      const { error } = await sb.from("partner_transactions").insert({ partner_id: p.id, txn_type: a.type, txn_date: a.date, notes: a.notes || null, receipt_path: null, ...mm });
+      const { data: row, error } = await sb.from("partner_transactions").insert({ partner_id: p.id, txn_type: a.type, txn_date: a.date, notes: a.notes || null, receipt_path: null, ...mm }).select("id").single();
       if (error) throw new Error(error.message);
-      return { summary: `Added ${a.type} ${fmt(mm.amount, mm.currency)} for ${p.name} on ${a.date}` };
+      const pend = await pendingNote(sb, "partner_transactions", row.id);
+      return { summary: `Added ${a.type} ${fmt(mm.amount, mm.currency)} for ${p.name} on ${a.date}${pend}` };
     }
     case "update_product": {
       const { data: prod } = await sb.from("products").select("*").eq("sku", a.sku).maybeSingle();
@@ -580,3 +582,12 @@ ${businessData}`;
     }
     return { reply: "", actions };
   });
+
+/** Large-expense rule: report "pending approval, needs N approvals" when the database marked the new row pending. */
+async function pendingNote(sb: any, table: "expenses" | "partner_transactions", id: string): Promise<string> {
+  if (!id) return "";
+  const { data } = await sb.from(table).select("approval_status").eq("id", id).maybeSingle();
+  if (data?.approval_status !== "pending") return "";
+  const { data: st } = await sb.from("app_settings").select("approvals_required").maybeSingle();
+  return ` — pending approval, needs ${st?.approvals_required ?? 2} approvals from other partners before it counts`;
+}
