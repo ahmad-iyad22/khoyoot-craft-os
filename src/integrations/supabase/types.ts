@@ -43,6 +43,8 @@ export type Database = {
       }
       app_settings: {
         Row: {
+          approval_threshold: number
+          approvals_required: number
           base_currency: string
           capital_return_percent_of_profit: number
           counting_statuses: string[]
@@ -53,6 +55,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_threshold?: number
+          approvals_required?: number
           base_currency?: string
           capital_return_percent_of_profit?: number
           counting_statuses?: string[]
@@ -63,6 +67,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_threshold?: number
+          approvals_required?: number
           base_currency?: string
           capital_return_percent_of_profit?: number
           counting_statuses?: string[]
@@ -574,6 +580,44 @@ export type Database = {
           },
         ]
       }
+      expense_approvals: {
+        Row: {
+          comment: string | null
+          decided_at: string
+          decision: string
+          id: string
+          partner_id: string
+          record_id: string
+          record_kind: string
+        }
+        Insert: {
+          comment?: string | null
+          decided_at?: string
+          decision: string
+          id?: string
+          partner_id: string
+          record_id: string
+          record_kind: string
+        }
+        Update: {
+          comment?: string | null
+          decided_at?: string
+          decision?: string
+          id?: string
+          partner_id?: string
+          record_id?: string
+          record_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_approvals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expense_categories: {
         Row: {
           code: string
@@ -646,6 +690,7 @@ export type Database = {
       expenses: {
         Row: {
           amount: number
+          approval_status: string
           base_amount: number | null
           campaign_id: string | null
           category: string
@@ -667,6 +712,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          approval_status?: string
           base_amount?: number | null
           campaign_id?: string | null
           category?: string
@@ -688,6 +734,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          approval_status?: string
           base_amount?: number | null
           campaign_id?: string | null
           category?: string
@@ -1262,8 +1309,10 @@ export type Database = {
       partner_transactions: {
         Row: {
           amount: number
+          approval_status: string
           base_amount: number | null
           created_at: string
+          created_by: string | null
           currency: string
           fx_rate_to_base: number
           id: string
@@ -1281,8 +1330,10 @@ export type Database = {
         }
         Insert: {
           amount: number
+          approval_status?: string
           base_amount?: number | null
           created_at?: string
+          created_by?: string | null
           currency?: string
           fx_rate_to_base?: number
           id?: string
@@ -1300,8 +1351,10 @@ export type Database = {
         }
         Update: {
           amount?: number
+          approval_status?: string
           base_amount?: number | null
           created_at?: string
+          created_by?: string | null
           currency?: string
           fx_rate_to_base?: number
           id?: string
@@ -2527,6 +2580,10 @@ export type Database = {
         Args: { _allocate: boolean; _lines: Json; _order_id: string }
         Returns: undefined
       }
+      _recount_approval: {
+        Args: { _id: string; _kind: string }
+        Returns: string
+      }
       _release_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
@@ -2559,6 +2616,15 @@ export type Database = {
       }
       create_order: { Args: { _lines: Json; _order: Json }; Returns: string }
       dashboard_summary: { Args: { _month: string }; Returns: Json }
+      decide_approval: {
+        Args: {
+          _comment?: string
+          _decision: string
+          _id: string
+          _kind: string
+        }
+        Returns: string
+      }
       delete_order: { Args: { _id: string }; Returns: undefined }
       delete_shipment: { Args: { _id: string }; Returns: undefined }
       generate_batch_codes: {
