@@ -1000,6 +1000,24 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_reads: {
+        Row: {
+          alert_key: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_key: string
+          read_at?: string
+          user_id?: string
+        }
+        Update: {
+          alert_key?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_allocations: {
         Row: {
           batch_code: string | null
