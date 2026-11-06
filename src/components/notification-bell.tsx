@@ -63,7 +63,7 @@ export function NotificationBell() {
         const cm = new Date().toISOString().slice(0, 8) + "01";
         const { data: bs } = await supabase.rpc("category_budget_status", { _month: cm });
         for (const b of ((bs ?? []) as any[]).filter((b) => b.state === "warn" || b.state === "over"))
-          out.push({ id: `bud-${cm}-${b.category}-${b.state}`, text: b.state === "over" ? L(`Over budget: ${b.category} (${b.percent}%)`, `تجاوز الميزانية: ${b.category} (${b.percent}%)`) : L(`Budget near limit: ${b.category} (${b.percent}%)`, `الميزانية تقترب من الحد: ${b.category} (${b.percent}%)`), to: "/expenses" });
+          out.push({ id: `bud-${cm}-${b.category}-${b.state}`, text: b.state === "over" ? L(`Over budget: ${b.category} (${b.percent}%)`, `تجاوز الميزانية: ${b.category} (${b.percent}%)`) : L(`Budget near limit: ${b.category} (${b.percent}%)`, `الميزانية تقترب من الحد: ${b.category} (${b.percent}%)`), to: "/shared-expenses" });
       }
       return out;
     },
