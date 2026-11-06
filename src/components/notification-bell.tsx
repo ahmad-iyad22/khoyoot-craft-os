@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Bell, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,29 +8,37 @@ import { marginState } from "@/lib/margin";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type Alert = { id: string; text: string; to: string };
-const KEY = "khoyoot-read-alerts";
-
-// Alerts are computed live from current data; "read" marks are kept on this device.
+// Alerts are computed live; keys embed the triggering values so a read alert
+// reappears only when its condition changes. Read marks live per user in notification_reads.
 export function NotificationBell() {
   const { lang } = useI18n();
   const roles = useRoles();
   const L = (en: string, ar: string) => (lang === "ar" ? ar : en);
-  const [read, setRead] = useState<string[]>([]);
-  useEffect(() => { try { setRead(JSON.parse(localStorage.getItem(KEY) ?? "[]")); } catch { /* ignore */ } }, []);
-  const persist = (ids: string[]) => { setRead(ids); localStorage.setItem(KEY, JSON.stringify(ids)); };
+  const qc = useQueryClient();
+  const readQ = useQuery({
+    queryKey: ["notification-reads"],
+    enabled: roles.isOwner,
+    queryFn: async () => ((await supabase.from("notification_reads").select("alert_key")).data ?? []).map((r) => r.alert_key),
+  });
+  const read = readQ.data ?? [];
+  const persist = async (keys: string[]) => {
+    if (!keys.length) return;
+    await supabase.from("notification_reads").upsert(keys.map((alert_key) => ({ alert_key })), { onConflict: "user_id,alert_key" });
+    qc.invalidateQueries({ queryKey: ["notification-reads"] });
+  };
 
   const q = useQuery({
     queryKey: ["notifications"],
-    enabled: roles.isOperations,
+    enabled: roles.isOwner,
     refetchInterval: 120000,
     queryFn: async () => {
       const out: Alert[] = [];
       const [p, s] = await Promise.all([
-        supabase.from("products").select("id, name, stock_qty, reorder_threshold, sale_price, avg_cost, target_margin, margin_alert_threshold, status").eq("archived", false),
+        supabase.from("products").select("id, name, stock_qty, reorder_threshold, min_stock, sale_price, avg_cost, target_margin, margin_alert_threshold, status").eq("archived", false),
         supabase.from("shipments").select("id, reference, status, updated_at").eq("status", "arrived_in_malaysia"),
       ]);
       for (const r of p.data ?? []) {
-        if (["active", "out_of_stock"].includes(r.status) && Number(r.stock_qty) <= Number(r.reorder_threshold))
+        if (["active", "out_of_stock"].includes(r.status) && Number(r.stock_qty) <= Math.max(Number(r.min_stock ?? 0), Number(r.reorder_threshold ?? 0)))
           out.push({ id: `low-${r.id}-${r.stock_qty}`, text: L(`Low stock: ${r.name} (${r.stock_qty})`, `مخزون منخفض: ${r.name} (${r.stock_qty})`), to: "/inventory" });
         if (roles.isOwner && Number(r.avg_cost) > 0 && marginState(r).level === "alert")
           out.push({ id: `mar-${r.id}-${r.avg_cost}-${r.sale_price}`, text: L(`Margin below alert: ${r.name}`, `الهامش أقل من الحد: ${r.name}`), to: "/inventory" });
@@ -47,6 +54,16 @@ export function NotificationBell() {
         const m = d.toISOString().slice(0, 8) + "01";
         const { data } = await supabase.from("month_closures").select("id").eq("month", m).maybeSingle();
         if (!data) out.push({ id: `month-${m}`, text: L(`Month ${m.slice(0, 7)} is ready to close`, `شهر ${m.slice(0, 7)} جاهز للإغلاق`), to: "/month-end" });
+        const [pe, pt] = await Promise.all([
+          supabase.from("expenses").select("id").eq("approval_status", "pending"),
+          supabase.from("partner_transactions").select("id").eq("approval_status", "pending"),
+        ]);
+        for (const r of [...(pe.data ?? []), ...(pt.data ?? [])])
+          out.push({ id: `appr-${r.id}`, text: L("Expense waiting for your approval", "مصروف بانتظار موافقتك"), to: "/approvals" });
+        const cm = new Date().toISOString().slice(0, 8) + "01";
+        const { data: bs } = await supabase.rpc("category_budget_status", { _month: cm });
+        for (const b of ((bs ?? []) as any[]).filter((b) => b.state === "warn" || b.state === "over"))
+          out.push({ id: `bud-${cm}-${b.category}-${b.state}`, text: b.state === "over" ? L(`Over budget: ${b.category} (${b.percent}%)`, `تجاوز الميزانية: ${b.category} (${b.percent}%)`) : L(`Budget near limit: ${b.category} (${b.percent}%)`, `الميزانية تقترب من الحد: ${b.category} (${b.percent}%)`), to: "/shared-expenses" });
       }
       return out;
     },
@@ -54,7 +71,7 @@ export function NotificationBell() {
 
   const alerts = q.data ?? [];
   const unread = alerts.filter((a) => !read.includes(a.id));
-  if (!roles.isOperations) return null;
+  if (!roles.isOwner) return null;
 
   return (
     <Popover>
@@ -68,7 +85,7 @@ export function NotificationBell() {
         <div className="flex items-center justify-between border-b px-3 py-2 text-sm font-medium">
           {L("Notifications", "الإشعارات")}
           {unread.length > 0 && (
-            <button className="text-xs text-primary" onClick={() => persist([...read, ...unread.map((a) => a.id)])}>{L("Mark all read", "تعليم الكل كمقروء")}</button>
+            <button className="text-xs text-primary" onClick={() => persist(unread.map((a) => a.id))}>{L("Mark all read", "تعليم الكل كمقروء")}</button>
           )}
         </div>
         <div className="max-h-96 overflow-y-auto">
@@ -79,7 +96,7 @@ export function NotificationBell() {
               <div key={a.id} className={`flex items-start gap-2 border-b px-3 py-2 text-sm ${isRead ? "opacity-50" : ""}`}>
                 <Link to={a.to} className="flex-1 hover:underline">{a.text}</Link>
                 {!isRead && (
-                  <button aria-label={L("Mark read", "تعليم كمقروء")} onClick={() => persist([...read, a.id])} className="text-muted-foreground hover:text-foreground"><Check className="size-4" /></button>
+                  <button aria-label={L("Mark read", "تعليم كمقروء")} onClick={() => persist([a.id])} className="text-muted-foreground hover:text-foreground"><Check className="size-4" /></button>
                 )}
               </div>
             );
