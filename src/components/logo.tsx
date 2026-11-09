@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /** Cross-stitch X mark built from small squares, in the primary colour. */
-export function LogoMark({ className }: { className?: string }) {
+export function LogoMark({ className }: { className?: string | undefined }) {
   const cells: [number, number][] = [];
   for (let i = 0; i < 7; i++) {
     cells.push([i, i]);
@@ -16,7 +16,7 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className, markClassName, label }: { className?: string; markClassName?: string; label: string }) {
+export function Logo({ className, markClassName, label }: { className?: string; markClassName?: string | undefined; label: string }) {
   return (
     <span className={cn("inline-flex items-center gap-2 font-display leading-none", className)}>
       <LogoMark className={markClassName} />
