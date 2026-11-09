@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LanguageToggle, ThemeToggle } from "@/components/app-shell";
+import { Logo } from "@/components/logo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
@@ -17,6 +18,10 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Sign in to the Khoyoot business operating system." },
       { property: "og:title", content: "Sign in — Khoyoot" },
       { property: "og:description", content: "Sign in to the Khoyoot business operating system." },
+      { property: "og:image", content: "https://khoyoot-craft-os.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: "https://khoyoot-craft-os.lovable.app/og-image.jpg" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: AuthPage,
@@ -52,7 +57,7 @@ function AuthPage() {
       <div className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
         <div className="tatreez-band h-3 w-40 rounded-full" />
         <div>
-          <h1 className="font-display text-5xl leading-tight">{tt("Khoyoot")}</h1>
+          <h1 className="text-5xl leading-tight"><Logo label={tt("Khoyoot")} markClassName="size-11" /></h1>
           <p className="mt-2 font-display text-2xl text-sidebar-primary" dir="rtl">
             خيوط
           </p>
@@ -68,7 +73,7 @@ function AuthPage() {
           <div className="mb-6 flex gap-2 rounded-lg bg-sidebar p-1 text-sidebar-foreground"><div className="flex-1"><LanguageToggle /></div><div className="w-28"><ThemeToggle /></div></div>
           <div className="mb-8 lg:hidden">
             <div className="tatreez-band mb-4 h-2 w-24 rounded-full" />
-            <h1 className="font-display text-3xl">{tt("Khoyoot")}</h1>
+            <h1 className="text-3xl"><Logo label={tt("Khoyoot")} markClassName="size-8 text-primary" /></h1>
           </div>
 
           <Tabs defaultValue="signin">
