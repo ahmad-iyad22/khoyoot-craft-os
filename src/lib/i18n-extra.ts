@@ -676,4 +676,6 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   ex_amount: { en: "Amount", ar: "المبلغ" },
   ex_cashCheck: { en: "Cash check", ar: "فحص النقد" },
   ex_period: { en: "Period", ar: "الفترة" },
+  pwa_install: { en: "Install app", ar: "تثبيت التطبيق" },
+  pwa_ios: { en: "On iPhone: tap Share, then Add to Home Screen.", ar: "على الآيفون: اضغط مشاركة ثم إضافة إلى الشاشة الرئيسية." },
 };

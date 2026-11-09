@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { NotificationBell } from "@/components/notification-bell";
+import { InstallHint } from "@/components/install-hint";
 
 type NavItem = {
   to: string;
@@ -139,7 +140,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
   }
 
   return (
-    <div className="flex h-full flex-col gap-6 bg-sidebar p-4 text-sidebar-foreground">
+    <div className="flex h-full flex-col gap-6 bg-sidebar p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] text-sidebar-foreground">
       <div>
         <div className="tatreez-band mb-3 h-1.5 w-16 rounded-full" />
         <p className="font-display text-2xl leading-none">{t("appName")}</p>
@@ -154,6 +155,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
         <LanguageToggle />
         <ThemeToggle />
         <NotificationBell />
+        <InstallHint />
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{user?.email}</p>
           {primaryRole && (
@@ -186,7 +188,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b bg-background/85 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b bg-background/85 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
@@ -201,7 +203,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="font-display text-lg">{t("appName")}</span>
         </header>
 
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">{children}</main>
       </div>
     </div>
   );
