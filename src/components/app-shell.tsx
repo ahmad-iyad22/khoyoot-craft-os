@@ -25,6 +25,8 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { Badge } from "@/components/ui/badge";
 import { NotificationBell } from "@/components/notification-bell";
 import { InstallHint } from "@/components/install-hint";
+import { Logo } from "@/components/logo";
+import { useEffect } from "react";
 
 type NavItem = {
   to: string;
@@ -143,7 +145,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
     <div className="flex h-full flex-col gap-6 bg-sidebar p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] text-sidebar-foreground">
       <div>
         <div className="tatreez-band mb-3 h-1.5 w-16 rounded-full" />
-        <p className="font-display text-2xl leading-none">{t("appName")}</p>
+        <Logo label={t("appName")} className="text-2xl" />
         <p className="mt-1 text-xs text-sidebar-foreground/55">{t("tagline")} · {tt("Phase 1 · Internal use only")}</p>
       </div>
 
@@ -180,6 +182,12 @@ function SidebarInner({ onNavigate }: { onNavigate?: (() => void) | undefined })
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { t, lang } = useI18n();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    const item = NAV.find((n) => pathname.startsWith(n.to));
+    const brand = t("appName");
+    document.title = item ? `${t(item.labelKey)} | ${brand}` : brand;
+  }, [pathname, lang, t]);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -200,7 +208,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SidebarInner onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          <span className="font-display text-lg">{t("appName")}</span>
+          <Logo label={t("appName")} className="text-lg" markClassName="size-5 text-primary" />
         </header>
 
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">{children}</main>
