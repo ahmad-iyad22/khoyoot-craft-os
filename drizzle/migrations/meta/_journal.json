@@ -183,6 +183,13 @@
       "when": 1793930065052,
       "tag": "0025_notification_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794279025291,
+      "tag": "0026_import_order_platforms_and_fee",
+      "breakpoints": true
     }
   ]
 }

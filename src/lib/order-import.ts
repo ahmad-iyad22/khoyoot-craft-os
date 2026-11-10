@@ -1,6 +1,7 @@
-export type ImportProduct = { id: string; sku: string; name: string; stock_qty: number; image_url: string | null };
-export type ImportLine = { row: number; reference: string; date: string; status: string; source: string; product_id: string; quantity: number; sale_price: number; customer: string };
-export const IMPORT_FIELDS = ['reference', 'date', 'sku', 'name', 'quantity', 'price', 'status', 'customer'] as const;
+export type ImportProduct = { id: string; sku: string; name: string; stock_qty: number; image_url: string | null; avg_cost?: number };
+export type ImportLine = { row: number; reference: string; date: string; status: string; source: string; product_id: string; quantity: number; sale_price: number; customer: string; rawStatus?: string; fee?: number; shipping?: number };
+export type StatusMap = Record<string, string>;
+export const IMPORT_FIELDS = ['reference', 'date', 'sku', 'name', 'quantity', 'price', 'status', 'customer', 'fee', 'shipping'] as const;
 export type ImportField = typeof IMPORT_FIELDS[number];
 export type ColumnMap = Record<ImportField, string>;
 const normalize = (v: unknown) => String(v ?? '').trim().toLowerCase().replace(/[\s_\-()./]+/g, '');
@@ -12,6 +13,8 @@ const aliases: Record<ImportField, string[]> = {
  quantity: ['Quantity', 'Qty', 'SKU Quantity', 'Order Item Quantity'],
  price: ['Deal Price', 'Unit Price', 'Paid Price', 'Sale Price'],
  status: ['Order Status', 'Status'],
+ fee: ['Commission Fee', 'Platform Fee', 'Total Fees'],
+ shipping: ['Shipping Fee Paid by Buyer', 'Buyer Paid Shipping Fee', 'Shipping Fee'],
  customer: ['Buyer Username', 'Buyer Name', 'Customer Name', 'Recipient', 'Recipient Name'],
 };
 export function detectColumns(headers: string[]): ColumnMap {
@@ -30,8 +33,12 @@ export function importDate(v: unknown): string {
  const d=new Date(y,month-1,day);
  return d.getFullYear()===y && d.getMonth()===month-1 && d.getDate()===day ? `${m[1]}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}` : '';
 }
-export function importStatus(v: unknown): string {
+export const statusKey = (v: unknown) => normalize(v);
+/** First word only — never keep full names, addresses or phone numbers. */
+export function firstName(v: unknown): string { return String(v ?? '').trim().split(/\s+/)[0]?.slice(0, 40) ?? ''; }
+export function importStatus(v: unknown, map: StatusMap = {}): string {
  const s=normalize(v);
+ if (map[s] !== undefined) return map[s] ?? '';
  if (['cancelled','canceled'].includes(s)) return 'cancelled';
  if (['completed','complete'].includes(s)) return 'completed';
  if (['delivered'].includes(s)) return 'delivered';
@@ -43,11 +50,22 @@ export function matchProduct(sku: unknown, name: unknown, products: ImportProduc
  const matches=code ? products.filter(p => p.sku.toLowerCase()===code) : products.filter(p => normalize(p.name)===normalize(name) && normalize(name)!=='');
  return matches.length===1 ? matches[0]?.id ?? '' : '';
 }
-export function buildImportLines(rows: Record<string, unknown>[], columns: ColumnMap, products: ImportProduct[]): ImportLine[] {
- return rows.map((r,i)=>({row:i+2, reference:String(r[columns.reference]??'').trim(), date:importDate(r[columns.date]), status:importStatus(r[columns.status]), source:String(r[columns.sku] || r[columns.name] || ''), product_id:matchProduct(r[columns.sku],r[columns.name],products), quantity:importNumber(r[columns.quantity]), sale_price:importNumber(r[columns.price]), customer:String(r[columns.customer]??'')}));
+export function buildImportLines(rows: Record<string, unknown>[], columns: ColumnMap, products: ImportProduct[], statusMap: StatusMap = {}): ImportLine[] {
+ return rows.map((r,i)=>({row:i+2, reference:String(r[columns.reference]??'').trim(), date:importDate(r[columns.date]), rawStatus:String(r[columns.status]??'').trim(), fee:columns.fee?importNumber(r[columns.fee]):NaN, shipping:columns.shipping?importNumber(r[columns.shipping]):NaN, status:importStatus(r[columns.status],statusMap), source:String(r[columns.sku] || r[columns.name] || ''), product_id:matchProduct(r[columns.sku],r[columns.name],products), quantity:importNumber(r[columns.quantity]), sale_price:importNumber(r[columns.price]), customer:firstName(r[columns.customer])}));
 }
 export function groupImportLines(lines: ImportLine[]) {
  const grouped=new Map<string,ImportLine[]>();
  for(const line of lines) grouped.set(line.reference,[...(grouped.get(line.reference)??[]),line]);
  return [...grouped].map(([reference,items])=>({reference,items,valid:!!reference && items.every(l=>!!l.product_id && !!importDate(l.date) && !!l.status && Number.isInteger(l.quantity) && l.quantity>0 && Number.isFinite(l.sale_price) && l.sale_price>=0 && l.date===items[0]?.date && l.status===items[0]?.status)}));
+}
+/** Flags orders whose combined quantities exceed available stock, in file order. */
+export function stockShortfalls(groups: { reference: string; valid: boolean; items: ImportLine[] }[], products: ImportProduct[], skip: (ref: string) => boolean = () => false): Set<string> {
+ const left = new Map(products.map(p => [p.id, p.stock_qty])); const short = new Set<string>();
+ for (const g of groups) {
+  if (!g.valid || skip(g.reference)) continue;
+  const need = new Map<string, number>(); for (const l of g.items) need.set(l.product_id, (need.get(l.product_id) ?? 0) + l.quantity);
+  if ([...need].some(([id, q]) => (left.get(id) ?? 0) < q)) { short.add(g.reference); continue; }
+  for (const [id, q] of need) left.set(id, (left.get(id) ?? 0) - q);
+ }
+ return short;
 }
