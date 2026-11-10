@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buildImportLines, detectColumns, groupImportLines, importDate, importStatus, matchProduct } from './order-import';
+import { stockShortfalls, firstName, buildImportLines, detectColumns, groupImportLines, importDate, importStatus, matchProduct } from './order-import';
 const products=[{id:'p1',sku:'LEA-001',name:'Bag',stock_qty:3,image_url:null},{id:'p2',sku:'BAG-001',name:'Bag',stock_qty:4,image_url:null}];
 describe('marketplace imports',()=>{
  test('matches SKU exactly and refuses ambiguous names',()=>{expect(matchProduct('LEA-001','Bag',products)).toBe('p1');expect(matchProduct('', 'Bag',products)).toBe('');expect(matchProduct('wrong','Bag',products)).toBe('');});
@@ -7,4 +7,5 @@ describe('marketplace imports',()=>{
  test('missing price and fractional quantities block creation',()=>{const base={row:2,reference:'A',date:'2026-10-27',status:'pending',source:'SKU',product_id:'p1',customer:'',quantity:1,sale_price:NaN};expect(groupImportLines([base])[0]?.valid).toBe(false);expect(groupImportLines([{...base,sale_price:10,quantity:1.5}])[0]?.valid).toBe(false);});
  test('unknown and returned statuses are never guessed',()=>{expect(importStatus('Returned')).toBe('');expect(importStatus('Completed')).toBe('completed');expect(importDate('2026-02-30')).toBe('');expect(importDate('27/10/2026')).toBe('');});
  test('does not treat order totals as unit prices',()=>{expect(detectColumns(['Order ID','Order Total','Quantity']).price).toBe('');});
+ test('saved status mapping, first name only, and stock shortfall across orders',()=>{expect(importStatus('Selesai',{selesai:'completed'})).toBe('completed');expect(firstName('Aisha binti Ali 0123')).toBe('Aisha');const l={row:2,reference:'A',date:'2026-10-27',status:'completed',source:'',product_id:'p1',customer:'',quantity:2,sale_price:10};const g=groupImportLines([l,{...l,row:3,reference:'B'}]);expect([...stockShortfalls(g,products)]).toEqual(['B']);});
 });
