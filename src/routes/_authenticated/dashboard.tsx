@@ -2,6 +2,7 @@ import { BudgetStatus } from "@/components/category-budgets";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { EInvoiceWarning } from "@/components/einvoice-warning";
 import { WorkOverview } from "@/components/work-overview";
+import { TodaySection } from "@/components/today-section";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import {
@@ -195,6 +196,7 @@ function Dashboard() {
         description={`${new Date().toLocaleString(lang === "ar" ? "ar" : "en", { month: "long", year: "numeric" })} · ${t("dashboardSubtitle")}`}
       />
 
+      {roles.isOwner && <TodaySection />}
       {roles.isOwner && <MonthEndCards />}
       {roles.isOwner && <EInvoiceWarning />}
       {roles.isOwner && <BudgetStatus />}
