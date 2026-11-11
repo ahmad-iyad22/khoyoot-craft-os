@@ -65,7 +65,7 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   imp_duplicate: { en: 'Already imported — skipped', ar: 'تم استيراده سابقًا — تم تجاوزه' },
   imp_create: { en: 'Create valid orders', ar: 'إنشاء الطلبات الصالحة' },
   imp_columns: { en: 'Back to columns', ar: 'العودة إلى الأعمدة' },
-  imp_myr: { en: 'Prices are in MYR, after discounts. Fees use Settings rates unless you chose the file's fee column; extra shipping/tax costs are zero.', ar: 'الأسعار بالرنجت بعد الخصومات. الرسوم حسب إعدادات المنصة ما لم تختر عمود الرسوم في الملف؛ تكاليف الشحن والضريبة الإضافية صفر.' },
+  imp_myr: { en: 'Prices are in MYR, after discounts. Fees use Settings rates unless you chose the file fee column; extra shipping/tax costs are zero.', ar: 'الأسعار بالرنجت بعد الخصومات. الرسوم حسب إعدادات المنصة ما لم تختر عمود الرسوم في الملف؛ تكاليف الشحن والضريبة الإضافية صفر.' },
   imp_noFees: { en: 'Add this platform’s fee rates in Settings before importing.', ar: 'أضف رسوم هذه المنصة في الإعدادات قبل الاستيراد.' },
   imp_stock: { en: 'Not enough stock — order was not created', ar: 'المخزون غير كافٍ — لم يتم إنشاء الطلب' },
   imp_importedNote: { en: 'Imported from marketplace order file', ar: 'مستورد من ملف طلبات المنصة' },
