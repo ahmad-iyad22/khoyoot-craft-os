@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/bank")({
 });
 
 const KINDS = ["business_bank", "partner_cash", "platform_wallet"] as const;
-const TYPES = ["deposit", "platform_payout", "withdrawal", "expense_payment", "transfer", "adjustment"] as const;
+const TYPES = ["deposit", "investment", "platform_payout", "withdrawal", "expense_payment", "transfer", "adjustment"] as const;
 const sel = "h-10 w-full rounded-md border border-input bg-background px-3 text-sm";
 
 function BankPage() {

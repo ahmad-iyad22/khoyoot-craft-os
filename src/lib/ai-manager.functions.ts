@@ -37,7 +37,7 @@ async function gatherBusinessContext(supabase: any): Promise<string> {
       .select("platform, snapshot_date, views, orders, revenue, ad_spend")
       .order("snapshot_date", { ascending: false })
       .limit(60),
-    supabase.rpc("partner_month_summary", { _month: month }),
+    supabase.rpc("month_statement" as never, { _month: month } as never),
     supabase.from("expense_categories").select("code, label"),
     supabase.from("platform_fees").select("platform, commission_percent, transaction_fee_percent, fixed_fee, sst_percent, waiver_until"),
   ]);
@@ -228,7 +228,7 @@ const TOOLS = [
       type: "object",
       properties: {
         account: { type: "string", description: "bank account name" },
-        type: { type: "string", enum: ["deposit", "platform_payout", "withdrawal", "expense_payment", "adjustment"] },
+        type: { type: "string", enum: ["deposit", "investment", "platform_payout", "withdrawal", "expense_payment", "adjustment"] },
         date: { type: "string", description: "YYYY-MM-DD" },
         ...money,
         note: { type: "string" },

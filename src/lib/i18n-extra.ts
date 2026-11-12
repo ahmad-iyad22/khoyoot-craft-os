@@ -703,4 +703,10 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   today_margin: { en: "Below margin threshold", ar: "أقل من حد الهامش" },
   today_pending: { en: "Pending approvals", ar: "موافقات معلقة" },
   today_close: { en: "Last month ready to close", ar: "الشهر الماضي جاهز للإغلاق" },
+  bk_t_investment: { en: "Investment", ar: "استثمار" },
+  pt_cashNet: { en: "Cash movements net (not the month result)", ar: "صافي الحركات النقدية (ليس نتيجة الشهر)" },
+  pt_finalLabel: { en: "Month-end result", ar: "نتيجة نهاية الشهر" },
+  pt_remaining: { en: "Still to pay / receive", ar: "المتبقي للدفع / الاستلام" },
+  pt_lastCalc: { en: "Last calculated", ar: "آخر حساب" },
+  pt_dupWarn: { en: "Possible duplicate: same payer, similar amount, same month. Check it isn't entered twice.", ar: "تكرار محتمل: نفس الدافع ومبلغ مشابه في نفس الشهر. تأكد أنه لم يُسجل مرتين." },
 };

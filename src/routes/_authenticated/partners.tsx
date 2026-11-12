@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -128,6 +128,19 @@ function PartnersPage() {
     () => computeLedger(partners, allTxns, (expensesQ.data ?? []) as any[], month),
     [partners, allTxns, expensesQ.data, month],
   );
+  const stmtMonth = month || currentMonth();
+  const stmt = useStatement(stmtMonth);
+  const duplicates = useMemo(() => {
+    const items: { payer: string; amount: number; month: string; label: string }[] = [];
+    for (const e of (expensesQ.data ?? []) as any[]) if (e.paid_by_partner_id && !e.paid_by_business) items.push({ payer: e.paid_by_partner_id, amount: Number(e.base_amount ?? e.amount), month: String(e.entry_date).slice(0, 7), label: e.description || e.category });
+    for (const x of allTxns as any[]) if (x.txn_type === "paid_on_behalf") items.push({ payer: x.partner_id, amount: Number(x.base_amount ?? x.amount), month: String(x.txn_date).slice(0, 7), label: x.notes || t("paidOnBehalf") });
+    const out: string[] = [];
+    items.forEach((a, i) => items.slice(i + 1).forEach((b) => {
+      if (a.payer === b.payer && a.month === b.month && a.month === stmtMonth && a.amount > 0 && Math.abs(a.amount - b.amount) <= 0.02 * Math.max(a.amount, b.amount))
+        out.push(`${partners.find((p) => p.id === a.payer)?.name ?? ""}: ${a.label} ${a.amount.toFixed(2)} ≈ ${b.label} ${b.amount.toFixed(2)}`);
+    }));
+    return out;
+  }, [expensesQ.data, allTxns, partners, stmtMonth, t]);
   const investments = useMemo(
     () =>
       allTxns
@@ -186,6 +199,10 @@ function PartnersPage() {
         </TabsList>
 
         <TabsContent value="cards">
+          <div className="mb-4 space-y-2">
+            <p className="text-xs text-muted-foreground">{t("pt_lastCalc")}: {stmt.dataUpdatedAt ? new Date(stmt.dataUpdatedAt).toLocaleString() : "—"}</p>
+            {duplicates.length > 0 && <div role="alert" className="rounded-md border border-warning bg-warning/10 p-3 text-sm"><p className="font-medium">{t("pt_dupWarn")}</p>{duplicates.map((d) => <p key={d} className="text-xs">{d}</p>)}</div>}
+          </div>
           <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {partners.map((p) => {
               const row = ledger.find((r) => r.partnerId === p.id);
@@ -223,8 +240,19 @@ function PartnersPage() {
                       <Stat label={t("contributions")} value={fmtMoney(row?.contributions, baseCur)} />
                       <Stat label={t("withdrawals")} value={fmtMoney(row?.withdrawals, baseCur)} />
                       <Stat label={t("paidOnBehalf")} value={fmtMoney(row?.paidOnBehalf, baseCur)} />
-                      <Stat label={t("net")} value={fmtMoney(row?.net, baseCur)} strong />
+                      <Stat label={t("pt_cashNet")} value={fmtMoney(row?.net, baseCur)} />
                     </div>
+                    {(() => {
+                      const sp = stmt.data?.partners.find((x) => x.partner_id === p.id);
+                      return (
+                        <Link to="/month-end" className="block rounded-md border bg-muted/40 p-3 text-sm hover:border-primary/50">
+                          <p className="text-xs text-muted-foreground">{t("pt_finalLabel")} · {stmtMonth}</p>
+                          <div className="flex justify-between"><span>{t("me_final")}</span><span className="font-semibold tabular-nums">{fmtMoney(sp?.final, baseCur)}</span></div>
+                          <div className="flex justify-between"><span>{t("pt_remaining")}</span><span className={"font-semibold tabular-nums " + (Number(sp?.remaining) < 0 ? "text-destructive" : "text-primary")}>{fmtMoney(sp?.remaining, baseCur)}</span></div>
+                          <p className="mt-1 text-xs text-primary underline">{t("me_seeDetails")}</p>
+                        </Link>
+                      );
+                    })()}
                     <div className="space-y-2">
                       {txns.map((x: any) => (
                         <div key={x.id} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
