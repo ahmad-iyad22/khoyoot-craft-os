@@ -82,7 +82,7 @@ export function TodaySection() {
         <div className="card-surface p-4 lg:col-span-2">
           <div className="mb-2 flex items-center justify-between"><p className="font-display text-lg">{t("today_platforms")}</p><Link to="/orders" className="text-xs font-medium text-primary underline">{t("orders")}</Link></div>
           {(platforms.data ?? []).length ? <>
-            <div className="h-48"><ResponsiveContainer width="100%" height="100%"><BarChart data={platforms.data}><CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" /><XAxis dataKey="platform" fontSize={12} /><YAxis fontSize={12} width={48} /><Tooltip formatter={(v: number) => money(v)} /><Bar dataKey="revenue" fill="var(--color-primary)" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="h-48"><ResponsiveContainer width="100%" height="100%"><BarChart data={platforms.data ?? []}><CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" /><XAxis dataKey="platform" fontSize={12} /><YAxis fontSize={12} width={48} /><Tooltip formatter={(v: number) => money(v)} /><Bar dataKey="revenue" fill="var(--color-primary)" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div>
             <div className="mt-2 grid gap-1 text-sm">{platforms.data!.map((p) => <Link key={p.platform} to="/orders" className="flex justify-between hover:text-primary"><span>{p.platform}</span><span className="tabular-nums">{p.orders} · {money(p.revenue)}</span></Link>)}</div>
           </> : <p className="text-sm text-muted-foreground">{t("today_noSales")}</p>}
         </div>
