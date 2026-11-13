@@ -197,6 +197,13 @@
       "when": 1794452566805,
       "tag": "0027_bank_investment_type",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794534060062,
+      "tag": "0028_creators_waitlist",
+      "breakpoints": true
     }
   ]
 }

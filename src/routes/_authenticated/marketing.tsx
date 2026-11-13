@@ -249,8 +249,13 @@ function MarketingPage() {
           <div className="mb-4">
             <Button onClick={() => { setEditingPost(null); setPostOpen(true); }}>{tt("Plan a post")}</Button>
           </div>
-          <Card>
+          {[
+            { key: "pending", label: tt("Pending posts"), rows: (contentQ.data ?? []).filter((c: any) => c.status !== "posted") },
+            { key: "published", label: tt("Published posts"), rows: (contentQ.data ?? []).filter((c: any) => c.status === "posted") },
+          ].map((grp) => (
+          <Card key={grp.key} className="mb-4">
             <CardContent className="pt-6">
+              <h3 className="mb-3 font-display text-lg">{grp.label} <span className="text-sm text-muted-foreground">({grp.rows.length})</span></h3>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -263,7 +268,7 @@ function MarketingPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(contentQ.data ?? []).map((c: any) => (
+                  {grp.rows.map((c: any) => (
                     <TableRow key={c.id}>
                       <TableCell>{formatDate(c.scheduled_date)}</TableCell>
                       <TableCell className="rtl-content font-medium">{c.title}</TableCell>
@@ -292,7 +297,7 @@ function MarketingPage() {
                       </div></TableCell>
                     </TableRow>
                   ))}
-                  {(contentQ.data ?? []).length === 0 && (
+                  {grp.rows.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center text-muted-foreground">
                         {tt("Nothing planned yet.")}
@@ -303,6 +308,7 @@ function MarketingPage() {
               </Table>
             </CardContent>
           </Card>
+          ))}
         </TabsContent>
 
         <TabsContent value="campaigns" className="mt-4">
