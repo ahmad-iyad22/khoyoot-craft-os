@@ -580,6 +580,134 @@ export type Database = {
           },
         ]
       }
+      creator_results: {
+        Row: {
+          commission_percent: number
+          created_at: string
+          creator_id: string
+          id: string
+          notes: string | null
+          orders: number
+          period_date: string
+          revenue: number
+        }
+        Insert: {
+          commission_percent?: number
+          created_at?: string
+          creator_id: string
+          id?: string
+          notes?: string | null
+          orders?: number
+          period_date?: string
+          revenue?: number
+        }
+        Update: {
+          commission_percent?: number
+          created_at?: string
+          creator_id?: string
+          id?: string
+          notes?: string | null
+          orders?: number
+          period_date?: string
+          revenue?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_results_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_samples: {
+        Row: {
+          cost_amount: number
+          created_at: string
+          created_by: string | null
+          creator_id: string
+          id: string
+          notes: string | null
+          product_id: string | null
+          quantity: number
+          sent_on: string
+        }
+        Insert: {
+          cost_amount?: number
+          created_at?: string
+          created_by?: string | null
+          creator_id: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          quantity: number
+          sent_on?: string
+        }
+        Update: {
+          cost_amount?: number
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          quantity?: number
+          sent_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_samples_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_samples_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creators: {
+        Row: {
+          commission_percent: number
+          contact: string | null
+          created_at: string
+          handle: string | null
+          id: string
+          name: string
+          notes: string | null
+          platform: string
+          updated_at: string
+        }
+        Insert: {
+          commission_percent?: number
+          contact?: string | null
+          created_at?: string
+          handle?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          platform?: string
+          updated_at?: string
+        }
+        Update: {
+          commission_percent?: number
+          contact?: string | null
+          created_at?: string
+          handle?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          platform?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       expense_approvals: {
         Row: {
           comment: string | null
@@ -2403,6 +2531,47 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          buyer_name: string
+          contact: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          platform: string | null
+          product_id: string
+          status: string
+        }
+        Insert: {
+          buyer_name: string
+          contact?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          product_id: string
+          status?: string
+        }
+        Update: {
+          buyer_name?: string
+          contact?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          product_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       bank_account_balances: {
@@ -2751,6 +2920,16 @@ export type Database = {
       }
       save_shipment: {
         Args: { _id: string; _items: Json; _s: Json }
+        Returns: string
+      }
+      send_creator_sample: {
+        Args: {
+          _creator_id: string
+          _date: string
+          _notes: string
+          _product_id: string
+          _qty: number
+        }
         Returns: string
       }
       set_order_status: {
