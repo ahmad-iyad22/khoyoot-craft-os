@@ -709,4 +709,8 @@ export const EXTRA_DICT: Record<string, { en: string; ar: string }> = {
   pt_remaining: { en: "Still to pay / receive", ar: "المتبقي للدفع / الاستلام" },
   pt_lastCalc: { en: "Last calculated", ar: "آخر حساب" },
   pt_dupWarn: { en: "Possible duplicate: same payer, similar amount, same month. Check it isn't entered twice.", ar: "تكرار محتمل: نفس الدافع ومبلغ مشابه في نفس الشهر. تأكد أنه لم يُسجل مرتين." },
+  "Pending posts": { en: "Pending posts", ar: "منشورات قيد الانتظار" },
+  "Published posts": { en: "Published posts", ar: "منشورات تم نشرها" },
+  creators: { en: "Creators", ar: "صناع المحتوى" },
+  waitlist: { en: "Waitlist", ar: "قائمة الانتظار" },
 };
