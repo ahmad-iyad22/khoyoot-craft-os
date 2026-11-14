@@ -28,6 +28,8 @@ export const Route = createFileRoute("/_authenticated/suppliers")({
       { name: "description", content: "Supplier contacts, products supplied and lead time notes." },
       { property: "og:title", content: "Suppliers — Khoyoot" },
       { property: "og:description", content: "Supplier contacts, products supplied and lead time notes." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: SuppliersPage,

@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { useAuthSync } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
 import { LanguageProvider } from "@/lib/i18n";
+import { WorkspaceDepth } from "@/components/workspace-depth";
 
 function NotFoundComponent() {
   return (
@@ -148,7 +149,7 @@ function RootComponent() {
         <LanguageProvider>
           <AuthSync />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
+          <WorkspaceDepth><Outlet /></WorkspaceDepth>
           <Toaster richColors position="top-right" />
         </LanguageProvider>
       </ThemeProvider>

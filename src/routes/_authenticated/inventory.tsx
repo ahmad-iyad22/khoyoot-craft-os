@@ -35,6 +35,8 @@ export const Route = createFileRoute("/_authenticated/inventory")({
       { name: "description", content: "Products, stock levels, received batches and stock movement history." },
       { property: "og:title", content: "Inventory — Khoyoot" },
       { property: "og:description", content: "Products, stock levels, received batches and stock movement history." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: InventoryPage,

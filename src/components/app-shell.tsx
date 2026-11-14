@@ -194,8 +194,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [pathname, lang, t]);
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 lg:block">
+    <div className="app-depth-shell flex min-h-screen">
+      <aside className="depth-sidebar sticky top-0 hidden h-screen w-64 shrink-0 lg:block">
         <SidebarInner />
       </aside>
 
@@ -231,7 +231,7 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="depth-page-header mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 className="font-display text-3xl text-foreground">{title}</h1>
         {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
