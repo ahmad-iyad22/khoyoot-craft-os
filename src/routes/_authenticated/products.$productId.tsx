@@ -20,6 +20,8 @@ export const Route = createFileRoute("/_authenticated/products/$productId")({
       { name: "description", content: "Full product file: costs, margin, sales, batches, serials and linked posts." },
       { property: "og:title", content: "Product — Khoyoot" },
       { property: "og:description", content: "Full product file: costs, margin, sales, batches, serials and linked posts." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ProductDetailPage,

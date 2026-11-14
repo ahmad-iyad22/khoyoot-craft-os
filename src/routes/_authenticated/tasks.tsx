@@ -29,6 +29,8 @@ export const Route = createFileRoute("/_authenticated/tasks")({
       { name: "description", content: "Shared task list for the Khoyoot team with owners and due dates." },
       { property: "og:title", content: "Tasks — Khoyoot" },
       { property: "og:description", content: "Shared task list with owners, due dates and status." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: TasksPage,
