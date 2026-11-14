@@ -53,8 +53,8 @@ function AuthPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
+    <div className="depth-auth grid min-h-screen lg:grid-cols-2">
+      <div className="depth-auth-brand relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
         <div className="tatreez-band h-3 w-40 rounded-full" />
         <div>
           <h1 className="text-5xl leading-tight"><Logo label={tt("Khoyoot")} markClassName="size-11" /></h1>

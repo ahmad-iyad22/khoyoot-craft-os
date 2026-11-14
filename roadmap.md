@@ -1,4 +1,6 @@
 # Current updates
+- [x] All-page dimensional presentation and decorative moving tatreez scene; preserve business forms, language and theme controls.
+- [ ] Verify signed-in dimensional presentation across EN/AR pages — requires an available app session.
 - [x] Finance consistency: uses Dashboard totals and Month-end statements; October/November regression passed and build OK.
 - [ ] Finance signed-in EN/AR checks — blocked: preview identity has no matching app account.
 - [ ] Batch 12: Owner-only editable Assets and atomic linked expenses; one rolled-back SQL test, no browser tests.

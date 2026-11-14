@@ -16,3 +16,4 @@
 - Marketplace files are parsed in browser event handlers and reviewed before creation; imports use the Owner-only import_order wrapper around create_order with a transaction-scoped platform/reference lock, so duplicate uploads cannot deduct stock twice and fee/allocation rules remain shared.
 - Asset writes use the assets synchronization trigger to create/update/remove linked expenses through save_shared_expense in the same transaction; this keeps partner settlements connected to asset changes.
 - Finance reads dashboard_summary for monthly business totals and month_statement for partner payouts; shared expenses stay separate from order profit and shared-expense edits use their dedicated split-aware page.
+- Shared dimensional styling lives in global CSS; WorkspaceDepth lazy-loads a decorative R3F scene after hydration, with WebGL fallback and reduced-motion support, so business pages remain usable without 3D rendering.
