@@ -39,7 +39,7 @@ function Stitches({ reduced, onReady }: { reduced: boolean; onReady: () => void 
         return <group key={i} position={[(x - 2) * 0.66, (y - 2) * 0.66, Math.sin(x + y) * 0.12]}>
           {[-1, 1].map(sign => <mesh key={sign} rotation-z={sign * Math.PI / 4}>
             <boxGeometry args={[0.56, 0.085, 0.12]} />
-            <meshStandardMaterial color={colors[(x + y) % 3]} roughness={0.46} metalness={0.22} />
+            <meshStandardMaterial color={colors[(x + y) % 3] ?? colors[0] ?? new Color()} roughness={0.46} metalness={0.22} />
           </mesh>)}
         </group>;
       })}

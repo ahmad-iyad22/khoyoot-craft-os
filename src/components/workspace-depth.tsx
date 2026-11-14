@@ -3,9 +3,9 @@ import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from "
 const HeritageScene = lazy(() => import("./heritage-scene"));
 
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? null : this.props.children; }
+  override render() { return this.state.failed ? null : this.props.children; }
 }
 
 export function WorkspaceDepth({ children }: { children: ReactNode }) {
