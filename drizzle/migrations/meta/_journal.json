@@ -204,6 +204,13 @@
       "when": 1794534060062,
       "tag": "0028_creators_waitlist",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794714725940,
+      "tag": "0029_preserve_creator_sample_history",
+      "breakpoints": true
     }
   ]
 }

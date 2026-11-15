@@ -18,6 +18,7 @@ import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
 import { Route as AuthenticatedBankRouteImport } from './routes/_authenticated/bank'
 import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
+import { Route as AuthenticatedCreatorsRouteImport } from './routes/_authenticated/creators'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
@@ -76,6 +77,11 @@ const AuthenticatedBankRoute = AuthenticatedBankRouteImport.update({
 const AuthenticatedContactsRoute = AuthenticatedContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCreatorsRoute = AuthenticatedCreatorsRouteImport.update({
+  id: '/creators',
+  path: '/creators',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/contacts': typeof AuthenticatedContactsRoute
+  '/creators': typeof AuthenticatedCreatorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/finance': typeof AuthenticatedFinanceRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/contacts': typeof AuthenticatedContactsRoute
+  '/creators': typeof AuthenticatedCreatorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/finance': typeof AuthenticatedFinanceRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
   '/_authenticated/bank': typeof AuthenticatedBankRoute
   '/_authenticated/contacts': typeof AuthenticatedContactsRoute
+  '/_authenticated/creators': typeof AuthenticatedCreatorsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/audit-log'
     | '/bank'
     | '/contacts'
+    | '/creators'
     | '/dashboard'
     | '/documents'
     | '/finance'
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/audit-log'
     | '/bank'
     | '/contacts'
+    | '/creators'
     | '/dashboard'
     | '/documents'
     | '/finance'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/_authenticated/audit-log'
     | '/_authenticated/bank'
     | '/_authenticated/contacts'
+    | '/_authenticated/creators'
     | '/_authenticated/dashboard'
     | '/_authenticated/documents'
     | '/_authenticated/finance'
@@ -381,6 +393,13 @@ declare module '@tanstack/react-router' {
       path: '/contacts'
       fullPath: '/contacts'
       preLoaderRoute: typeof AuthenticatedContactsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/creators': {
+      id: '/_authenticated/creators'
+      path: '/creators'
+      fullPath: '/creators'
+      preLoaderRoute: typeof AuthenticatedCreatorsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -498,6 +517,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
   AuthenticatedBankRoute: typeof AuthenticatedBankRoute
   AuthenticatedContactsRoute: typeof AuthenticatedContactsRoute
+  AuthenticatedCreatorsRoute: typeof AuthenticatedCreatorsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
@@ -522,6 +542,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
   AuthenticatedBankRoute: AuthenticatedBankRoute,
   AuthenticatedContactsRoute: AuthenticatedContactsRoute,
+  AuthenticatedCreatorsRoute: AuthenticatedCreatorsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
