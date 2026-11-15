@@ -1,5 +1,6 @@
 # Current updates
-- [ ] Repair missing Creators and Waitlist pages, including editable records, sample recording and waiting buyers.
+- [x] Repair missing Creators and Waitlist pages; CRUD rollback test passed (creator 12%→15%, 2 orders/100 revenue, waiting→contacted, delete). Build OK; fresh signed-out routes redirect without errors.
+- [ ] Creators/Waitlist signed-in EN/AR and sample-stock checks — blocked: requesting user's email has no matching app account; no test identity selected.
 - [x] All-page dimensional presentation and decorative moving tatreez scene; preserve business forms, language and theme controls.
 - [ ] Verify signed-in dimensional presentation across EN/AR pages — blocked: requesting user has no matching app account; sign-in desktop/mobile and Arabic dark mode render without page errors; build OK.
 - [x] Finance consistency: uses Dashboard totals and Month-end statements; October/November regression passed and build OK.
