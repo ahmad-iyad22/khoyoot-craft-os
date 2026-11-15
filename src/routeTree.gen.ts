@@ -18,6 +18,7 @@ import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
 import { Route as AuthenticatedBankRouteImport } from './routes/_authenticated/bank'
 import { Route as AuthenticatedContactsRouteImport } from './routes/_authenticated/contacts'
+import { Route as AuthenticatedCreatorsRouteImport } from './routes/_authenticated/creators'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
@@ -31,6 +32,7 @@ import { Route as AuthenticatedSharedExpensesRouteImport } from './routes/_authe
 import { Route as AuthenticatedShipmentsRouteImport } from './routes/_authenticated/shipments'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedWaitlistRouteImport } from './routes/_authenticated/waitlist'
 import { Route as AuthenticatedProductsProductIdRouteImport } from './routes/_authenticated/products.$productId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -75,6 +77,11 @@ const AuthenticatedBankRoute = AuthenticatedBankRouteImport.update({
 const AuthenticatedContactsRoute = AuthenticatedContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCreatorsRoute = AuthenticatedCreatorsRouteImport.update({
+  id: '/creators',
+  path: '/creators',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -143,6 +150,11 @@ const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWaitlistRoute = AuthenticatedWaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProductsProductIdRoute =
   AuthenticatedProductsProductIdRouteImport.update({
     id: '/products/$productId',
@@ -159,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/contacts': typeof AuthenticatedContactsRoute
+  '/creators': typeof AuthenticatedCreatorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/finance': typeof AuthenticatedFinanceRoute
@@ -172,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/shipments': typeof AuthenticatedShipmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/waitlist': typeof AuthenticatedWaitlistRoute
   '/products/$productId': typeof AuthenticatedProductsProductIdRoute
 }
 export interface FileRoutesByTo {
@@ -183,6 +197,7 @@ export interface FileRoutesByTo {
   '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank': typeof AuthenticatedBankRoute
   '/contacts': typeof AuthenticatedContactsRoute
+  '/creators': typeof AuthenticatedCreatorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/finance': typeof AuthenticatedFinanceRoute
@@ -196,6 +211,7 @@ export interface FileRoutesByTo {
   '/shipments': typeof AuthenticatedShipmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/waitlist': typeof AuthenticatedWaitlistRoute
   '/products/$productId': typeof AuthenticatedProductsProductIdRoute
 }
 export interface FileRoutesById {
@@ -209,6 +225,7 @@ export interface FileRoutesById {
   '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
   '/_authenticated/bank': typeof AuthenticatedBankRoute
   '/_authenticated/contacts': typeof AuthenticatedContactsRoute
+  '/_authenticated/creators': typeof AuthenticatedCreatorsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
@@ -222,6 +239,7 @@ export interface FileRoutesById {
   '/_authenticated/shipments': typeof AuthenticatedShipmentsRoute
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_authenticated/waitlist': typeof AuthenticatedWaitlistRoute
   '/_authenticated/products/$productId': typeof AuthenticatedProductsProductIdRoute
 }
 export interface FileRouteTypes {
@@ -235,6 +253,7 @@ export interface FileRouteTypes {
     | '/audit-log'
     | '/bank'
     | '/contacts'
+    | '/creators'
     | '/dashboard'
     | '/documents'
     | '/finance'
@@ -248,6 +267,7 @@ export interface FileRouteTypes {
     | '/shipments'
     | '/suppliers'
     | '/tasks'
+    | '/waitlist'
     | '/products/$productId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -259,6 +279,7 @@ export interface FileRouteTypes {
     | '/audit-log'
     | '/bank'
     | '/contacts'
+    | '/creators'
     | '/dashboard'
     | '/documents'
     | '/finance'
@@ -272,6 +293,7 @@ export interface FileRouteTypes {
     | '/shipments'
     | '/suppliers'
     | '/tasks'
+    | '/waitlist'
     | '/products/$productId'
   id:
     | '__root__'
@@ -284,6 +306,7 @@ export interface FileRouteTypes {
     | '/_authenticated/audit-log'
     | '/_authenticated/bank'
     | '/_authenticated/contacts'
+    | '/_authenticated/creators'
     | '/_authenticated/dashboard'
     | '/_authenticated/documents'
     | '/_authenticated/finance'
@@ -297,6 +320,7 @@ export interface FileRouteTypes {
     | '/_authenticated/shipments'
     | '/_authenticated/suppliers'
     | '/_authenticated/tasks'
+    | '/_authenticated/waitlist'
     | '/_authenticated/products/$productId'
   fileRoutesById: FileRoutesById
 }
@@ -369,6 +393,13 @@ declare module '@tanstack/react-router' {
       path: '/contacts'
       fullPath: '/contacts'
       preLoaderRoute: typeof AuthenticatedContactsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/creators': {
+      id: '/_authenticated/creators'
+      path: '/creators'
+      fullPath: '/creators'
+      preLoaderRoute: typeof AuthenticatedCreatorsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -462,6 +493,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/waitlist': {
+      id: '/_authenticated/waitlist'
+      path: '/waitlist'
+      fullPath: '/waitlist'
+      preLoaderRoute: typeof AuthenticatedWaitlistRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/products/$productId': {
       id: '/_authenticated/products/$productId'
       path: '/products/$productId'
@@ -479,6 +517,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
   AuthenticatedBankRoute: typeof AuthenticatedBankRoute
   AuthenticatedContactsRoute: typeof AuthenticatedContactsRoute
+  AuthenticatedCreatorsRoute: typeof AuthenticatedCreatorsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
@@ -492,6 +531,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedShipmentsRoute: typeof AuthenticatedShipmentsRoute
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
+  AuthenticatedWaitlistRoute: typeof AuthenticatedWaitlistRoute
   AuthenticatedProductsProductIdRoute: typeof AuthenticatedProductsProductIdRoute
 }
 
@@ -502,6 +542,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
   AuthenticatedBankRoute: AuthenticatedBankRoute,
   AuthenticatedContactsRoute: AuthenticatedContactsRoute,
+  AuthenticatedCreatorsRoute: AuthenticatedCreatorsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
@@ -515,6 +556,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedShipmentsRoute: AuthenticatedShipmentsRoute,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
+  AuthenticatedWaitlistRoute: AuthenticatedWaitlistRoute,
   AuthenticatedProductsProductIdRoute: AuthenticatedProductsProductIdRoute,
 }
 
