@@ -1,4 +1,5 @@
 # Current updates
+- [ ] Repair missing Creators and Waitlist pages, including editable records, sample recording and waiting buyers.
 - [x] All-page dimensional presentation and decorative moving tatreez scene; preserve business forms, language and theme controls.
 - [ ] Verify signed-in dimensional presentation across EN/AR pages — blocked: requesting user has no matching app account; sign-in desktop/mobile and Arabic dark mode render without page errors; build OK.
 - [x] Finance consistency: uses Dashboard totals and Month-end statements; October/November regression passed and build OK.
